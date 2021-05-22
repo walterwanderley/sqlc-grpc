@@ -1,6 +1,6 @@
 ## sqlc-grpc
 
-Create a gRPC Server from the generated code on the awesome project [sqlc](https://sqlc.dev/).
+Create a gRPC Server from the generated code by the awesome project [sqlc](https://sqlc.dev/).
 
 ### Dependencies
 
