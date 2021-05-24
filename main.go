@@ -75,10 +75,6 @@ func moduleFromGoMod() string {
 }
 
 func postProcess(module string) {
-	fmt.Printf("Configuring project %s...\n", module)
-	execCommand("go mod init " + module)
-	execCommand("go mod tidy")
-
 	fmt.Println("Running compile.sh...")
 	if err := os.Chdir("api"); err != nil {
 		panic(err)
@@ -93,6 +89,8 @@ func postProcess(module string) {
 		panic(err)
 	}
 
+	fmt.Printf("Configuring project %s...\n", module)
+	execCommand("go mod init " + module)
 	execCommand("go mod tidy")
 
 	fmt.Println("Finished!")

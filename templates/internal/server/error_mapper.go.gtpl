@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"google.golang.org/grpc"
@@ -16,7 +17,7 @@ func errorMapper(ctx context.Context, req interface{}, info *grpc.UnaryServerInf
 	if err != nil {
 		if errors.Is(err, ErrUserInput) {
 			err = status.Error(codes.InvalidArgument, err.Error())
-		} else if err.Error() == "sql: no rows in result set" {
+		} else if errors.Is(err, sql.ErrNoRows) {
 			err = status.Error(codes.NotFound, err.Error())
 		}
 	}

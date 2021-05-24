@@ -66,7 +66,7 @@ func (d *Definition) importTimestamp() bool {
 func (d *Definition) importWrappers() bool {
 	for _, m := range d.Messages {
 		for _, typ := range m.AttrTypes {
-			if typ == "time.Time" || typ == "sql.NullTime" {
+			if strings.HasPrefix(typ, "sql.Null") {
 				return true
 			}
 		}

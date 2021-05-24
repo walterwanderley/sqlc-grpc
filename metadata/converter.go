@@ -55,27 +55,6 @@ func toProtoType(typ string) string {
 	}
 }
 
-func toKebabCase(s string) string {
-	var res = make([]rune, 0, len(s))
-	var p = '-'
-	for i, r := range s {
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
-			res = append(res, '-')
-		} else if unicode.IsUpper(r) && i > 0 {
-			if unicode.IsLetter(p) && !unicode.IsUpper(p) || unicode.IsDigit(p) {
-				res = append(res, '-', unicode.ToLower(r))
-			} else {
-				res = append(res, unicode.ToLower(r))
-			}
-		} else {
-			res = append(res, unicode.ToLower(r))
-		}
-
-		p = r
-	}
-	return string(res)
-}
-
 func UpperFirstCharacter(str string) string {
 	for i, v := range str {
 		return string(unicode.ToUpper(v)) + str[i+1:]
