@@ -26,11 +26,11 @@ func toProtoType(typ string) string {
 	if strings.HasPrefix(typ, "*") {
 		return toProtoType(typ[1:])
 	}
-	if strings.HasPrefix(typ, "[]") {
+	if strings.HasPrefix(typ, "[]") && typ != "[]byte" {
 		return "repeated " + toProtoType(typ[2:])
 	}
 	switch typ {
-	case "json.RawMessage":
+	case "json.RawMessage", "[]byte":
 		return "bytes"
 	case "sql.NullBool":
 		return ".google.protobuf.BoolValue"

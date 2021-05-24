@@ -253,7 +253,7 @@ func (s *Service) HasArrayParams() bool {
 		return false
 	}
 
-	return strings.HasPrefix(s.InputTypes[0], "[]")
+	return strings.HasPrefix(s.InputTypes[0], "[]") && s.InputTypes[0] != "[]byte"
 }
 
 func (s *Service) HasCustomOutput() bool {
@@ -268,7 +268,7 @@ func (s *Service) HasArrayOutput() bool {
 	if s.EmptyOutput() {
 		return false
 	}
-	return strings.HasPrefix(s.Output[0], "[]")
+	return strings.HasPrefix(s.Output[0], "[]") && s.Output[0] != "[]byte"
 }
 
 func (s *Service) ProtoInputs() string {
