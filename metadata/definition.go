@@ -66,19 +66,19 @@ func (d *Definition) importTimestamp() bool {
 func (d *Definition) importWrappers() bool {
 	for _, m := range d.Messages {
 		for _, typ := range m.AttrTypes {
-			if strings.HasPrefix(typ, "sql.Null") {
+			if strings.HasPrefix(typ, "sql.Null") && typ != "sql.NullTime" {
 				return true
 			}
 		}
 	}
 	for _, s := range d.Services {
 		for _, n := range s.InputTypes {
-			if strings.HasPrefix(n, "sql.Null") {
+			if strings.HasPrefix(n, "sql.Null") && n != "sql.NullTime" {
 				return true
 			}
 		}
 		for _, n := range s.Output {
-			if strings.HasPrefix(n, "sql.Null") {
+			if strings.HasPrefix(n, "sql.Null") && n != "sql.NullTime" {
 				return true
 			}
 		}
