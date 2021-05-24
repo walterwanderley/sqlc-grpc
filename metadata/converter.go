@@ -30,6 +30,8 @@ func toProtoType(typ string) string {
 		return "repeated " + toProtoType(typ[2:])
 	}
 	switch typ {
+	case "json.RawMessage":
+		return "bytes"
 	case "sql.NullBool":
 		return ".google.protobuf.BoolValue"
 	case "sql.NullInt32":
