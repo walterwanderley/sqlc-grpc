@@ -101,7 +101,7 @@ func (srv *Server) ListenAndServe() error {
 		Handler: handler,
 	}
 
-	log.Printf("Starting gRPC-UI on https://localhost:%s\n", srv.cfg.Port)
+	log.Printf("Serving gRPC UI on http://localhost:%s\n", srv.cfg.Port)
 	return httpServer.Serve(httpListener)
 }
 
