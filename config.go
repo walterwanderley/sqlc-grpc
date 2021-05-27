@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
@@ -43,7 +44,15 @@ func readConfig() (sqlcConfig, error) {
 	default:
 		return cfg, fmt.Errorf("invalid config file %q", name)
 	}
-	return cfg, err
+	if err != nil {
+		return cfg, err
+	}
+	for _, pkg := range cfg.Packages {
+		if pkg.Name == "" {
+			pkg.Name = filepath.Base(pkg.Path)
+		}
+	}
+	return cfg, nil
 }
 
 func configFile() (string, error) {

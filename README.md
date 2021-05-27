@@ -61,8 +61,7 @@ WHERE id = $1;
 ```yaml
 version: "1"
 packages:
-  - name: "db"
-    path: "internal/db"
+  - path: "internal/author"
     queries: "./queries.sql"
     schema: "./queries.sql"
     engine: "postgresql"

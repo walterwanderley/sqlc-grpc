@@ -10,44 +10,99 @@ import (
 	"os"
 	"time"
 
+    "github.com/fullstorydev/grpcui/standalone"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/reflection"
 
-	"{{ .GoModule}}/api"	
+	{{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/proto/{{.Package}}"
+	{{end}}
 )
 	
 // Server represents a gRPC server
 type Server struct {		
-	cfg  Config
-	service api.{{ .Package | UpperFirst}}Server		
+	cfg  Config		
 	grpcServer *grpc.Server
+	{{range .Packages}}{{.Package}}Service pb_{{.Package}}.{{ .Package | UpperFirst}}Server
+	{{end}}
 }
 
 // New gRPC server
-func New(cfg Config, service api.{{ .Package | UpperFirst}}Server) *Server {
-	return &Server{cfg: cfg, service: service}
+func New(cfg Config,
+    {{range .Packages}}{{.Package}}Service pb_{{.Package}}.{{ .Package | UpperFirst}}Server,
+	{{end}}
+    ) *Server {
+	return &Server{cfg: cfg,
+	              {{range .Packages}}{{.Package}}Service: {{.Package}}Service,
+				  {{end}} 
+			}
 }
 
 // ListenAndServe start the server
 func (srv *Server) ListenAndServe() error {
 	srv.grpcServer = grpc.NewServer(srv.cfg.grpcOpts()...)
-	api.Register{{ .Package | UpperFirst}}Server(srv.grpcServer, srv.service)
+	reflection.Register(srv.grpcServer)
+	{{range .Packages}}pb_{{.Package}}.Register{{ .Package | UpperFirst}}Server(srv.grpcServer, srv.{{.Package}}Service)
+	{{end}}
 
-	conn, err := net.Listen("tcp", fmt.Sprintf(":%s", srv.cfg.Port))
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", srv.cfg.Port))
 	if err != nil {
 		return err
 	}
+
+	mux := cmux.New(listen)
+	grpcListener := mux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpListener := mux.Match(cmux.Any())
+
+	go func() {
+		if err := mux.Serve(); err != nil {
+			log.Fatal("Failed to serve cmux: ", err.Error())
+		}
+	}()
 
 	if srv.cfg.PrometheusEnabled() {
 		grpc_prometheus.Register(srv.grpcServer)
 		go prometheusServer(srv.cfg.PrometheusPort)
 	}
 
-	log.Printf("Server running on port %s...\n", srv.cfg.Port)
+	go func() {
+		log.Printf("Server running on port %s...\n", srv.cfg.Port)
+		if err := srv.grpcServer.Serve(grpcListener); err != nil {
+			log.Fatal("Failed to start gRPC Server: ", err.Error())
+		}
+	}()
+
 	grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, ioutil.Discard, ioutil.Discard))
-	return srv.grpcServer.Serve(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	sAddr := fmt.Sprintf("dns:///localhost:%s", srv.cfg.Port)
+	cc, err := grpc.DialContext(
+		ctx,
+		sAddr,
+		grpc.WithBlock(),
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		return err
+	}
+	defer cc.Close()
+
+	handler, err := standalone.HandlerViaReflection(ctx, cc, sAddr)
+	if err != nil {
+		return err
+	}
+
+	httpServer := &http.Server{
+		Handler: handler,
+	}
+
+	log.Printf("Starting gRPC-UI on https://localhost:%s\n", srv.cfg.Port)
+	return httpServer.Serve(httpListener)
 }
 
 func prometheusServer(port string) {

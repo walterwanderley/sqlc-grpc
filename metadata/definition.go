@@ -9,30 +9,45 @@ import (
 )
 
 type Definition struct {
-	Database string
-	Package  string
 	GoModule string
-	SrcPath  string
-	Services []*Service
-	Messages map[string]*Message
+	Packages []*Package
 }
 
-func (d *Definition) ProtoImports() []string {
+func (d *Definition) Database() string {
+	for _, p := range d.Packages {
+		if p.Engine != "" {
+			return p.Engine
+		}
+	}
+	return ""
+}
+
+type Package struct {
+	Engine     string
+	Package    string
+	GoModule   string
+	SrcPath    string
+	SchemaPath string
+	Services   []*Service
+	Messages   map[string]*Message
+}
+
+func (p *Package) ProtoImports() []string {
 	r := make([]string, 0)
-	if d.importEmpty() {
+	if p.importEmpty() {
 		r = append(r, `import "google/protobuf/empty.proto";`)
 	}
-	if d.importTimestamp() {
+	if p.importTimestamp() {
 		r = append(r, `import "google/protobuf/timestamp.proto";`)
 	}
-	if d.importWrappers() {
+	if p.importWrappers() {
 		r = append(r, `import "google/protobuf/wrappers.proto";`)
 	}
 	return r
 }
 
-func (d *Definition) importEmpty() bool {
-	for _, s := range d.Services {
+func (p *Package) importEmpty() bool {
+	for _, s := range p.Services {
 		if s.EmptyInput() || s.EmptyOutput() {
 			return true
 		}
@@ -40,15 +55,15 @@ func (d *Definition) importEmpty() bool {
 	return false
 }
 
-func (d *Definition) importTimestamp() bool {
-	for _, m := range d.Messages {
+func (p *Package) importTimestamp() bool {
+	for _, m := range p.Messages {
 		for _, typ := range m.AttrTypes {
 			if typ == "time.Time" || typ == "sql.NullTime" {
 				return true
 			}
 		}
 	}
-	for _, s := range d.Services {
+	for _, s := range p.Services {
 		for _, n := range s.InputTypes {
 			if n == "time.Time" || n == "sql.NullTime" {
 				return true
@@ -63,15 +78,15 @@ func (d *Definition) importTimestamp() bool {
 	return false
 }
 
-func (d *Definition) importWrappers() bool {
-	for _, m := range d.Messages {
+func (p *Package) importWrappers() bool {
+	for _, m := range p.Messages {
 		for _, typ := range m.AttrTypes {
 			if strings.HasPrefix(typ, "sql.Null") && typ != "sql.NullTime" {
 				return true
 			}
 		}
 	}
-	for _, s := range d.Services {
+	for _, s := range p.Services {
 		for _, n := range s.InputTypes {
 			if strings.HasPrefix(n, "sql.Null") && n != "sql.NullTime" {
 				return true
@@ -86,7 +101,7 @@ func (d *Definition) importWrappers() bool {
 	return false
 }
 
-func ParseDefinition(src, engine, module string) (*Definition, error) {
+func ParsePackage(src string) (*Package, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, src, nil, parser.ParseComments)
 	if err != nil {
@@ -97,10 +112,8 @@ func ParseDefinition(src, engine, module string) (*Definition, error) {
 	}
 
 	for pkgName, pkg := range pkgs {
-		def := Definition{
-			Database: engine,
+		p := Package{
 			Package:  pkgName,
-			GoModule: module,
 			SrcPath:  src,
 			Messages: make(map[string]*Message),
 		}
@@ -108,24 +121,24 @@ func ParseDefinition(src, engine, module string) (*Definition, error) {
 		for _, file := range pkg.Files {
 			if file.Scope != nil {
 				for name, obj := range file.Scope.Objects {
-					if name == "Queries" {
+					if name == "Queries" || name == "Service" {
 						continue
 					}
 					if typ, ok := obj.Decl.(*ast.TypeSpec); ok {
 						if structType, ok := typ.Type.(*ast.StructType); ok {
-							def.Messages[name] = createMessage(name, structType)
+							p.Messages[name] = createMessage(name, structType)
 						}
 					}
 				}
 			}
 			for _, n := range file.Decls {
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					visitFunc(fun, &def)
+					visitFunc(fun, &p)
 				}
 			}
 		}
 
-		return &def, nil
+		return &p, nil
 	}
 	return nil, nil
 }

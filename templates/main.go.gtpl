@@ -8,15 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"{{ .GoModule}}/internal/application"
-	database "{{ .GoModule}}/{{.SrcPath}}"
-	"{{ .GoModule}}/internal/server"
+	{{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
+	{{end}}	"{{ .GoModule}}/internal/server"
 
 	// database driver
 	_ {{if eq .Database "mysql"}}"github.com/go-sql-driver/mysql"{{else}}"github.com/jackc/pgx/v4/stdlib"{{end}}
 )
 
-const serviceName = "{{ .Package}}"
+const serviceName = "{{ .GoModule}}"
 
 func main() {
 	log.Printf("Starting %s services...\n", serviceName)
@@ -42,8 +41,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	queries := database.New(db)
-	srv := server.New(cfg, application.NewService(queries))
+	srv := server.New(cfg,
+	{{range .Packages}}app_{{.Package}}.NewService(app_{{.Package}}.New(db)),
+	{{end}})
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)

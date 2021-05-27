@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/mod/modfile"
@@ -32,8 +33,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if len(cfg.Packages) != 1 {
-		log.Fatal("multiple packages aren't supported yet")
+	if len(cfg.Packages) == 0 {
+		log.Fatal("no packages")
 	}
 
 	if m := moduleFromGoMod(); m != "" {
@@ -41,9 +42,20 @@ func main() {
 		module = m
 	}
 
-	def, err := metadata.ParseDefinition(cfg.Packages[0].Path, cfg.Packages[0].Engine, module)
-	if err != nil {
-		log.Fatal("parser error:", err.Error())
+	def := metadata.Definition{
+		GoModule: module,
+		Packages: make([]*metadata.Package, 0),
+	}
+
+	for _, p := range cfg.Packages {
+		pkg, err := metadata.ParsePackage(p.Path)
+		if err != nil {
+			log.Fatal("parser error:", err.Error())
+		}
+		pkg.GoModule = module
+		pkg.Engine = p.Engine
+
+		def.Packages = append(def.Packages, pkg)
 	}
 
 	wd, err := os.Getwd()
@@ -51,12 +63,12 @@ func main() {
 		log.Fatal("unable to get working directory:", err.Error())
 	}
 
-	err = process(def, wd)
+	err = process(&def, wd)
 	if err != nil {
 		log.Fatal("unable to process templates:", err.Error())
 	}
 
-	postProcess(module)
+	postProcess(&def, wd)
 }
 
 func moduleFromGoMod() string {
@@ -74,26 +86,38 @@ func moduleFromGoMod() string {
 	return modfile.ModulePath(b)
 }
 
-func postProcess(module string) {
+func postProcess(def *metadata.Definition, workingDirectory string) {
 	fmt.Println("Running compile.sh...")
-	if err := os.Chdir("api"); err != nil {
-		panic(err)
-	}
-	fmt.Println("Generating protocol buffer...")
-	err := execCommand("protoc -I. -Ideps --go_out . --go_opt paths=source_relative --go-grpc_out . --go-grpc_opt paths=source_relative service.proto")
-	if err != nil {
-		fmt.Println("error calling protoc:", err.Error())
+	for _, pkg := range def.Packages {
+		newDir := filepath.Join(workingDirectory, "proto", pkg.Package)
+		if _, err := os.Stat(newDir); os.IsNotExist(err) {
+			err := os.MkdirAll(newDir, 0777)
+			if err != nil {
+				panic(err)
+			}
+		}
+		if err := os.Chdir(filepath.Join(workingDirectory, "proto")); err != nil {
+			panic(err)
+		}
+		if err := compileProto(pkg.Package); err != nil {
+			fmt.Printf("Error on executing compile.sh for package %s: %v\n", pkg.Package, err)
+		}
 	}
 
-	if err := os.Chdir("../"); err != nil {
+	if err := os.Chdir(workingDirectory); err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("Configuring project %s...\n", module)
-	execCommand("go mod init " + module)
+	fmt.Printf("Configuring project %s...\n", def.GoModule)
+	execCommand("go mod init " + def.GoModule)
 	execCommand("go mod tidy")
 
 	fmt.Println("Finished!")
+}
+
+func compileProto(pkg string) error {
+	fmt.Printf("Compiling %s.proto...\n", pkg)
+	return execCommand(fmt.Sprintf("protoc -I. -Ivendor --go_out %s --go_opt paths=source_relative --go-grpc_out %s --go-grpc_opt paths=source_relative %s.proto", pkg, pkg, pkg))
 }
 
 func execCommand(command string) error {

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 )
 
 type Service struct {
@@ -21,7 +19,7 @@ func (s *Service) MethodInputType() string {
 	case s.EmptyInput():
 		return "emptypb.Empty"
 	default:
-		return fmt.Sprintf("api.%sParams", s.Name)
+		return fmt.Sprintf("pb.%sParams", s.Name)
 	}
 }
 
@@ -30,9 +28,9 @@ func (s *Service) MethodOutputType() string {
 	case s.EmptyOutput():
 		return "emptypb.Empty"
 	case s.HasCustomOutput():
-		return fmt.Sprintf("api.%s", s.Output[0])
+		return fmt.Sprintf("pb.%s", s.Output[0])
 	default:
-		return fmt.Sprintf("api.%sResponse", s.Name)
+		return fmt.Sprintf("pb.%sResponse", s.Name)
 	}
 }
 
@@ -59,7 +57,7 @@ func (s *Service) InputGrpc() []string {
 	if s.HasCustomParams() {
 		typ := s.InputTypes[0]
 		in := s.InputNames[0]
-		res = append(res, fmt.Sprintf("var %s database.%s", in, typ))
+		res = append(res, fmt.Sprintf("var %s %s", in, typ))
 		m := s.Messages[typ]
 		for i, name := range m.AttrNames {
 			attrName := UpperFirstCharacter(name)
@@ -83,7 +81,7 @@ func (s *Service) OutputGrpc() []string {
 	if s.HasArrayOutput() {
 		res = append(res, "for _, r := range result {")
 		typ := strings.TrimPrefix(s.Output[0], "[]")
-		res = append(res, fmt.Sprintf("var item api.%s", typ))
+		res = append(res, fmt.Sprintf("var item pb.%s", typ))
 		m := s.Messages[typ]
 		for i, attr := range m.AttrNames {
 			res = append(res, bindToProto("r", "item", UpperFirstCharacter(attr), m.AttrTypes[i])...)
@@ -184,7 +182,7 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, attrName))
-		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), server.ErrUserInput)", attrName))
+		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
 		res = append(res, "t := v.AsTime()")
 		res = append(res, "if !t.IsZero() {")
@@ -195,17 +193,17 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, attrName))
-		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), server.ErrUserInput)", attrName))
+		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
 		res = append(res, fmt.Sprintf("%s = v.AsTime()", dst))
-		res = append(res, fmt.Sprintf("} else { err = fmt.Errorf(\"%s is required%%w\", server.ErrUserInput)", attrName))
+		res = append(res, fmt.Sprintf("} else { err = fmt.Errorf(\"%s is required%%w\", validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
 	case "uuid.UUID":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if %s, err = uuid.Parse(%s.Get%s()); err != nil {", dst, src, attrName))
-		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), server.ErrUserInput)", attrName))
+		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
 	default:
 		if newVar {
@@ -244,24 +242,16 @@ func (s *Service) HasCustomParams() bool {
 	if s.EmptyInput() {
 		return false
 	}
-	ru, _ := utf8.DecodeRuneInString(s.InputTypes[0][0:1])
-	return unicode.IsUpper(ru)
-}
 
-func (s *Service) HasArrayParams() bool {
-	if s.EmptyInput() {
-		return false
-	}
-
-	return strings.HasPrefix(s.InputTypes[0], "[]") && s.InputTypes[0] != "[]byte"
+	return customType(s.InputTypes[0])
 }
 
 func (s *Service) HasCustomOutput() bool {
 	if s.EmptyOutput() {
 		return false
 	}
-	ru, _ := utf8.DecodeRuneInString(s.Output[0][0:1])
-	return unicode.IsUpper(ru)
+
+	return customType(s.Output[0])
 }
 
 func (s *Service) HasArrayOutput() bool {
@@ -295,7 +285,7 @@ func (s *Service) ProtoOutputs() string {
 	return b.String()
 }
 
-func visitFunc(fun *ast.FuncDecl, def *Definition) {
+func visitFunc(fun *ast.FuncDecl, def *Package) {
 	if !isMethodValid(fun) {
 		return
 	}
@@ -304,14 +294,14 @@ func visitFunc(fun *ast.FuncDecl, def *Definition) {
 	inputTypes := make([]string, 0)
 	output := make([]string, 0)
 
-	// first param is always a context
+	// ignora o primeiro parâmetro que sempre é o context
 	for i := 1; i < len(fun.Type.Params.List); i++ {
 		p := fun.Type.Params.List[i]
 		inputNames = append(inputNames, p.Names[0].Name)
 		inputTypes = append(inputTypes, exprToStr(p.Type))
 	}
 
-	// last output result is always an error
+	// ignora o último parâmetro que sempre é o error
 	for i := 0; i < len(fun.Type.Results.List)-1; i++ {
 		p := fun.Type.Results.List[0]
 		output = append(output, exprToStr(p.Type))
@@ -357,8 +347,5 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 		return false
 	}
 
-	if t.Name != "Queries" {
-		return false
-	}
-	return true
+	return t.Name == "Queries"
 }

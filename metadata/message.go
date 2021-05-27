@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 type Message struct {
@@ -25,11 +27,20 @@ func createMessage(name string, s *ast.StructType) *Message {
 	types := make([]string, 0)
 	for _, f := range s.Fields.List {
 		types = append(types, exprToStr(f.Type))
-		names = append(names, f.Names[0].Name)
+		var name string
+		if len(f.Names) > 0 {
+			name = f.Names[0].Name
+		}
+		names = append(names, name)
 	}
 	return &Message{
 		Name:      name,
 		AttrNames: names,
 		AttrTypes: types,
 	}
+}
+
+func customType(typ string) bool {
+	ru, _ := utf8.DecodeRuneInString(typ[0:1])
+	return unicode.IsUpper(ru)
 }

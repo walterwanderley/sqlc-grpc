@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -48,6 +49,47 @@ func process(def *metadata.Definition, outPath string) error {
 			return err
 		}
 		defer in.Close()
+
+		if strings.HasSuffix(newPath, "service.proto") {
+			dir := strings.TrimSuffix(newPath, "service.proto")
+			tpl, err := ioutil.ReadAll(in)
+			if err != nil {
+				return err
+			}
+			for _, pkg := range def.Packages {
+				out, err := os.Create(filepath.Join(dir, (pkg.Package + ".proto")))
+				if err != nil {
+					return err
+				}
+				defer out.Close()
+
+				err = genFromTemplate(path, string(tpl), pkg, false, out)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
+		if strings.HasSuffix(newPath, "service.go") {
+			tpl, err := ioutil.ReadAll(in)
+			if err != nil {
+				return err
+			}
+			for _, pkg := range def.Packages {
+				out, err := os.Create(filepath.Join(pkg.SrcPath, "service.go"))
+				if err != nil {
+					return err
+				}
+				defer out.Close()
+
+				err = genFromTemplate(path, string(tpl), pkg, true, out)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
 
 		out, err := os.Create(newPath)
 		if err != nil {
