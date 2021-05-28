@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/reflection"
 
+	"{{ .GoModule}}/internal/validation"
 	{{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/proto/{{.Package}}"
 	{{end}}
 )
