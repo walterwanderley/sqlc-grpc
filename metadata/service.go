@@ -131,8 +131,10 @@ func bindToProto(src, dst, attrName, attrType string) []string {
 		res = append(res, fmt.Sprintf("%s.%s = timestamppb.New(%s.%s.Time) }", dst, attrName, src, attrName))
 	case "time.Time":
 		res = append(res, fmt.Sprintf("%s.%s = timestamppb.New(%s.%s)", dst, attrName, src, attrName))
-	case "uuid.UUID":
+	case "uuid.UUID", "net.HardwareAddr", "net.IP":
 		res = append(res, fmt.Sprintf("%s.%s = %s.%s.String()", dst, attrName, src, attrName))
+	case "int16":
+		res = append(res, fmt.Sprintf("%s.%s = int32(%s.%s)", dst, attrName, src, attrName))
 	default:
 		res = append(res, fmt.Sprintf("%s.%s = %s.%s", dst, attrName, src, attrName))
 	}
@@ -184,8 +186,7 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, attrName))
 		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
-		res = append(res, "t := v.AsTime()")
-		res = append(res, "if !t.IsZero() {")
+		res = append(res, "if t := v.AsTime(); !t.IsZero() {")
 		res = append(res, fmt.Sprintf("%s.Valid = true", dst))
 		res = append(res, fmt.Sprintf("%s.Time = t } }", dst))
 	case "time.Time":
@@ -205,6 +206,25 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("if %s, err = uuid.Parse(%s.Get%s()); err != nil {", dst, src, attrName))
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
+	case "net.HardwareAddr":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
+		}
+		res = append(res, fmt.Sprintf("if %s, err = net.ParseMAC(%s.Get%s()); err != nil {", dst, src, attrName))
+		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
+		res = append(res, "return }")
+	case "net.IP":
+		if newVar {
+			res = append(res, fmt.Sprintf("%s := net.ParseIP(%s.Get%s())", dst, src, attrName))
+		} else {
+			res = append(res, fmt.Sprintf("%s = net.ParseIP(%s.Get%s())", dst, src, attrName))
+		}
+	case "int16":
+		if newVar {
+			res = append(res, fmt.Sprintf("%s := int16(%s.Get%s())", dst, src, attrName))
+		} else {
+			res = append(res, fmt.Sprintf("%s = int16(%s.Get%s())", dst, src, attrName))
+		}
 	default:
 		if newVar {
 			res = append(res, fmt.Sprintf("%s := %s.Get%s()", dst, src, attrName))
@@ -294,14 +314,14 @@ func visitFunc(fun *ast.FuncDecl, def *Package) {
 	inputTypes := make([]string, 0)
 	output := make([]string, 0)
 
-	// ignora o primeiro parâmetro que sempre é o context
+	// context is the first parameter
 	for i := 1; i < len(fun.Type.Params.List); i++ {
 		p := fun.Type.Params.List[i]
 		inputNames = append(inputNames, p.Names[0].Name)
 		inputTypes = append(inputTypes, exprToStr(p.Type))
 	}
 
-	// ignora o último parâmetro que sempre é o error
+	// error is the last result
 	for i := 0; i < len(fun.Type.Results.List)-1; i++ {
 		p := fun.Type.Results.List[0]
 		output = append(output, exprToStr(p.Type))

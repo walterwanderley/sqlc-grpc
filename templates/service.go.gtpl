@@ -3,6 +3,8 @@ package {{.Package}}
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"net"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"

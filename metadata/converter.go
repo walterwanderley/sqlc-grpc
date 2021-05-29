@@ -38,6 +38,8 @@ func toProtoType(typ string) string {
 		return ".google.protobuf.Int32Value"
 	case "int":
 		return "int64"
+	case "int16":
+		return "int32"
 	case "sql.NullInt64":
 		return ".google.protobuf.Int64Value"
 	case "float32":
@@ -50,7 +52,7 @@ func toProtoType(typ string) string {
 		return ".google.protobuf.StringValue"
 	case "sql.NullTime", "time.Time":
 		return ".google.protobuf.Timestamp"
-	case "uuid.UUID":
+	case "uuid.UUID", "net.HardwareAddr", "net.IP":
 		return "string"
 	default:
 		return typ
