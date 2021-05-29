@@ -2,7 +2,7 @@
 
 Create a gRPC Server from the generated code by the awesome [sqlc](https://sqlc.dev/) project.
 
-### Dependencies
+### Requirements
 
 - Go 1.16 or superior
 - [protoc](https://github.com/protocolbuffers/protobuf/releases)
@@ -81,3 +81,8 @@ sqlc-grpc -m "my/module/path"
 ```
 
 5. Enjoy!
+
+```sh
+export DB_URL=[database connection url]
+go run .
+```
