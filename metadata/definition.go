@@ -23,13 +23,12 @@ func (d *Definition) Database() string {
 }
 
 type Package struct {
-	Engine     string
-	Package    string
-	GoModule   string
-	SrcPath    string
-	SchemaPath string
-	Services   []*Service
-	Messages   map[string]*Message
+	Engine   string
+	Package  string
+	GoModule string
+	SrcPath  string
+	Services []*Service
+	Messages map[string]*Message
 }
 
 func (p *Package) ProtoImports() []string {
