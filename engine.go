@@ -30,7 +30,7 @@ func process(def *metadata.Definition, outPath string) error {
 		}
 
 		newPath := strings.Replace(path, rootPath, outPath, 1)
-		newPath = strings.TrimSuffix(newPath, ".gtpl")
+		newPath = strings.TrimSuffix(newPath, ".tmpl")
 
 		if d.IsDir() {
 			if _, err := os.Stat(newPath); os.IsNotExist(err) {
@@ -104,7 +104,7 @@ func process(def *metadata.Definition, outPath string) error {
 			}
 		}
 
-		if strings.HasSuffix(path, ".gtpl") {
+		if strings.HasSuffix(path, ".tmpl") {
 			tpl, err := ioutil.ReadAll(in)
 			if err != nil {
 				return err
