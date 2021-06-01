@@ -336,6 +336,10 @@ func visitFunc(fun *ast.FuncDecl, def *Package) {
 	})
 }
 func isMethodValid(fun *ast.FuncDecl) bool {
+	if fun.Name == nil {
+		return false
+	}
+
 	if !fun.Name.IsExported() {
 		return false
 	}
