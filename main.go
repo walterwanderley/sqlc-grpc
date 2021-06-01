@@ -15,16 +15,26 @@ import (
 	"github.com/walterwanderley/sqlc-grpc/metadata"
 )
 
-var module string
-var help bool
+var (
+	module      string
+	showVersion bool
+	help        bool
+)
 
 func main() {
 	flag.BoolVar(&help, "h", false, "Help for this program")
+	flag.BoolVar(&showVersion, "v", false, "Show version")
 	flag.StringVar(&module, "m", "my-project", "Go module name if there are no go.mod")
 	flag.Parse()
 
 	if help {
 		flag.PrintDefaults()
+		fmt.Println("\nFor more information, please visit https://github.com/walterwanderley/sqlc-grpc")
+		return
+	}
+
+	if showVersion {
+		fmt.Println(version)
 		return
 	}
 

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -18,24 +19,17 @@ import (
 const serviceName = "{{ .GoModule}}"
 
 func main() {
+	var cfg server.Config
+	var dbURL string
+	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
+	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
+	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
+	flag.StringVar(&cfg.JaegerAgent, "jaegerAgent", "", "The Jaeger Tracing agent URL")
+	flag.StringVar(&cfg.Cert, "cert", "", "The path to the server certificate file in PEM format")
+	flag.StringVar(&cfg.Key, "key", "", "The path to the server private key in PEM format")
+	flag.Parse()
+
 	log.Printf("Starting %s services...\n", serviceName)
-
-	port := os.Getenv("SERVER_PORT")
-	if port == "" {
-		port = "8080"
-	}
-	cfg := server.Config{
-		ServiceName:       serviceName,
-		Port:              port,
-		PrometheusPort:    os.Getenv("PROMETHEUS_PORT"),
-		JaegerAgent:       os.Getenv("JAEGER_AGENT"),
-	}
-	var err error
-	if err = cfg.Validate(); err != nil {
-		log.Fatal(err)
-	}	
-
-	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else}}pgx{{end}}", dbURL)
 	if err != nil {
 		log.Fatal(err)

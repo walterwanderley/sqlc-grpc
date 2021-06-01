@@ -11,25 +11,27 @@ import (
 
 // Config represents the server configuration
 type Config struct {
-	ServiceName       string
-	Port              string
-	PrometheusPort    string
-	JaegerAgent       string
+	ServiceName    string
+	Port           int
+	PrometheusPort int
+	JaegerAgent    string
+	Cert           string
+	Key            string
 }
 
 // PrometheusEnabled check configuration
 func (c Config) PrometheusEnabled() bool {
-	return c.PrometheusPort != ""
+	return c.PrometheusPort > 0
+}
+
+// TLSEnabled check configuration
+func (c Config) TLSEnabled() bool {
+	return c.Cert != "" && c.Key != ""
 }
 
 // TracingEnabled check configuration
 func (c Config) TracingEnabled() bool {
 	return c.JaegerAgent != ""
-}
-
-// Validate the config
-func (c Config) Validate() error {
-	return nil
 }
 
 func (c Config) grpcOpts() []grpc.ServerOption {
