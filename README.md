@@ -83,6 +83,9 @@ sqlc-grpc -m "my/module/path"
 5. Enjoy!
 
 ```sh
-export DB_URL=[database connection url]
-go run .
+go run . -db [Database Connection URL]
 ```
+
+### Similar Projects
+
+- [xo-grpc](https://github.com/walterwanderley/xo-grpc)
