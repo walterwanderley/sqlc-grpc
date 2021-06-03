@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"flag"
 	"log"
@@ -42,13 +41,13 @@ func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		<-done
-		log.Print("Signal detected...")
-		if err := srv.Shutdown(context.Background()); err != nil {
-			panic(err)
-		}
+		sig := <-done
+		log.Printf("%v signal detected...", sig)
+		srv.Shutdown()
 	}()
 	if err := srv.ListenAndServe(); err != nil {
-		log.Fatalf("Shutdown: %v", err)
+		if err.Error() != "mux: server closed" {
+			log.Fatal(err)
+		}
 	}
-}	
+}
