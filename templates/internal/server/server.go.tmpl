@@ -149,7 +149,7 @@ func prometheusServer(port int) {
 	}
 	log.Printf("Metrics server running on port %d\n", port)
 	if err := httpServer.ListenAndServe(); err != nil {
-		log.Fatalf("unable to start metrics server at port %s: %v", port, err)
+		log.Fatalf("unable to start metrics server on port %d: %v", port, err)
 	}
 }
 
