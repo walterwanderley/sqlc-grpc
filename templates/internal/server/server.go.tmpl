@@ -5,20 +5,20 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/fullstorydev/grpcui/standalone"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/soheilhy/cmux"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
 	{{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/proto/{{.Package}}"
@@ -29,31 +29,40 @@ const readTimeout = 15 * time.Second
 	
 // Server represents a gRPC server
 type Server struct {		
-	cfg  Config		
+	cfg Config
+	log *zap.Logger
 	grpcServer *grpc.Server
+	healthServer *health.Server
 	{{range .Packages}}{{.Package}}Service pb_{{.Package}}.{{ .Package | UpperFirst}}Server
 	{{end}}
 }
 
 // New gRPC server
-func New(cfg Config,
+func New(cfg Config, log *zap.Logger,
     {{range .Packages}}{{.Package}}Service pb_{{.Package}}.{{ .Package | UpperFirst}}Server,
 	{{end}}
     ) *Server {
-	return &Server{cfg: cfg,
-	              {{range .Packages}}{{.Package}}Service: {{.Package}}Service,
-				  {{end}} 
+	return &Server{
+				cfg: cfg,
+				log: log,
+	            {{range .Packages}}{{.Package}}Service: {{.Package}}Service,
+				{{end}} 
 			}
 }
 
 // ListenAndServe start the server
 func (srv *Server) ListenAndServe() error {
-	srv.grpcServer = grpc.NewServer(srv.cfg.grpcOpts()...)
+	grpc_zap.ReplaceGrpcLoggerV2(srv.log)
+	srv.grpcServer = grpc.NewServer(srv.cfg.grpcOpts(srv.log)...)
 	reflection.Register(srv.grpcServer)
+	srv.healthServer = health.NewServer()
+	healthpb.RegisterHealthServer(srv.grpcServer, srv.healthServer)
+	srv.healthServer.SetServingStatus("serverName", healthpb.HealthCheckResponse_SERVING)
+
 	{{range .Packages}}pb_{{.Package}}.Register{{ .Package | UpperFirst}}Server(srv.grpcServer, srv.{{.Package}}Service)
 	{{end}}
 
-var listen net.Listener
+	var listen net.Listener
 	dialOptions := []grpc.DialOption{grpc.WithBlock()}
 	var schema string
 	if srv.cfg.TLSEnabled() {
@@ -92,23 +101,21 @@ var listen net.Listener
 
 	go func() {
 		if err := mux.Serve(); err != nil {
-			log.Println("Failed to serve cmux: ", err.Error())
+			srv.log.Error("Failed to serve cmux", zap.String("error", err.Error()))
 		}
 	}()
 
 	if srv.cfg.PrometheusEnabled() {
 		grpc_prometheus.Register(srv.grpcServer)
-		go prometheusServer(srv.cfg.PrometheusPort)
+		go prometheusServer(srv.log, srv.cfg.PrometheusPort)
 	}
 
 	go func() {
-		log.Printf("Server running on %s...\n", grpcListener.Addr().String())
+		srv.log.Info("Server running", zap.String("addr", grpcListener.Addr().String()))
 		if err := srv.grpcServer.Serve(grpcListener); err != nil {
-			log.Fatal("Failed to start gRPC Server: ", err.Error())
+			srv.log.Fatal("Failed to start gRPC Server", zap.String("error", err.Error()))
 		}
 	}()
-
-	grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, ioutil.Discard, ioutil.Discard))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -133,27 +140,29 @@ var listen net.Listener
 		Handler: handler,
 	}
 
-	log.Printf("Serving gRPC UI on %s://localhost:%d\n", schema, srv.cfg.Port)
+	srv.log.Info(fmt.Sprintf("Serving gRPC UI on %s://localhost:%d", schema, srv.cfg.Port))
 	return httpServer.Serve(httpListener)
 }
 
-func prometheusServer(port int) {
+func prometheusServer(log *zap.Logger, port int) {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	httpServer := &http.Server{
-		Addr: fmt.Sprintf("0.0.0.0:%d", port),
+		Addr:         fmt.Sprintf(":%d", port),
 		ReadTimeout:  readTimeout,
 		WriteTimeout: time.Second * 15,
 		IdleTimeout:  time.Second * 60,
 		Handler:      mux,
 	}
-	log.Printf("Metrics server running on port %d\n", port)
+	log.Info("Metrics server running", zap.Int("port", port))
 	if err := httpServer.ListenAndServe(); err != nil {
-		log.Fatalf("unable to start metrics server on port %d: %v", port, err)
+		log.Fatal("unable to start metrics server", zap.String("error", err.Error()), zap.Int("port", port))
 	}
 }
 
 // Shutdown the server
 func (srv *Server) Shutdown() {
+	srv.healthServer.Shutdown()
+	srv.log.Info("Graceful stop")
 	srv.grpcServer.GracefulStop()
 }

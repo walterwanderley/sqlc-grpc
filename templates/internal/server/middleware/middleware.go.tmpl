@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"		
 	"io"
 	"time"
 
@@ -13,27 +12,6 @@ import (
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 )
-
-func Logging(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	start := time.Now()
-
-	h, err := handler(ctx, req)
-
-	if err != nil {
-		grpclog.Errorf("Service: %s | Input: %v | Duration: %s | Error: %v\n",
-			info.FullMethod,
-			req,
-			time.Since(start),
-			err)
-	} else {
-		grpclog.Infof("Service: %s | Input: %v | Duration: %s\n",
-			info.FullMethod,
-			req,
-			time.Since(start))
-	}
-
-	return h, err
-}
 
 func Tracing(serviceName string, agentHost string) grpc.UnaryServerInterceptor {
 	t, _, err := newTracer(serviceName, agentHost)
