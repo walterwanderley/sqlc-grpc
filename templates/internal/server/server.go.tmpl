@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/flowchartsman/swaggerui"
 	"github.com/fullstorydev/grpcui/standalone"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/soheilhy/cmux"
 	"go.uber.org/zap"
@@ -21,6 +23,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
+	"{{ .GoModule}}/proto"
 	{{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/proto/{{.Package}}"
 	{{end}}
 )
@@ -117,7 +120,7 @@ func (srv *Server) ListenAndServe() error {
 		}
 	}()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	sAddr := fmt.Sprintf("dns:///localhost:%d", srv.cfg.Port)
@@ -131,16 +134,29 @@ func (srv *Server) ListenAndServe() error {
 	}
 	defer cc.Close()
 
-	handler, err := standalone.HandlerViaReflection(ctx, cc, sAddr)
+	gwmux := runtime.NewServeMux()
+	{{range .Packages}}if err := pb_{{.Package}}.Register{{ .Package | UpperFirst}}Handler(context.Background(), gwmux, cc); err != nil {
+		return err
+	}
+	{{end}}
+
+	httpMux := http.NewServeMux()
+
+	grpcui, err := standalone.HandlerViaReflection(ctx, cc, sAddr)
 	if err != nil {
 		return err
 	}
 
+	httpMux.Handle("/grpcui/", http.StripPrefix("/grpcui", grpcui))
+	httpMux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(proto.OpenAPIv2)))
+	httpMux.Handle("/", gwmux)
+
 	httpServer := &http.Server{
-		Handler: handler,
+		Handler: httpMux,
 	}
 
-	srv.log.Info(fmt.Sprintf("Serving gRPC UI on %s://localhost:%d", schema, srv.cfg.Port))
+	srv.log.Info(fmt.Sprintf("Serving gRPC UI on %s://localhost:%d/grpcui", schema, srv.cfg.Port))
+	srv.log.Info(fmt.Sprintf("Serving Swagger UI on %s://localhost:%d/swagger", schema, srv.cfg.Port))
 	return httpServer.Serve(httpListener)
 }
 

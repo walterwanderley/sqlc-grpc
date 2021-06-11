@@ -1,6 +1,6 @@
 ## sqlc-grpc
 
-Create a gRPC Server from the generated code by the awesome [sqlc](https://sqlc.dev/) project.
+Create a **gRPC** (and **HTTP/JSON**) **Server** from the generated code by the awesome [sqlc](https://sqlc.dev/) project.
 
 ### Requirements
 
@@ -80,11 +80,16 @@ sqlc generate
 sqlc-grpc -m "my/module/path"
 ```
 
-5. Enjoy!
+5. Run the generated server
 
 ```sh
-go run . -db [Database Connection URL]
+go run . -db [Database Connection URL] -dev
 ```
+
+6. Enjoy!
+
+- gRPC UI [http://localhost:5000/grpcui](http://localhost:5000/grpcui)
+- Swagger UI [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ### Similar Projects
 

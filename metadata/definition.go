@@ -117,12 +117,14 @@ func ParsePackage(src string) (*Package, error) {
 			Messages: make(map[string]*Message),
 		}
 
+		constants := make(map[string]string)
 		for _, file := range pkg.Files {
 			if file.Scope != nil {
 				for name, obj := range file.Scope.Objects {
 					if name == "Queries" || name == "Service" {
 						continue
 					}
+					addConstant(constants, name, obj)
 					if typ, ok := obj.Decl.(*ast.TypeSpec); ok {
 						if structType, ok := typ.Type.(*ast.StructType); ok {
 							p.Messages[name] = createMessage(name, structType)
@@ -132,7 +134,7 @@ func ParsePackage(src string) (*Package, error) {
 			}
 			for _, n := range file.Decls {
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					visitFunc(fun, &p)
+					visitFunc(fun, &p, constants)
 				}
 			}
 		}
@@ -140,4 +142,16 @@ func ParsePackage(src string) (*Package, error) {
 		return &p, nil
 	}
 	return nil, nil
+}
+
+func addConstant(constants map[string]string, name string, obj *ast.Object) {
+	if obj.Kind != ast.Con {
+		return
+	}
+	if vs, ok := obj.Decl.(*ast.ValueSpec); ok {
+		if v, ok := vs.Values[0].(*ast.BasicLit); ok {
+			constants[UpperFirstCharacter(name)] = v.Value
+		}
+	}
+
 }

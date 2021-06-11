@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"fmt"
-	"go/ast"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -22,22 +21,14 @@ func (m *Message) ProtoAttributes() string {
 	return s.String()
 }
 
-func createMessage(name string, s *ast.StructType) *Message {
-	names := make([]string, 0)
-	types := make([]string, 0)
-	for _, f := range s.Fields.List {
-		types = append(types, exprToStr(f.Type))
-		var name string
-		if len(f.Names) > 0 {
-			name = f.Names[0].Name
+func (m *Message) HasComplexAttribute() bool {
+	for _, t := range m.AttrTypes {
+		if customType(t) || strings.HasPrefix(t, "[]") {
+			return true
 		}
-		names = append(names, name)
 	}
-	return &Message{
-		Name:      name,
-		AttrNames: names,
-		AttrTypes: types,
-	}
+
+	return false
 }
 
 func customType(typ string) bool {
