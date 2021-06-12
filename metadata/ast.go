@@ -14,8 +14,10 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	// context is the first parameter
 	for i := 1; i < len(fun.Type.Params.List); i++ {
 		p := fun.Type.Params.List[i]
-		inputNames = append(inputNames, p.Names[0].Name)
-		inputTypes = append(inputTypes, exprToStr(p.Type))
+		for _, n := range p.Names {
+			inputNames = append(inputNames, n.Name)
+			inputTypes = append(inputTypes, exprToStr(p.Type))
+		}
 	}
 
 	// error is the last result
@@ -37,12 +39,10 @@ func createMessage(name string, s *ast.StructType) *Message {
 	names := make([]string, 0)
 	types := make([]string, 0)
 	for _, f := range s.Fields.List {
-		types = append(types, exprToStr(f.Type))
-		var name string
-		if len(f.Names) > 0 {
-			name = f.Names[0].Name
+		for _, n := range f.Names {
+			names = append(names, n.Name)
+			types = append(types, exprToStr(f.Type))
 		}
-		names = append(names, name)
 	}
 	return &Message{
 		Name:      name,
