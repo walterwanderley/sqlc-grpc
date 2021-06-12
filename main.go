@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"golang.org/x/mod/modfile"
@@ -67,6 +68,9 @@ func main() {
 
 		def.Packages = append(def.Packages, pkg)
 	}
+	sort.SliceStable(def.Packages, func(i, j int) bool {
+		return strings.Compare(def.Packages[i].Package, def.Packages[j].Package) < 0
+	})
 
 	wd, err := os.Getwd()
 	if err != nil {

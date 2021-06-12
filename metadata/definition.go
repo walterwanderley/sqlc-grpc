@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"sort"
 	"strings"
 )
 
@@ -138,6 +139,10 @@ func ParsePackage(src string) (*Package, error) {
 				}
 			}
 		}
+
+		sort.SliceStable(p.Services, func(i, j int) bool {
+			return strings.Compare(p.Services[i].Name, p.Services[j].Name) < 0
+		})
 
 		return &p, nil
 	}
