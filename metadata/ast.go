@@ -1,6 +1,8 @@
 package metadata
 
-import "go/ast"
+import (
+	"go/ast"
+)
 
 func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	if !isMethodValid(fun) {
@@ -35,22 +37,6 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	})
 }
 
-func createMessage(name string, s *ast.StructType) *Message {
-	names := make([]string, 0)
-	types := make([]string, 0)
-	for _, f := range s.Fields.List {
-		for _, n := range f.Names {
-			names = append(names, n.Name)
-			types = append(types, exprToStr(f.Type))
-		}
-	}
-	return &Message{
-		Name:      name,
-		AttrNames: names,
-		AttrTypes: types,
-	}
-}
-
 func isMethodValid(fun *ast.FuncDecl) bool {
 	if fun.Name == nil {
 		return false
@@ -74,6 +60,15 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 		return false
 	}
 
+	t, ok := typ.X.(*ast.Ident)
+	if !ok {
+		return false
+	}
+
+	if t.Name != "Queries" {
+		return false
+	}
+
 	if exprToStr(fun.Type.Params.List[0].Type) != "context.Context" {
 		return false
 	}
@@ -82,10 +77,5 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 		return false
 	}
 
-	t, ok := typ.X.(*ast.Ident)
-	if !ok {
-		return false
-	}
-
-	return t.Name == "Queries"
+	return true
 }

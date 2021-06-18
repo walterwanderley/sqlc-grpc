@@ -127,10 +127,16 @@ func ParsePackage(src string) (*Package, error) {
 					}
 					addConstant(constants, name, obj)
 					if typ, ok := obj.Decl.(*ast.TypeSpec); ok {
-						if structType, ok := typ.Type.(*ast.StructType); ok {
-							p.Messages[name] = createMessage(name, structType)
+						switch t := typ.Type.(type) {
+						case *ast.Ident:
+							p.Messages[name] = createAliasMessage(name, t)
+						case *ast.StructType:
+							p.Messages[name] = createStructMessage(name, t)
+						case *ast.ArrayType:
+							p.Messages[name] = createArrayMessage(name, t)
 						}
 					}
+
 				}
 			}
 			for _, n := range file.Decls {
@@ -138,6 +144,10 @@ func ParsePackage(src string) (*Package, error) {
 					visitFunc(fun, &p, constants)
 				}
 			}
+		}
+
+		for _, m := range p.Messages {
+			m.adjustType(p.Messages)
 		}
 
 		sort.SliceStable(p.Services, func(i, j int) bool {

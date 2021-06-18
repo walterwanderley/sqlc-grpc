@@ -20,6 +20,7 @@ type Config struct {
 	JaegerAgent    string
 	Cert           string
 	Key            string
+	EnableGrpcUI   bool
 }
 
 // PrometheusEnabled check configuration

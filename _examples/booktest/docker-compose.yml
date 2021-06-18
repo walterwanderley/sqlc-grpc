@@ -1,0 +1,37 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"    
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13-alpine
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/1-ddl.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+
+  prometheus:
+    image: prom/prometheus
+    command: --config.file=/etc/config/prometheus.yml        
+    volumes:
+      - ./configs/prometheus.yml:/etc/config/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources/
+      - ./configs/grafana/dashboards:/etc/grafana/provisioning/dashboards/
+    ports:
+      - "3000:3000"
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    ports:
+      - "16686:16686"

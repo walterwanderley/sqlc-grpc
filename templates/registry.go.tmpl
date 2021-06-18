@@ -1,0 +1,30 @@
+package main
+
+import (
+    "context"
+    "database/sql"
+
+    "go.uber.org/zap"
+	"google.golang.org/grpc"
+
+    {{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
+	{{end}}	"{{ .GoModule}}/internal/server"
+    {{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/proto/{{.Package | SnakeCase}}"
+	{{end}}
+)
+
+func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
+    return func(grpcServer *grpc.Server) {
+        {{range .Packages}}pb_{{.Package}}.Register{{ .Package | UpperFirst}}Server(grpcServer, app_{{.Package}}.NewService(logger, app_{{.Package}}.New(db)))
+        {{end}}
+    }
+}
+
+func registerHandlers() []server.RegisterHandler {
+    var handlers []server.RegisterHandler
+
+    {{range .Packages}}handlers = append(handlers, pb_{{.Package}}.Register{{ .Package | UpperFirst}}Handler)
+	{{end}}
+
+    return handlers
+}

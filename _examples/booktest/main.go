@@ -4,22 +4,23 @@ import (
 	"database/sql"
 	_ "embed"
 	"flag"
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	// database driver
-	_ {{if eq .Database "mysql"}}"github.com/go-sql-driver/mysql"{{else}}"github.com/jackc/pgx/v4/stdlib"{{end}}
 
-	{{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
-	{{end}}	"{{ .GoModule}}/internal/server"
+	// database driver
+	_ "github.com/jackc/pgx/v4/stdlib"
+
+	"booktest/internal/server"
 )
 
-const serviceName = "{{ .GoModule}}"
+const serviceName = "booktest"
 
 //go:embed proto/apidocs.swagger.json
 var openAPISpec []byte
@@ -49,7 +50,7 @@ func main() {
 	}
 	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
 
-	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else}}pgx{{end}}", dbURL)
+	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
 		log.Fatal("Failed to open DB", zap.Error(err))
 	}

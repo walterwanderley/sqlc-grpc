@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -17,11 +18,12 @@ import (
 	
 type Service struct {
     pb.Unimplemented{{ .Package | UpperFirst}}Server
-	db *Queries
+	logger *zap.Logger
+	db     *Queries
 }
 	
-func NewService(db *Queries) *Service {
-	return &Service{db: db}
+func NewService(logger *zap.Logger, db *Queries) *Service {
+	return &Service{logger: logger, db: db}
 }
 
 {{ range .Services }}

@@ -181,7 +181,7 @@ func (s *Service) HasArrayOutput() bool {
 func (s *Service) ProtoInputs() string {
 	var b strings.Builder
 	for i, name := range s.InputNames {
-		fmt.Fprintf(&b, "\n    %s %s = %d;", toProtoType(s.InputTypes[i]), name, i+1)
+		fmt.Fprintf(&b, "\n    %s %s = %d;", toProtoType(s.InputTypes[i]), lowerFirstCharacter(name), i+1)
 	}
 	return b.String()
 }
