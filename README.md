@@ -85,7 +85,7 @@ sqlc-grpc -m "my/module/path"
 5. Run the generated server
 
 ```sh
-go run . -db [Database Connection URL] -dev
+go run . -db [Database Connection URL] -dev -grpcui
 ```
 
 6. Enjoy!
