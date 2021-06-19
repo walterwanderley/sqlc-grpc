@@ -20,6 +20,7 @@ type Config struct {
 	JaegerAgent    string
 	Cert           string
 	Key            string
+	EnableCors     bool
 	EnableGrpcUI   bool
 }
 

@@ -40,7 +40,7 @@ func NewBooksClient(cc grpc.ClientConnInterface) BooksClient {
 
 func (c *booksClient) BooksByTags(ctx context.Context, in *BooksByTagsParams, opts ...grpc.CallOption) (*BooksByTagsResponse, error) {
 	out := new(BooksByTagsResponse)
-	err := c.cc.Invoke(ctx, "/books.books/BooksByTags", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/BooksByTags", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *booksClient) BooksByTags(ctx context.Context, in *BooksByTagsParams, op
 
 func (c *booksClient) BooksByTitleYear(ctx context.Context, in *BooksByTitleYearParams, opts ...grpc.CallOption) (*BooksByTitleYearResponse, error) {
 	out := new(BooksByTitleYearResponse)
-	err := c.cc.Invoke(ctx, "/books.books/BooksByTitleYear", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/BooksByTitleYear", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *booksClient) BooksByTitleYear(ctx context.Context, in *BooksByTitleYear
 
 func (c *booksClient) CreateAuthor(ctx context.Context, in *CreateAuthorParams, opts ...grpc.CallOption) (*Author, error) {
 	out := new(Author)
-	err := c.cc.Invoke(ctx, "/books.books/CreateAuthor", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/CreateAuthor", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *booksClient) CreateAuthor(ctx context.Context, in *CreateAuthorParams, 
 
 func (c *booksClient) CreateBook(ctx context.Context, in *CreateBookParams, opts ...grpc.CallOption) (*Book, error) {
 	out := new(Book)
-	err := c.cc.Invoke(ctx, "/books.books/CreateBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/CreateBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *booksClient) CreateBook(ctx context.Context, in *CreateBookParams, opts
 
 func (c *booksClient) DeleteBook(ctx context.Context, in *DeleteBookParams, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/books.books/DeleteBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/DeleteBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (c *booksClient) DeleteBook(ctx context.Context, in *DeleteBookParams, opts
 
 func (c *booksClient) GetAuthor(ctx context.Context, in *GetAuthorParams, opts ...grpc.CallOption) (*Author, error) {
 	out := new(Author)
-	err := c.cc.Invoke(ctx, "/books.books/GetAuthor", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/GetAuthor", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (c *booksClient) GetAuthor(ctx context.Context, in *GetAuthorParams, opts .
 
 func (c *booksClient) GetBook(ctx context.Context, in *GetBookParams, opts ...grpc.CallOption) (*Book, error) {
 	out := new(Book)
-	err := c.cc.Invoke(ctx, "/books.books/GetBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/GetBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (c *booksClient) GetBook(ctx context.Context, in *GetBookParams, opts ...gr
 
 func (c *booksClient) UpdateBook(ctx context.Context, in *UpdateBookParams, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/books.books/UpdateBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/UpdateBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *booksClient) UpdateBook(ctx context.Context, in *UpdateBookParams, opts
 
 func (c *booksClient) UpdateBookISBN(ctx context.Context, in *UpdateBookISBNParams, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/books.books/UpdateBookISBN", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.Books/UpdateBookISBN", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func _Books_BooksByTags_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/BooksByTags",
+		FullMethod: "/books.Books/BooksByTags",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).BooksByTags(ctx, req.(*BooksByTagsParams))
@@ -207,7 +207,7 @@ func _Books_BooksByTitleYear_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/BooksByTitleYear",
+		FullMethod: "/books.Books/BooksByTitleYear",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).BooksByTitleYear(ctx, req.(*BooksByTitleYearParams))
@@ -225,7 +225,7 @@ func _Books_CreateAuthor_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/CreateAuthor",
+		FullMethod: "/books.Books/CreateAuthor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).CreateAuthor(ctx, req.(*CreateAuthorParams))
@@ -243,7 +243,7 @@ func _Books_CreateBook_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/CreateBook",
+		FullMethod: "/books.Books/CreateBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).CreateBook(ctx, req.(*CreateBookParams))
@@ -261,7 +261,7 @@ func _Books_DeleteBook_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/DeleteBook",
+		FullMethod: "/books.Books/DeleteBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).DeleteBook(ctx, req.(*DeleteBookParams))
@@ -279,7 +279,7 @@ func _Books_GetAuthor_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/GetAuthor",
+		FullMethod: "/books.Books/GetAuthor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).GetAuthor(ctx, req.(*GetAuthorParams))
@@ -297,7 +297,7 @@ func _Books_GetBook_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/GetBook",
+		FullMethod: "/books.Books/GetBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).GetBook(ctx, req.(*GetBookParams))
@@ -315,7 +315,7 @@ func _Books_UpdateBook_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/UpdateBook",
+		FullMethod: "/books.Books/UpdateBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).UpdateBook(ctx, req.(*UpdateBookParams))
@@ -333,7 +333,7 @@ func _Books_UpdateBookISBN_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/books.books/UpdateBookISBN",
+		FullMethod: "/books.Books/UpdateBookISBN",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServer).UpdateBookISBN(ctx, req.(*UpdateBookISBNParams))
@@ -345,7 +345,7 @@ func _Books_UpdateBookISBN_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Books_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "books.books",
+	ServiceName: "books.Books",
 	HandlerType: (*BooksServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -1013,7 +1013,7 @@ var file_books_proto_rawDesc = []byte{
 	0x73, 0x12, 0x1a, 0x0a, 0x08, 0x62, 0x6f, 0x6f, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x18, 0x03, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x08, 0x62, 0x6f, 0x6f, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x12, 0x16, 0x0a,
 	0x06, 0x62, 0x6f, 0x6f, 0x6b, 0x49, 0x44, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x62,
-	0x6f, 0x6f, 0x6b, 0x49, 0x44, 0x32, 0x9e, 0x06, 0x0a, 0x05, 0x62, 0x6f, 0x6f, 0x6b, 0x73, 0x12,
+	0x6f, 0x6f, 0x6b, 0x49, 0x44, 0x32, 0x9e, 0x06, 0x0a, 0x05, 0x42, 0x6f, 0x6f, 0x6b, 0x73, 0x12,
 	0x6c, 0x0a, 0x0b, 0x42, 0x6f, 0x6f, 0x6b, 0x73, 0x42, 0x79, 0x54, 0x61, 0x67, 0x73, 0x12, 0x18,
 	0x2e, 0x62, 0x6f, 0x6f, 0x6b, 0x73, 0x2e, 0x42, 0x6f, 0x6f, 0x6b, 0x73, 0x42, 0x79, 0x54, 0x61,
 	0x67, 0x73, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x1a, 0x1a, 0x2e, 0x62, 0x6f, 0x6f, 0x6b, 0x73,
@@ -1119,24 +1119,24 @@ var file_books_proto_depIdxs = []int32{
 	8,  // 1: books.BooksByTitleYearResponse.value:type_name -> books.Book
 	15, // 2: books.Book.available:type_name -> google.protobuf.Timestamp
 	15, // 3: books.CreateBookParams.available:type_name -> google.protobuf.Timestamp
-	0,  // 4: books.books.BooksByTags:input_type -> books.BooksByTagsParams
-	11, // 5: books.books.BooksByTitleYear:input_type -> books.BooksByTitleYearParams
-	3,  // 6: books.books.CreateAuthor:input_type -> books.CreateAuthorParams
-	12, // 7: books.books.CreateBook:input_type -> books.CreateBookParams
-	4,  // 8: books.books.DeleteBook:input_type -> books.DeleteBookParams
-	5,  // 9: books.books.GetAuthor:input_type -> books.GetAuthorParams
-	6,  // 10: books.books.GetBook:input_type -> books.GetBookParams
-	14, // 11: books.books.UpdateBook:input_type -> books.UpdateBookParams
-	13, // 12: books.books.UpdateBookISBN:input_type -> books.UpdateBookISBNParams
-	1,  // 13: books.books.BooksByTags:output_type -> books.BooksByTagsResponse
-	2,  // 14: books.books.BooksByTitleYear:output_type -> books.BooksByTitleYearResponse
-	7,  // 15: books.books.CreateAuthor:output_type -> books.Author
-	8,  // 16: books.books.CreateBook:output_type -> books.Book
-	16, // 17: books.books.DeleteBook:output_type -> google.protobuf.Empty
-	7,  // 18: books.books.GetAuthor:output_type -> books.Author
-	8,  // 19: books.books.GetBook:output_type -> books.Book
-	16, // 20: books.books.UpdateBook:output_type -> google.protobuf.Empty
-	16, // 21: books.books.UpdateBookISBN:output_type -> google.protobuf.Empty
+	0,  // 4: books.Books.BooksByTags:input_type -> books.BooksByTagsParams
+	11, // 5: books.Books.BooksByTitleYear:input_type -> books.BooksByTitleYearParams
+	3,  // 6: books.Books.CreateAuthor:input_type -> books.CreateAuthorParams
+	12, // 7: books.Books.CreateBook:input_type -> books.CreateBookParams
+	4,  // 8: books.Books.DeleteBook:input_type -> books.DeleteBookParams
+	5,  // 9: books.Books.GetAuthor:input_type -> books.GetAuthorParams
+	6,  // 10: books.Books.GetBook:input_type -> books.GetBookParams
+	14, // 11: books.Books.UpdateBook:input_type -> books.UpdateBookParams
+	13, // 12: books.Books.UpdateBookISBN:input_type -> books.UpdateBookISBNParams
+	1,  // 13: books.Books.BooksByTags:output_type -> books.BooksByTagsResponse
+	2,  // 14: books.Books.BooksByTitleYear:output_type -> books.BooksByTitleYearResponse
+	7,  // 15: books.Books.CreateAuthor:output_type -> books.Author
+	8,  // 16: books.Books.CreateBook:output_type -> books.Book
+	16, // 17: books.Books.DeleteBook:output_type -> google.protobuf.Empty
+	7,  // 18: books.Books.GetAuthor:output_type -> books.Author
+	8,  // 19: books.Books.GetBook:output_type -> books.Book
+	16, // 20: books.Books.UpdateBook:output_type -> google.protobuf.Empty
+	16, // 21: books.Books.UpdateBookISBN:output_type -> google.protobuf.Empty
 	13, // [13:22] is the sub-list for method output_type
 	4,  // [4:13] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name

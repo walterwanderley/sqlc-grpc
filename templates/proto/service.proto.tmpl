@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package {{.Package}};
+package {{.Package | SnakeCase}};
 
-option go_package = "{{.GoModule}}/proto/{{.Package}}";
+option go_package = "{{.GoModule}}/proto/{{.Package | SnakeCase}}";
 
 import "google/api/annotations.proto";
 {{range .ProtoImports}}{{ .}}
@@ -20,9 +20,9 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
         };
     };
 };
-service {{.Package}} {
+service {{.Package | UpperFirst}} {
     {{range .Services}}
-    rpc {{.RpcSignature}} { 
+    rpc {{.RpcSignature}} {
         option (google.api.http) = {
             {{range .HttpOptions}}{{ .}}
             {{end}}

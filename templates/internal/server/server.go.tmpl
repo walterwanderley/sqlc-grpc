@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/flowchartsman/swaggerui"
@@ -21,20 +22,27 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/proto"
+
+	"{{.GoModule}}/internal/server/middleware"
 )
 
 const (
-	readTimeout    = 15 * time.Second
+	httpReadTimeout  = 15 * time.Second
+	httpWriteTimeout = 15 * time.Second
+	httpIdleTimeout  = 60 * time.Second
+
 	startupTimeout = 2 * time.Minute
 )
 
 type RegisterServer func(srv *grpc.Server)
 
 type RegisterHandler func(ctx context.Context, mux *runtime.ServeMux, cc *grpc.ClientConn) error
-	
+
 // Server represents a gRPC server
-type Server struct {		
+type Server struct {
 	cfg Config
 	log *zap.Logger
 
@@ -49,12 +57,12 @@ type Server struct {
 // New gRPC server
 func New(cfg Config, log *zap.Logger, register RegisterServer, registerHandlers []RegisterHandler, openAPISpec []byte) *Server {
 	return &Server{
-	              cfg: cfg,
-				  log: log,
-	              register: register,
-				  registerHandlers: registerHandlers,
-				  openAPISpec: openAPISpec,
-			}
+		cfg:              cfg,
+		log:              log,
+		register:         register,
+		registerHandlers: registerHandlers,
+		openAPISpec:      openAPISpec,
+	}
 }
 
 // ListenAndServe start the server
@@ -101,7 +109,6 @@ func (srv *Server) ListenAndServe() error {
 	}
 
 	mux := cmux.New(listen)
-	mux.SetReadTimeout(readTimeout)
 	grpcListener := mux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
 	httpListener := mux.Match(cmux.Any())
 
@@ -137,7 +144,11 @@ func (srv *Server) ListenAndServe() error {
 	}
 	defer cc.Close()
 
-	gwmux := runtime.NewServeMux()
+	gwmux := runtime.NewServeMux(
+		runtime.WithMetadata(annotator),
+		runtime.WithForwardResponseOption(forwardResponse),
+		runtime.WithOutgoingHeaderMatcher(outcomingHeaderMatcher),
+	)
 
 	for _, h := range srv.registerHandlers {
 		if err := h(context.Background(), gwmux, cc); err != nil {
@@ -163,9 +174,17 @@ func (srv *Server) ListenAndServe() error {
 	httpMux.Handle("/", gwmux)
 
 	httpServer := &http.Server{
-		Handler: httpMux,
+		ReadTimeout:  httpReadTimeout,
+		WriteTimeout: httpWriteTimeout,
+		IdleTimeout:  httpIdleTimeout,
+		Handler:      httpMux,
 	}
-	
+
+	if srv.cfg.EnableCors {
+		srv.log.Info("Enable Cross-Origin Resource Sharing")
+		httpServer.Handler = middleware.CORS(httpMux)
+	}
+
 	return httpServer.Serve(httpListener)
 }
 
@@ -174,9 +193,9 @@ func prometheusServer(log *zap.Logger, port int) {
 	mux.Handle("/metrics", promhttp.Handler())
 	httpServer := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
-		ReadTimeout:  readTimeout,
-		WriteTimeout: time.Second * 15,
-		IdleTimeout:  time.Second * 60,
+		ReadTimeout:  httpReadTimeout,
+		WriteTimeout: httpWriteTimeout,
+		IdleTimeout:  httpIdleTimeout,
 		Handler:      mux,
 	}
 	log.Info("Metrics server running", zap.Int("port", port))
@@ -190,4 +209,36 @@ func (srv *Server) Shutdown() {
 	srv.healthServer.Shutdown()
 	srv.log.Info("Graceful stop")
 	srv.grpcServer.GracefulStop()
+}
+
+func annotator(ctx context.Context, req *http.Request) metadata.MD {
+	return metadata.New(map[string]string{"requestURI": req.Host + req.URL.RequestURI()})
+}
+
+func forwardResponse(ctx context.Context, w http.ResponseWriter, message proto.Message) error {
+	md, ok := runtime.ServerMetadataFromContext(ctx)
+	if !ok {
+		return nil
+	}
+
+	if vals := md.HeaderMD.Get("x-http-code"); len(vals) > 0 {
+		code, err := strconv.Atoi(vals[0])
+		if err != nil {
+			return err
+		}
+		w.WriteHeader(code)
+		delete(md.HeaderMD, "x-http-code")
+		delete(w.Header(), "Grpc-Metadata-X-Http-Code")
+	}
+
+	return nil
+}
+
+func outcomingHeaderMatcher(header string) (string, bool) {
+	switch header {
+	case "location", "authorization", "access-control-expose-headers":
+		return header, true
+	default:
+		return header, false
+	}
 }

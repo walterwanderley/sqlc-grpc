@@ -11,7 +11,7 @@
   },
   "tags": [
     {
-      "name": "books"
+      "name": "Books"
     }
   ],
   "consumes": [
@@ -23,7 +23,7 @@
   "paths": {
     "/author": {
       "post": {
-        "operationId": "books_CreateAuthor",
+        "operationId": "Books_CreateAuthor",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -49,13 +49,13 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     },
     "/author/{authorID}": {
       "get": {
-        "operationId": "books_GetAuthor",
+        "operationId": "Books_GetAuthor",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -80,13 +80,13 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     },
     "/book": {
       "post": {
-        "operationId": "books_CreateBook",
+        "operationId": "Books_CreateBook",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -112,11 +112,11 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       },
       "put": {
-        "operationId": "books_UpdateBook",
+        "operationId": "Books_UpdateBook",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -142,13 +142,13 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     },
     "/book-isbn": {
       "put": {
-        "operationId": "books_UpdateBookISBN",
+        "operationId": "Books_UpdateBookISBN",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -174,13 +174,13 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     },
     "/book/{bookID}": {
       "get": {
-        "operationId": "books_GetBook",
+        "operationId": "Books_GetBook",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -205,11 +205,11 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       },
       "delete": {
-        "operationId": "books_DeleteBook",
+        "operationId": "Books_DeleteBook",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -234,13 +234,13 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     },
     "/books-by-tags": {
       "post": {
-        "operationId": "books_BooksByTags",
+        "operationId": "Books_BooksByTags",
         "responses": {
           "200": {
             "description": "",
@@ -272,13 +272,13 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     },
     "/books-by-title-year": {
       "get": {
-        "operationId": "books_BooksByTitleYear",
+        "operationId": "Books_BooksByTitleYear",
         "responses": {
           "200": {
             "description": "",
@@ -312,7 +312,7 @@
           }
         ],
         "tags": [
-          "books"
+          "Books"
         ]
       }
     }

@@ -21,9 +21,9 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
         };
     };
 };
-service books {
+service Books {
     
-    rpc BooksByTags(BooksByTagsParams) returns (BooksByTagsResponse) { 
+    rpc BooksByTags(BooksByTagsParams) returns (BooksByTagsResponse) {
         option (google.api.http) = {
             post: "/books-by-tags"
             body: "dollar_1"
@@ -32,7 +32,7 @@ service books {
         };
     }
     
-    rpc BooksByTitleYear(BooksByTitleYearParams) returns (BooksByTitleYearResponse) { 
+    rpc BooksByTitleYear(BooksByTitleYearParams) returns (BooksByTitleYearResponse) {
         option (google.api.http) = {
             get: "/books-by-title-year"
             response_body: "value"
@@ -40,7 +40,7 @@ service books {
         };
     }
     
-    rpc CreateAuthor(CreateAuthorParams) returns (Author) { 
+    rpc CreateAuthor(CreateAuthorParams) returns (Author) {
         option (google.api.http) = {
             post: "/author"
             body: "*"
@@ -48,7 +48,7 @@ service books {
         };
     }
     
-    rpc CreateBook(CreateBookParams) returns (Book) { 
+    rpc CreateBook(CreateBookParams) returns (Book) {
         option (google.api.http) = {
             post: "/book"
             body: "*"
@@ -56,28 +56,28 @@ service books {
         };
     }
     
-    rpc DeleteBook(DeleteBookParams) returns (google.protobuf.Empty) { 
+    rpc DeleteBook(DeleteBookParams) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/book/{bookID}"
             
         };
     }
     
-    rpc GetAuthor(GetAuthorParams) returns (Author) { 
+    rpc GetAuthor(GetAuthorParams) returns (Author) {
         option (google.api.http) = {
             get: "/author/{authorID}"
             
         };
     }
     
-    rpc GetBook(GetBookParams) returns (Book) { 
+    rpc GetBook(GetBookParams) returns (Book) {
         option (google.api.http) = {
             get: "/book/{bookID}"
             
         };
     }
     
-    rpc UpdateBook(UpdateBookParams) returns (google.protobuf.Empty) { 
+    rpc UpdateBook(UpdateBookParams) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             put: "/book"
             body: "*"
@@ -85,7 +85,7 @@ service books {
         };
     }
     
-    rpc UpdateBookISBN(UpdateBookISBNParams) returns (google.protobuf.Empty) { 
+    rpc UpdateBookISBN(UpdateBookISBNParams) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             put: "/book-isbn"
             body: "*"
@@ -177,3 +177,4 @@ message UpdateBookParams {
     string bookType = 3;
     int32 bookID = 4;
 }
+
