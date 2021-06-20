@@ -13,7 +13,7 @@ import (
 
 func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
 	return func(grpcServer *grpc.Server) {
-		pb_books.RegisterBooksServer(grpcServer, app_books.NewService(logger, app_books.New(db)))
+		pb_books.RegisterBooksServiceServer(grpcServer, app_books.NewService(logger, app_books.New(db)))
 
 	}
 }
@@ -21,7 +21,7 @@ func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
 func registerHandlers() []server.RegisterHandler {
 	var handlers []server.RegisterHandler
 
-	handlers = append(handlers, pb_books.RegisterBooksHandler)
+	handlers = append(handlers, pb_books.RegisterBooksServiceHandler)
 
 	return handlers
 }

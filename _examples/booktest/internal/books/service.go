@@ -13,7 +13,7 @@ import (
 )
 
 type Service struct {
-	pb.UnimplementedBooksServer
+	pb.UnimplementedBooksServiceServer
 	logger *zap.Logger
 	db     *Queries
 }

@@ -17,7 +17,7 @@ import (
 )
 	
 type Service struct {
-    pb.Unimplemented{{ .Package | UpperFirst}}Server
+    pb.Unimplemented{{ .Package | UpperFirst}}ServiceServer
 	logger *zap.Logger
 	db     *Queries
 }

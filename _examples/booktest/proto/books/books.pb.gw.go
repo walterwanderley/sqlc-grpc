@@ -31,7 +31,7 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_Books_BooksByTags_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_BooksByTags_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq BooksByTagsParams
 	var metadata runtime.ServerMetadata
 
@@ -48,7 +48,7 @@ func request_Books_BooksByTags_0(ctx context.Context, marshaler runtime.Marshale
 
 }
 
-func local_request_Books_BooksByTags_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_BooksByTags_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq BooksByTagsParams
 	var metadata runtime.ServerMetadata
 
@@ -66,17 +66,17 @@ func local_request_Books_BooksByTags_0(ctx context.Context, marshaler runtime.Ma
 }
 
 var (
-	filter_Books_BooksByTitleYear_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_BooksService_BooksByTitleYear_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_Books_BooksByTitleYear_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_BooksByTitleYear_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq BooksByTitleYearParams
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Books_BooksByTitleYear_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BooksService_BooksByTitleYear_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -85,14 +85,14 @@ func request_Books_BooksByTitleYear_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func local_request_Books_BooksByTitleYear_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_BooksByTitleYear_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq BooksByTitleYearParams
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Books_BooksByTitleYear_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BooksService_BooksByTitleYear_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -101,7 +101,7 @@ func local_request_Books_BooksByTitleYear_0(ctx context.Context, marshaler runti
 
 }
 
-func request_Books_CreateAuthor_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_CreateAuthor_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateAuthorParams
 	var metadata runtime.ServerMetadata
 
@@ -118,7 +118,7 @@ func request_Books_CreateAuthor_0(ctx context.Context, marshaler runtime.Marshal
 
 }
 
-func local_request_Books_CreateAuthor_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_CreateAuthor_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateAuthorParams
 	var metadata runtime.ServerMetadata
 
@@ -135,7 +135,7 @@ func local_request_Books_CreateAuthor_0(ctx context.Context, marshaler runtime.M
 
 }
 
-func request_Books_CreateBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_CreateBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateBookParams
 	var metadata runtime.ServerMetadata
 
@@ -152,7 +152,7 @@ func request_Books_CreateBook_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
-func local_request_Books_CreateBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_CreateBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateBookParams
 	var metadata runtime.ServerMetadata
 
@@ -169,7 +169,7 @@ func local_request_Books_CreateBook_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func request_Books_DeleteBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_DeleteBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DeleteBookParams
 	var metadata runtime.ServerMetadata
 
@@ -195,7 +195,7 @@ func request_Books_DeleteBook_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
-func local_request_Books_DeleteBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_DeleteBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DeleteBookParams
 	var metadata runtime.ServerMetadata
 
@@ -221,7 +221,7 @@ func local_request_Books_DeleteBook_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func request_Books_GetAuthor_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_GetAuthor_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetAuthorParams
 	var metadata runtime.ServerMetadata
 
@@ -247,7 +247,7 @@ func request_Books_GetAuthor_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func local_request_Books_GetAuthor_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_GetAuthor_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetAuthorParams
 	var metadata runtime.ServerMetadata
 
@@ -273,7 +273,7 @@ func local_request_Books_GetAuthor_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func request_Books_GetBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_GetBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetBookParams
 	var metadata runtime.ServerMetadata
 
@@ -299,7 +299,7 @@ func request_Books_GetBook_0(ctx context.Context, marshaler runtime.Marshaler, c
 
 }
 
-func local_request_Books_GetBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_GetBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetBookParams
 	var metadata runtime.ServerMetadata
 
@@ -325,7 +325,7 @@ func local_request_Books_GetBook_0(ctx context.Context, marshaler runtime.Marsha
 
 }
 
-func request_Books_UpdateBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_UpdateBook_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateBookParams
 	var metadata runtime.ServerMetadata
 
@@ -342,7 +342,7 @@ func request_Books_UpdateBook_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
-func local_request_Books_UpdateBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_UpdateBook_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateBookParams
 	var metadata runtime.ServerMetadata
 
@@ -359,7 +359,7 @@ func local_request_Books_UpdateBook_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func request_Books_UpdateBookISBN_0(ctx context.Context, marshaler runtime.Marshaler, client BooksClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BooksService_UpdateBookISBN_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateBookISBNParams
 	var metadata runtime.ServerMetadata
 
@@ -376,7 +376,7 @@ func request_Books_UpdateBookISBN_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-func local_request_Books_UpdateBookISBN_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BooksService_UpdateBookISBN_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateBookISBNParams
 	var metadata runtime.ServerMetadata
 
@@ -393,24 +393,24 @@ func local_request_Books_UpdateBookISBN_0(ctx context.Context, marshaler runtime
 
 }
 
-// RegisterBooksHandlerServer registers the http handlers for service Books to "mux".
-// UnaryRPC     :call BooksServer directly.
+// RegisterBooksServiceHandlerServer registers the http handlers for service BooksService to "mux".
+// UnaryRPC     :call BooksServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterBooksHandlerFromEndpoint instead.
-func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, server BooksServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterBooksServiceHandlerFromEndpoint instead.
+func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server BooksServiceServer) error {
 
-	mux.Handle("POST", pattern_Books_BooksByTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BooksService_BooksByTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/BooksByTags")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/BooksByTags")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_BooksByTags_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_BooksByTags_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -418,22 +418,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_BooksByTags_0(ctx, mux, outboundMarshaler, w, req, response_Books_BooksByTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTags_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Books_BooksByTitleYear_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BooksService_BooksByTitleYear_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/BooksByTitleYear")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/BooksByTitleYear")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_BooksByTitleYear_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_BooksByTitleYear_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -441,22 +441,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_BooksByTitleYear_0(ctx, mux, outboundMarshaler, w, req, response_Books_BooksByTitleYear_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTitleYear_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_BooksByTitleYear_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_Books_CreateAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BooksService_CreateAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/CreateAuthor")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/CreateAuthor")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_CreateAuthor_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_CreateAuthor_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -464,22 +464,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_Books_CreateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BooksService_CreateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/CreateBook")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/CreateBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_CreateBook_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_CreateBook_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -487,22 +487,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_CreateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_Books_DeleteBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_BooksService_DeleteBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/DeleteBook")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/DeleteBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_DeleteBook_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_DeleteBook_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -510,22 +510,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_DeleteBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_DeleteBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Books_GetAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BooksService_GetAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/GetAuthor")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/GetAuthor")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_GetAuthor_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_GetAuthor_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -533,22 +533,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Books_GetBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BooksService_GetBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/GetBook")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/GetBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_GetBook_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_GetBook_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -556,22 +556,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_GetBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_Books_UpdateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_BooksService_UpdateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/UpdateBook")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/UpdateBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_UpdateBook_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_UpdateBook_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -579,22 +579,22 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_UpdateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_UpdateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_Books_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_BooksService_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.Books/UpdateBookISBN")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.BooksService/UpdateBookISBN")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Books_UpdateBookISBN_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BooksService_UpdateBookISBN_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -602,16 +602,16 @@ func RegisterBooksHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Books_UpdateBookISBN_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_UpdateBookISBN_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
 }
 
-// RegisterBooksHandlerFromEndpoint is same as RegisterBooksHandler but
+// RegisterBooksServiceHandlerFromEndpoint is same as RegisterBooksServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterBooksHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterBooksServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -631,259 +631,259 @@ func RegisterBooksHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux
 		}()
 	}()
 
-	return RegisterBooksHandler(ctx, mux, conn)
+	return RegisterBooksServiceHandler(ctx, mux, conn)
 }
 
-// RegisterBooksHandler registers the http handlers for service Books to "mux".
+// RegisterBooksServiceHandler registers the http handlers for service BooksService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterBooksHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterBooksHandlerClient(ctx, mux, NewBooksClient(conn))
+func RegisterBooksServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterBooksServiceHandlerClient(ctx, mux, NewBooksServiceClient(conn))
 }
 
-// RegisterBooksHandlerClient registers the http handlers for service Books
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "BooksClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "BooksClient"
+// RegisterBooksServiceHandlerClient registers the http handlers for service BooksService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "BooksServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "BooksServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "BooksClient" to call the correct interceptors.
-func RegisterBooksHandlerClient(ctx context.Context, mux *runtime.ServeMux, client BooksClient) error {
+// "BooksServiceClient" to call the correct interceptors.
+func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client BooksServiceClient) error {
 
-	mux.Handle("POST", pattern_Books_BooksByTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BooksService_BooksByTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/BooksByTags")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/BooksByTags")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_BooksByTags_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_BooksByTags_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_BooksByTags_0(ctx, mux, outboundMarshaler, w, req, response_Books_BooksByTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTags_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Books_BooksByTitleYear_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BooksService_BooksByTitleYear_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/BooksByTitleYear")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/BooksByTitleYear")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_BooksByTitleYear_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_BooksByTitleYear_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_BooksByTitleYear_0(ctx, mux, outboundMarshaler, w, req, response_Books_BooksByTitleYear_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTitleYear_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_BooksByTitleYear_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_Books_CreateAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BooksService_CreateAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/CreateAuthor")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/CreateAuthor")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_CreateAuthor_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_CreateAuthor_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_Books_CreateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BooksService_CreateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/CreateBook")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/CreateBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_CreateBook_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_CreateBook_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_CreateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_Books_DeleteBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_BooksService_DeleteBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/DeleteBook")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/DeleteBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_DeleteBook_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_DeleteBook_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_DeleteBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_DeleteBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Books_GetAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BooksService_GetAuthor_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/GetAuthor")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/GetAuthor")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_GetAuthor_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_GetAuthor_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Books_GetBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BooksService_GetBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/GetBook")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/GetBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_GetBook_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_GetBook_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_GetBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_Books_UpdateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_BooksService_UpdateBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/UpdateBook")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/UpdateBook")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_UpdateBook_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_UpdateBook_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_UpdateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_UpdateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_Books_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_BooksService_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.Books/UpdateBookISBN")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/books.BooksService/UpdateBookISBN")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Books_UpdateBookISBN_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BooksService_UpdateBookISBN_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Books_UpdateBookISBN_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_UpdateBookISBN_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
 }
 
-type response_Books_BooksByTags_0 struct {
+type response_BooksService_BooksByTags_0 struct {
 	proto.Message
 }
 
-func (m response_Books_BooksByTags_0) XXX_ResponseBody() interface{} {
+func (m response_BooksService_BooksByTags_0) XXX_ResponseBody() interface{} {
 	response := m.Message.(*BooksByTagsResponse)
 	return response.Value
 }
 
-type response_Books_BooksByTitleYear_0 struct {
+type response_BooksService_BooksByTitleYear_0 struct {
 	proto.Message
 }
 
-func (m response_Books_BooksByTitleYear_0) XXX_ResponseBody() interface{} {
+func (m response_BooksService_BooksByTitleYear_0) XXX_ResponseBody() interface{} {
 	response := m.Message.(*BooksByTitleYearResponse)
 	return response.Value
 }
 
 var (
-	pattern_Books_BooksByTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-tags"}, ""))
+	pattern_BooksService_BooksByTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-tags"}, ""))
 
-	pattern_Books_BooksByTitleYear_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-title-year"}, ""))
+	pattern_BooksService_BooksByTitleYear_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-title-year"}, ""))
 
-	pattern_Books_CreateAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"author"}, ""))
+	pattern_BooksService_CreateAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"author"}, ""))
 
-	pattern_Books_CreateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book"}, ""))
+	pattern_BooksService_CreateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book"}, ""))
 
-	pattern_Books_DeleteBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"book", "bookID"}, ""))
+	pattern_BooksService_DeleteBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"book", "bookID"}, ""))
 
-	pattern_Books_GetAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"author", "authorID"}, ""))
+	pattern_BooksService_GetAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"author", "authorID"}, ""))
 
-	pattern_Books_GetBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"book", "bookID"}, ""))
+	pattern_BooksService_GetBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"book", "bookID"}, ""))
 
-	pattern_Books_UpdateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book"}, ""))
+	pattern_BooksService_UpdateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book"}, ""))
 
-	pattern_Books_UpdateBookISBN_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book-isbn"}, ""))
+	pattern_BooksService_UpdateBookISBN_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book-isbn"}, ""))
 )
 
 var (
-	forward_Books_BooksByTags_0 = runtime.ForwardResponseMessage
+	forward_BooksService_BooksByTags_0 = runtime.ForwardResponseMessage
 
-	forward_Books_BooksByTitleYear_0 = runtime.ForwardResponseMessage
+	forward_BooksService_BooksByTitleYear_0 = runtime.ForwardResponseMessage
 
-	forward_Books_CreateAuthor_0 = runtime.ForwardResponseMessage
+	forward_BooksService_CreateAuthor_0 = runtime.ForwardResponseMessage
 
-	forward_Books_CreateBook_0 = runtime.ForwardResponseMessage
+	forward_BooksService_CreateBook_0 = runtime.ForwardResponseMessage
 
-	forward_Books_DeleteBook_0 = runtime.ForwardResponseMessage
+	forward_BooksService_DeleteBook_0 = runtime.ForwardResponseMessage
 
-	forward_Books_GetAuthor_0 = runtime.ForwardResponseMessage
+	forward_BooksService_GetAuthor_0 = runtime.ForwardResponseMessage
 
-	forward_Books_GetBook_0 = runtime.ForwardResponseMessage
+	forward_BooksService_GetBook_0 = runtime.ForwardResponseMessage
 
-	forward_Books_UpdateBook_0 = runtime.ForwardResponseMessage
+	forward_BooksService_UpdateBook_0 = runtime.ForwardResponseMessage
 
-	forward_Books_UpdateBookISBN_0 = runtime.ForwardResponseMessage
+	forward_BooksService_UpdateBookISBN_0 = runtime.ForwardResponseMessage
 )

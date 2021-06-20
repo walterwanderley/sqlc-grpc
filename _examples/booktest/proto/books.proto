@@ -21,7 +21,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
         };
     };
 };
-service Books {
+service BooksService {
     
     rpc BooksByTags(BooksByTagsParams) returns (BooksByTagsResponse) {
         option (google.api.http) = {
@@ -134,7 +134,7 @@ message Book {
     string bookType = 4;
     string title = 5;
     int32 year = 6;
-    .google.protobuf.Timestamp available = 7;
+    google.protobuf.Timestamp available = 7;
     repeated string tags = 8;
 }
 
@@ -160,7 +160,7 @@ message CreateBookParams {
     string bookType = 3;
     string title = 4;
     int32 year = 5;
-    .google.protobuf.Timestamp available = 6;
+    google.protobuf.Timestamp available = 6;
     repeated string tags = 7;
 }
 
