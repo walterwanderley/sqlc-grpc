@@ -24,12 +24,13 @@ func (d *Definition) Database() string {
 }
 
 type Package struct {
-	Engine   string
-	Package  string
-	GoModule string
-	SrcPath  string
-	Services []*Service
-	Messages map[string]*Message
+	Engine     string
+	Package    string
+	GoModule   string
+	SchemaPath string
+	SrcPath    string
+	Services   []*Service
+	Messages   map[string]*Message
 }
 
 func (p *Package) ProtoImports() []string {
@@ -44,6 +45,17 @@ func (p *Package) ProtoImports() []string {
 		r = append(r, `import "google/protobuf/wrappers.proto";`)
 	}
 	return r
+}
+
+func (d *Package) VolumeSchema() string {
+	switch {
+	case strings.HasSuffix(d.SchemaPath, ".sql"):
+		return fmt.Sprintf("- ./%s:/docker-entrypoint-initdb.d/1-schema.sql", d.SchemaPath)
+	case d.SchemaPath != "":
+		return fmt.Sprintf("- ./%s:/docker-entrypoint-initdb.d", d.SchemaPath)
+	default:
+		return ""
+	}
 }
 
 func (p *Package) importEmpty() bool {
