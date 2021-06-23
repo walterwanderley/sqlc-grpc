@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	_ "embed"
 	"flag"
@@ -10,6 +11,11 @@ import (
 	"runtime"
 	"syscall"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -34,7 +40,7 @@ func main() {
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
-	flag.StringVar(&cfg.JaegerAgent, "jaegerAgent", "", "The Jaeger Tracing agent URL")
+	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
 	flag.StringVar(&cfg.Cert, "cert", "", "The path to the server certificate file in PEM format")
 	flag.StringVar(&cfg.Key, "key", "", "The path to the server private key in PEM format")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
@@ -50,6 +56,11 @@ func main() {
 		os.Exit(1)
 	}
 	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
+
+	if cfg.TracingEnabled() {
+		cleanup := installExportPipeline(context.Background(), log, cfg.JaegerCollector)
+		defer cleanup()
+	}
 
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
@@ -93,4 +104,27 @@ func logger(dev bool) *zap.Logger {
 		os.Exit(1)
 	}
 	return log
+}
+
+func installExportPipeline(ctx context.Context, log *zap.Logger, url string) func() {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+	if err != nil {
+		log.Fatal("creating jaeger exporter", zap.Error(err))
+	}
+
+	tp := tracesdk.NewTracerProvider(
+		tracesdk.WithBatcher(exp),
+		tracesdk.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(serviceName),
+		)),
+	)
+
+	otel.SetTracerProvider(tp)
+
+	return func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			log.Fatal("stopping tracer provider", zap.Error(err))
+		}
+	}
 }
