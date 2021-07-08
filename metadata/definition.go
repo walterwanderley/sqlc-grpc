@@ -47,17 +47,6 @@ func (p *Package) ProtoImports() []string {
 	return r
 }
 
-func (d *Package) VolumeSchema() string {
-	switch {
-	case strings.HasSuffix(d.SchemaPath, ".sql"):
-		return fmt.Sprintf("- ./%s:/docker-entrypoint-initdb.d/1-schema.sql", d.SchemaPath)
-	case d.SchemaPath != "":
-		return fmt.Sprintf("- ./%s:/docker-entrypoint-initdb.d", d.SchemaPath)
-	default:
-		return ""
-	}
-}
-
 func (p *Package) importEmpty() bool {
 	for _, s := range p.Services {
 		if s.EmptyInput() || s.EmptyOutput() {
