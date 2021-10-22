@@ -30,36 +30,48 @@ func (m *Message) adjustType(messages map[string]*Message) {
 	}
 }
 
-func createStructMessage(name string, s *ast.StructType) *Message {
+func createStructMessage(name string, s *ast.StructType) (*Message, error) {
 	names := make([]string, 0)
 	types := make([]string, 0)
 	for _, f := range s.Fields.List {
 		if len(f.Names) == 0 || !firstIsUpper(f.Names[0].Name) {
 			continue
 		}
-		types = append(types, exprToStr(f.Type))
+		typ, err := exprToStr(f.Type)
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, typ)
 		names = append(names, f.Names[0].Name)
 	}
 	return &Message{
 		Name:      name,
 		AttrNames: names,
 		AttrTypes: types,
-	}
+	}, nil
 }
 
-func createArrayMessage(name string, s *ast.ArrayType) *Message {
+func createArrayMessage(name string, s *ast.ArrayType) (*Message, error) {
+	elt, err := exprToStr(s.Elt)
+	if err != nil {
+		return nil, err
+	}
 	return &Message{
 		Name:        name,
 		IsArray:     true,
-		ElementType: exprToStr(s.Elt),
-	}
+		ElementType: elt,
+	}, nil
 }
 
-func createAliasMessage(name string, s *ast.Ident) *Message {
+func createAliasMessage(name string, s *ast.Ident) (*Message, error) {
+	str, err := exprToStr(s)
+	if err != nil {
+		return nil, err
+	}
 	return &Message{
 		Name:        name,
-		ElementType: exprToStr(s),
-	}
+		ElementType: str,
+	}, nil
 }
 
 func customType(typ string) bool {

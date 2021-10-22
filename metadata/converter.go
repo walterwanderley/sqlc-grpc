@@ -10,18 +10,30 @@ import (
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 )
 
-func exprToStr(e ast.Expr) string {
+func exprToStr(e ast.Expr) (string, error) {
 	switch exp := e.(type) {
 	case *ast.SelectorExpr:
-		return fmt.Sprintf("%s.%s", exprToStr(exp.X), exp.Sel.Name)
+		x, err := exprToStr(exp.X)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s.%s", x, exp.Sel.Name), nil
 	case *ast.Ident:
-		return exp.String()
+		return exp.String(), nil
 	case *ast.StarExpr:
-		return "*" + exprToStr(exp.X)
+		x, err := exprToStr(exp.X)
+		if err != nil {
+			return "", err
+		}
+		return "*" + x, nil
 	case *ast.ArrayType:
-		return "[]" + exprToStr(exp.Elt)
+		elt, err := exprToStr(exp.Elt)
+		if err != nil {
+			return "", err
+		}
+		return "[]" + elt, nil
 	default:
-		panic(fmt.Sprintf("invalid type %T - %v", exp, exp))
+		return "", fmt.Errorf("invalid type %T - %v", exp, exp)
 	}
 }
 

@@ -130,11 +130,23 @@ func ParsePackage(src string) (*Package, error) {
 					if typ, ok := obj.Decl.(*ast.TypeSpec); ok {
 						switch t := typ.Type.(type) {
 						case *ast.Ident:
-							p.Messages[name] = createAliasMessage(name, t)
+							msg, err := createAliasMessage(name, t)
+							if err != nil {
+								return nil, err
+							}
+							p.Messages[name] = msg
 						case *ast.StructType:
-							p.Messages[name] = createStructMessage(name, t)
+							msg, err := createStructMessage(name, t)
+							if err != nil {
+								return nil, err
+							}
+							p.Messages[name] = msg
 						case *ast.ArrayType:
-							p.Messages[name] = createArrayMessage(name, t)
+							msg, err := createArrayMessage(name, t)
+							if err != nil {
+								return nil, err
+							}
+							p.Messages[name] = msg
 						}
 					}
 

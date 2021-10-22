@@ -18,14 +18,22 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 		p := fun.Type.Params.List[i]
 		for _, n := range p.Names {
 			inputNames = append(inputNames, n.Name)
-			inputTypes = append(inputTypes, exprToStr(p.Type))
+			typ, err := exprToStr(p.Type)
+			if err != nil {
+				return
+			}
+			inputTypes = append(inputTypes, typ)
 		}
 	}
 
 	// error is the last result
 	for i := 0; i < len(fun.Type.Results.List)-1; i++ {
 		p := fun.Type.Results.List[0]
-		output = append(output, exprToStr(p.Type))
+		typ, err := exprToStr(p.Type)
+		if err != nil {
+			return
+		}
+		output = append(output, typ)
 	}
 	def.Services = append(def.Services, &Service{
 		Name:       fun.Name.String(),
@@ -69,11 +77,21 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 		return false
 	}
 
-	if exprToStr(fun.Type.Params.List[0].Type) != "context.Context" {
+	firstParam, err := exprToStr(fun.Type.Params.List[0].Type)
+	if err != nil {
 		return false
 	}
 
-	if exprToStr(fun.Type.Results.List[len(fun.Type.Results.List)-1].Type) != "error" {
+	if firstParam != "context.Context" {
+		return false
+	}
+
+	lastResult, err := exprToStr(fun.Type.Results.List[len(fun.Type.Results.List)-1].Type)
+	if err != nil {
+		return false
+	}
+
+	if lastResult != "error" {
 		return false
 	}
 
