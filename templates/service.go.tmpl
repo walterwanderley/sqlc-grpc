@@ -28,13 +28,13 @@ func NewService(logger *zap.Logger, db *Queries) *Service {
 }
 
 {{ range .Services }}
-func (s *Service) {{.Name}}(ctx context.Context, in *{{.MethodInputType}}) (*{{.MethodOutputType}}, error) {
+func (s *Service) {{.Name}}(ctx context.Context, in *{{.MethodInputType}}) (out *{{.MethodOutputType}}, err error) {
 	{{ range .InputGrpc}}{{ .}}
 	{{end}}
-	{{ .ReturnCallDatabase}} err {{if not .EmptyOutput}}:{{else if not .HasCustomParams}}:{{end}}= s.db.{{ .Name}}(ctx{{ .ParamsCallDatabase}})
+	{{ .ReturnCallDatabase}} err {{if not .EmptyOutput}}:{{end}}= s.db.{{ .Name}}(ctx{{ .ParamsCallDatabase}})
 	if err != nil {
 		s.logger.Error("{{.Name}} sql call failed", zap.Error(err))			
-		return nil, err
+		return
 	}
 	{{ range .OutputGrpc}}{{ .}}		
 	{{end}}

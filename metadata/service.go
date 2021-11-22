@@ -78,7 +78,7 @@ func (s *Service) OutputGrpc() []string {
 	}
 
 	if s.HasArrayOutput() {
-		res = append(res, fmt.Sprintf("out := new(%s)", s.MethodOutputType()))
+		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
 		typ := strings.TrimPrefix(s.Output[0], "[]")
 		res = append(res, fmt.Sprintf("item, err := to%sProto(r)", typ))
@@ -96,7 +96,7 @@ func (s *Service) OutputGrpc() []string {
 		return res
 	}
 	if !s.EmptyOutput() {
-		res = append(res, fmt.Sprintf("out := new(%s)", s.MethodOutputType()))
+		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "out.Value = result")
 		res = append(res, "return out, nil")
 		return res
