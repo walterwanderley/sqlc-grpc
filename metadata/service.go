@@ -60,7 +60,7 @@ func (s *Service) InputGrpc() []string {
 		res = append(res, fmt.Sprintf("%s, err := to%s(in)", in, typ))
 		res = append(res, "if err != nil {")
 		res = append(res, fmt.Sprintf("s.logger.Error(\"%s input adapter failed\", zap.Error(err))", s.Name))
-		res = append(res, "return nil, err }")
+		res = append(res, "return }")
 	} else {
 		for i, n := range s.InputNames {
 			res = append(res, bindToGo("in", n, UpperFirstCharacter(n), s.InputTypes[i], true)...)
@@ -81,11 +81,12 @@ func (s *Service) OutputGrpc() []string {
 		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
 		typ := strings.TrimPrefix(s.Output[0], "[]")
-		res = append(res, fmt.Sprintf("item, err := to%sProto(r)", typ))
-		res = append(res, "if err != nil { return nil, err }")
+		res = append(res, fmt.Sprintf("var item *pb.%s", typ))
+		res = append(res, fmt.Sprintf("item, err = to%sProto(r)", typ))
+		res = append(res, "if err != nil { return }")
 		res = append(res, "out.Value = append(out.Value, item)")
 		res = append(res, "}")
-		res = append(res, "return out, nil")
+		res = append(res, "return")
 		return res
 	}
 
@@ -98,7 +99,7 @@ func (s *Service) OutputGrpc() []string {
 	if !s.EmptyOutput() {
 		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "out.Value = result")
-		res = append(res, "return out, nil")
+		res = append(res, "return")
 		return res
 	}
 

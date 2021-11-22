@@ -29,13 +29,14 @@ func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (ou
 	}
 	out = new(pb.BooksByTagsResponse)
 	for _, r := range result {
-		item, err := toBooksByTagsRowProto(r)
+		var item *pb.BooksByTagsRow
+		item, err = toBooksByTagsRowProto(r)
 		if err != nil {
-			return nil, err
+			return
 		}
 		out.Value = append(out.Value, item)
 	}
-	return out, nil
+	return
 
 }
 
@@ -43,7 +44,7 @@ func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearP
 	arg, err := toBooksByTitleYearParams(in)
 	if err != nil {
 		s.logger.Error("BooksByTitleYear input adapter failed", zap.Error(err))
-		return nil, err
+		return
 	}
 
 	result, err := s.db.BooksByTitleYear(ctx, arg)
@@ -53,13 +54,14 @@ func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearP
 	}
 	out = new(pb.BooksByTitleYearResponse)
 	for _, r := range result {
-		item, err := toBookProto(r)
+		var item *pb.Book
+		item, err = toBookProto(r)
 		if err != nil {
-			return nil, err
+			return
 		}
 		out.Value = append(out.Value, item)
 	}
-	return out, nil
+	return
 
 }
 
@@ -79,7 +81,7 @@ func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out 
 	arg, err := toCreateBookParams(in)
 	if err != nil {
 		s.logger.Error("CreateBook input adapter failed", zap.Error(err))
-		return nil, err
+		return
 	}
 
 	result, err := s.db.CreateBook(ctx, arg)
@@ -131,7 +133,7 @@ func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out 
 	arg, err := toUpdateBookParams(in)
 	if err != nil {
 		s.logger.Error("UpdateBook input adapter failed", zap.Error(err))
-		return nil, err
+		return
 	}
 
 	err = s.db.UpdateBook(ctx, arg)
@@ -147,7 +149,7 @@ func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNParam
 	arg, err := toUpdateBookISBNParams(in)
 	if err != nil {
 		s.logger.Error("UpdateBookISBN input adapter failed", zap.Error(err))
-		return nil, err
+		return
 	}
 
 	err = s.db.UpdateBookISBN(ctx, arg)
