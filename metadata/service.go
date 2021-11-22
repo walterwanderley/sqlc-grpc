@@ -57,12 +57,10 @@ func (s *Service) InputGrpc() []string {
 	if s.HasCustomParams() {
 		typ := s.InputTypes[0]
 		in := s.InputNames[0]
-		res = append(res, fmt.Sprintf("var %s %s", in, typ))
-		m := s.Messages[typ]
-		for i, name := range m.AttrNames {
-			attrName := UpperFirstCharacter(name)
-			res = append(res, bindToGo("in", fmt.Sprintf("%s.%s", in, attrName), attrName, m.AttrTypes[i], false)...)
-		}
+		res = append(res, fmt.Sprintf("%s, err := to%s(in)", in, typ))
+		res = append(res, "if err != nil {")
+		res = append(res, fmt.Sprintf("s.logger.Error(\"%s input adapter failed\", zap.Error(err))", s.Name))
+		res = append(res, "return nil, err }")
 	} else {
 		for i, n := range s.InputNames {
 			res = append(res, bindToGo("in", n, UpperFirstCharacter(n), s.InputTypes[i], true)...)
@@ -75,33 +73,32 @@ func (s *Service) InputGrpc() []string {
 func (s *Service) OutputGrpc() []string {
 	res := make([]string, 0)
 	if s.EmptyOutput() {
+		res = append(res, "return &emptypb.Empty{}, nil")
 		return res
 	}
 
 	if s.HasArrayOutput() {
+		res = append(res, fmt.Sprintf("out := new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
 		typ := strings.TrimPrefix(s.Output[0], "[]")
-		res = append(res, fmt.Sprintf("var item pb.%s", typ))
-		m := s.Messages[typ]
-		for i, attr := range m.AttrNames {
-			res = append(res, bindToProto("r", "item", UpperFirstCharacter(attr), m.AttrTypes[i])...)
-		}
-		res = append(res, "out.Value = append(out.Value, &item)")
+		res = append(res, fmt.Sprintf("item, err := to%sProto(r)", typ))
+		res = append(res, "if err != nil { return nil, err }")
+		res = append(res, "out.Value = append(out.Value, item)")
 		res = append(res, "}")
+		res = append(res, "return out, nil")
 		return res
 	}
 
 	if s.HasCustomOutput() {
 		for _, n := range s.Output {
-			m := s.Messages[n]
-			for i, attr := range m.AttrNames {
-				res = append(res, bindToProto("result", "out", UpperFirstCharacter(attr), m.AttrTypes[i])...)
-			}
+			res = append(res, fmt.Sprintf("return to%sProto(result)", n))
 		}
 		return res
 	}
 	if !s.EmptyOutput() {
+		res = append(res, fmt.Sprintf("out := new(%s)", s.MethodOutputType()))
 		res = append(res, "out.Value = result")
+		res = append(res, "return out, nil")
 		return res
 	}
 

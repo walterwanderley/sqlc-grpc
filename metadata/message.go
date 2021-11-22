@@ -113,3 +113,20 @@ func (m *Message) HasComplexAttribute() bool {
 
 	return false
 }
+
+func (m *Message) AdapterToGo(src, dst string) []string {
+	res := make([]string, 0)
+	for i, attr := range m.AttrNames {
+		attrName := UpperFirstCharacter(attr)
+		res = append(res, bindToGo(src, fmt.Sprintf("%s.%s", dst, attrName), attrName, m.AttrTypes[i], false)...)
+	}
+	return res
+}
+
+func (m *Message) AdapterToProto(src, dst string) []string {
+	res := make([]string, 0)
+	for i, attr := range m.AttrNames {
+		res = append(res, bindToProto(src, dst, UpperFirstCharacter(attr), m.AttrTypes[i])...)
+	}
+	return res
+}

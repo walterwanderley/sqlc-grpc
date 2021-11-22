@@ -79,6 +79,22 @@ func process(def *metadata.Definition, outPath string) error {
 			return nil
 		}
 
+		if strings.HasSuffix(newPath, "adapters.go") {
+			tpl, err := ioutil.ReadAll(in)
+			if err != nil {
+				return err
+			}
+			for _, pkg := range def.Packages {
+				if len(pkg.InputAdapters) > 0 || len(pkg.OutputAdapters) > 0 {
+					err = genFromTemplate(path, string(tpl), pkg, true, filepath.Join(pkg.SrcPath, "adapters.go"))
+					if err != nil {
+						return err
+					}
+				}
+			}
+			return nil
+		}
+
 		if strings.HasSuffix(path, ".tmpl") {
 			tpl, err := ioutil.ReadAll(in)
 			if err != nil {

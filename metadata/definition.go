@@ -24,13 +24,15 @@ func (d *Definition) Database() string {
 }
 
 type Package struct {
-	Engine     string
-	Package    string
-	GoModule   string
-	SchemaPath string
-	SrcPath    string
-	Services   []*Service
-	Messages   map[string]*Message
+	Engine         string
+	Package        string
+	GoModule       string
+	SchemaPath     string
+	SrcPath        string
+	Services       []*Service
+	Messages       map[string]*Message
+	InputAdapters  []*Message
+	OutputAdapters []*Message
 }
 
 func (p *Package) ProtoImports() []string {
@@ -165,6 +167,46 @@ func ParsePackage(src string) (*Package, error) {
 
 		sort.SliceStable(p.Services, func(i, j int) bool {
 			return strings.Compare(p.Services[i].Name, p.Services[j].Name) < 0
+		})
+
+		inAdapters := make(map[string]struct{})
+		outAdapters := make(map[string]struct{})
+
+		for _, s := range p.Services {
+			if s.HasCustomParams() {
+				inAdapters[s.InputTypes[0]] = struct{}{}
+			}
+			if s.HasCustomOutput() {
+				for _, n := range s.Output {
+					outAdapters[n] = struct{}{}
+				}
+			}
+			if s.HasArrayOutput() {
+				typ := strings.TrimPrefix(s.Output[0], "[]")
+				outAdapters[typ] = struct{}{}
+			}
+		}
+
+		p.InputAdapters = make([]*Message, len(inAdapters))
+		i := 0
+		for k := range inAdapters {
+			p.InputAdapters[i] = p.Messages[k]
+			i++
+		}
+
+		sort.SliceStable(p.InputAdapters, func(i, j int) bool {
+			return strings.Compare(p.InputAdapters[i].Name, p.InputAdapters[j].Name) < 0
+		})
+
+		p.OutputAdapters = make([]*Message, len(outAdapters))
+		i = 0
+		for k := range outAdapters {
+			p.OutputAdapters[i] = p.Messages[k]
+			i++
+		}
+
+		sort.SliceStable(p.OutputAdapters, func(i, j int) bool {
+			return strings.Compare(p.OutputAdapters[i].Name, p.OutputAdapters[j].Name) < 0
 		})
 
 		return &p, nil

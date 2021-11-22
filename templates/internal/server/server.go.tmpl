@@ -39,7 +39,7 @@ const (
 
 type RegisterServer func(srv *grpc.Server)
 
-type RegisterHandler func(ctx context.Context, mux *runtime.ServeMux, cc *grpc.ClientConn) error
+type RegisterHandler func(ctx context.Context, mux *runtime.ServeMux, cc grpc.ClientConnInterface) error
 
 // Server represents a gRPC server
 type Server struct {
