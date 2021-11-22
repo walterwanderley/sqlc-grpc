@@ -636,7 +636,7 @@ func RegisterBooksServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.S
 
 // RegisterBooksServiceHandler registers the http handlers for service BooksService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterBooksServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterBooksServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterBooksServiceHandlerClient(ctx, mux, NewBooksServiceClient(conn))
 }
 
