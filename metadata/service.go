@@ -57,7 +57,7 @@ func (s *Service) InputGrpc() []string {
 	if s.HasCustomParams() {
 		typ := s.InputTypes[0]
 		in := s.InputNames[0]
-		res = append(res, fmt.Sprintf("%s, err := to%s(in)", in, typ))
+		res = append(res, fmt.Sprintf("%s, err := from%s(in)", in, typ))
 		res = append(res, "if err != nil {")
 		res = append(res, fmt.Sprintf("s.logger.Error(\"%s input adapter failed\", zap.Error(err))", s.Name))
 		res = append(res, "return }")
@@ -82,7 +82,7 @@ func (s *Service) OutputGrpc() []string {
 		res = append(res, "for _, r := range result {")
 		typ := strings.TrimPrefix(s.Output[0], "[]")
 		res = append(res, fmt.Sprintf("var item *pb.%s", typ))
-		res = append(res, fmt.Sprintf("item, err = to%sProto(r)", typ))
+		res = append(res, fmt.Sprintf("item, err = to%s(r)", typ))
 		res = append(res, "if err != nil { return }")
 		res = append(res, "out.Value = append(out.Value, item)")
 		res = append(res, "}")
@@ -92,7 +92,7 @@ func (s *Service) OutputGrpc() []string {
 
 	if s.HasCustomOutput() {
 		for _, n := range s.Output {
-			res = append(res, fmt.Sprintf("return to%sProto(result)", n))
+			res = append(res, fmt.Sprintf("return to%s(result)", n))
 		}
 		return res
 	}

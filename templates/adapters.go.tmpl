@@ -15,7 +15,7 @@ import (
 )
 
 {{range .InputAdapters}}
-func to{{.Name}}(in *pb.{{.Name}}) (out {{.Name}}, err error) {
+func from{{.Name}}(in *pb.{{.Name}}) (out {{.Name}}, err error) {
 	if in == nil {
 	    return
 	}
@@ -24,7 +24,7 @@ func to{{.Name}}(in *pb.{{.Name}}) (out {{.Name}}, err error) {
 }
 {{end}}
 {{range .OutputAdapters}}
-func to{{.Name}}Proto(in {{.Name}}) (out *pb.{{.Name}}, err error) {
+func to{{.Name}}(in {{.Name}}) (out *pb.{{.Name}}, err error) {
     out = new(pb.{{.Name}})
     {{range .AdapterToProto "in" "out"}}{{.}}
     {{end }}return
