@@ -30,7 +30,7 @@ func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (ou
 	out = new(pb.BooksByTagsResponse)
 	for _, r := range result {
 		var item *pb.BooksByTagsRow
-		item, err = toBooksByTagsRowProto(r)
+		item, err = toBooksByTagsRow(r)
 		if err != nil {
 			return
 		}
@@ -41,7 +41,7 @@ func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (ou
 }
 
 func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearParams) (out *pb.BooksByTitleYearResponse, err error) {
-	arg, err := toBooksByTitleYearParams(in)
+	arg, err := fromBooksByTitleYearParams(in)
 	if err != nil {
 		s.logger.Error("BooksByTitleYear input adapter failed", zap.Error(err))
 		return
@@ -55,7 +55,7 @@ func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearP
 	out = new(pb.BooksByTitleYearResponse)
 	for _, r := range result {
 		var item *pb.Book
-		item, err = toBookProto(r)
+		item, err = toBook(r)
 		if err != nil {
 			return
 		}
@@ -73,12 +73,12 @@ func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorParams) (
 		s.logger.Error("CreateAuthor sql call failed", zap.Error(err))
 		return
 	}
-	return toAuthorProto(result)
+	return toAuthor(result)
 
 }
 
 func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out *pb.Book, err error) {
-	arg, err := toCreateBookParams(in)
+	arg, err := fromCreateBookParams(in)
 	if err != nil {
 		s.logger.Error("CreateBook input adapter failed", zap.Error(err))
 		return
@@ -89,7 +89,7 @@ func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out 
 		s.logger.Error("CreateBook sql call failed", zap.Error(err))
 		return
 	}
-	return toBookProto(result)
+	return toBook(result)
 
 }
 
@@ -113,7 +113,7 @@ func (s *Service) GetAuthor(ctx context.Context, in *pb.GetAuthorParams) (out *p
 		s.logger.Error("GetAuthor sql call failed", zap.Error(err))
 		return
 	}
-	return toAuthorProto(result)
+	return toAuthor(result)
 
 }
 
@@ -125,12 +125,12 @@ func (s *Service) GetBook(ctx context.Context, in *pb.GetBookParams) (out *pb.Bo
 		s.logger.Error("GetBook sql call failed", zap.Error(err))
 		return
 	}
-	return toBookProto(result)
+	return toBook(result)
 
 }
 
 func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out *emptypb.Empty, err error) {
-	arg, err := toUpdateBookParams(in)
+	arg, err := fromUpdateBookParams(in)
 	if err != nil {
 		s.logger.Error("UpdateBook input adapter failed", zap.Error(err))
 		return
@@ -146,7 +146,7 @@ func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out 
 }
 
 func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNParams) (out *emptypb.Empty, err error) {
-	arg, err := toUpdateBookISBNParams(in)
+	arg, err := fromUpdateBookISBNParams(in)
 	if err != nil {
 		s.logger.Error("UpdateBookISBN input adapter failed", zap.Error(err))
 		return

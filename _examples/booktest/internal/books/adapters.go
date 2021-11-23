@@ -10,7 +10,7 @@ import (
 	pb "booktest/proto/books"
 )
 
-func toBooksByTitleYearParams(in *pb.BooksByTitleYearParams) (out BooksByTitleYearParams, err error) {
+func fromBooksByTitleYearParams(in *pb.BooksByTitleYearParams) (out BooksByTitleYearParams, err error) {
 	if in == nil {
 		return
 	}
@@ -19,7 +19,7 @@ func toBooksByTitleYearParams(in *pb.BooksByTitleYearParams) (out BooksByTitleYe
 	return
 }
 
-func toCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err error) {
+func fromCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err error) {
 	if in == nil {
 		return
 	}
@@ -42,7 +42,7 @@ func toCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err erro
 	return
 }
 
-func toUpdateBookISBNParams(in *pb.UpdateBookISBNParams) (out UpdateBookISBNParams, err error) {
+func fromUpdateBookISBNParams(in *pb.UpdateBookISBNParams) (out UpdateBookISBNParams, err error) {
 	if in == nil {
 		return
 	}
@@ -53,7 +53,7 @@ func toUpdateBookISBNParams(in *pb.UpdateBookISBNParams) (out UpdateBookISBNPara
 	return
 }
 
-func toUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err error) {
+func fromUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err error) {
 	if in == nil {
 		return
 	}
@@ -64,14 +64,14 @@ func toUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err erro
 	return
 }
 
-func toAuthorProto(in Author) (out *pb.Author, err error) {
+func toAuthor(in Author) (out *pb.Author, err error) {
 	out = new(pb.Author)
 	out.AuthorID = in.AuthorID
 	out.Name = in.Name
 	return
 }
 
-func toBookProto(in Book) (out *pb.Book, err error) {
+func toBook(in Book) (out *pb.Book, err error) {
 	out = new(pb.Book)
 	out.BookID = in.BookID
 	out.AuthorID = in.AuthorID
@@ -84,7 +84,7 @@ func toBookProto(in Book) (out *pb.Book, err error) {
 	return
 }
 
-func toBooksByTagsRowProto(in BooksByTagsRow) (out *pb.BooksByTagsRow, err error) {
+func toBooksByTagsRow(in BooksByTagsRow) (out *pb.BooksByTagsRow, err error) {
 	out = new(pb.BooksByTagsRow)
 	out.BookID = in.BookID
 	out.Title = in.Title
