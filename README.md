@@ -5,11 +5,12 @@ Create a **gRPC** (and **HTTP/JSON**) **Server** from the generated code by the 
 ### Requirements
 
 - Go 1.16 or superior
-- [protoc](https://github.com/protocolbuffers/protobuf/releases)
-- sqlc, protoc-gen-go, protoc-gen-go-grpc and grpc-gateway
+- [sqlc](https://sqlc.dev/)
+- [buf](https://buf.build/)
 
 ```sh
 go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+go install github.com/bufbuild/buf/cmd/buf@latest
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest

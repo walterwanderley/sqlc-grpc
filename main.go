@@ -102,9 +102,11 @@ func moduleFromGoMod() string {
 
 func postProcess(def *metadata.Definition, workingDirectory string) {
 	fmt.Println("Running compile.sh...")
-	protos := make([]string, 0)
+	if err := os.Chdir(filepath.Join(workingDirectory, "proto")); err != nil {
+		panic(err)
+	}
+	execCommand("buf mod update")
 	for _, pkg := range def.Packages {
-		protos = append(protos, pkg.Package+".proto")
 		newDir := filepath.Join(workingDirectory, "proto", pkg.Package)
 		if _, err := os.Stat(newDir); os.IsNotExist(err) {
 			err := os.MkdirAll(newDir, 0750)
@@ -112,16 +114,13 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 				panic(err)
 			}
 		}
-		if err := os.Chdir(filepath.Join(workingDirectory, "proto")); err != nil {
-			panic(err)
-		}
 		if err := compileProto(pkg.Package); err != nil {
 			fmt.Printf("Error on executing compile.sh for package %s: %v\n", pkg.Package, err)
 		}
 	}
 
 	fmt.Println("Generating OpenAPIv2 specs...")
-	execCommand("protoc -I. -I3rd-party --openapiv2_out . --openapiv2_opt logtostderr=true,allow_repeated_fields_in_body=true,generate_unbound_methods=true,allow_merge=true " + strings.Join(protos, " "))
+	execCommand("buf generate --template buf.doc.yaml")
 
 	if err := os.Chdir(workingDirectory); err != nil {
 		panic(err)
@@ -136,12 +135,7 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 
 func compileProto(pkg string) error {
 	fmt.Printf("Compiling %s.proto...\n", pkg)
-	err := execCommand(fmt.Sprintf("protoc -I. -I3rd-party --go_out %s --go_opt paths=source_relative --go-grpc_out %s --go-grpc_opt paths=source_relative %s.proto", pkg, pkg, pkg))
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Generating reverse proxy (grpc-gateway) %s.proto...\n", pkg)
-	return execCommand(fmt.Sprintf("protoc -I. -I3rd-party --grpc-gateway_out %s --grpc-gateway_opt logtostderr=true,paths=source_relative,allow_repeated_fields_in_body=true,generate_unbound_methods=true %s.proto", pkg, pkg))
+	return execCommand(fmt.Sprintf("buf generate --path %s.proto -o %s", pkg, pkg))
 }
 
 func execCommand(command string) error {
