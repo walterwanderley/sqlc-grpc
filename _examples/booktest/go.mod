@@ -3,12 +3,13 @@ module booktest
 go 1.16
 
 require (
+	github.com/bufbuild/buf v0.56.0
 	github.com/flowchartsman/swaggerui v0.0.0-20210303154956-0e71c297862e
 	github.com/fullstorydev/grpcui v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0
-	github.com/jackc/pgx/v4 v4.14.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.1
+	github.com/jackc/pgx/v4 v4.14.1
 	github.com/lib/pq v1.10.4
 	github.com/prometheus/client_golang v1.11.0
 	github.com/soheilhy/cmux v0.1.5
@@ -18,7 +19,8 @@ require (
 	go.opentelemetry.io/otel/sdk v1.2.0
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/zap v1.19.1
-	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa
 	google.golang.org/grpc v1.42.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0
 	google.golang.org/protobuf v1.27.1
 )

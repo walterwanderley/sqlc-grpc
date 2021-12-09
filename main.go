@@ -101,6 +101,18 @@ func moduleFromGoMod() string {
 }
 
 func postProcess(def *metadata.Definition, workingDirectory string) {
+	fmt.Printf("Configuring project %s...\n", def.GoModule)
+	if err := os.Chdir(workingDirectory); err != nil {
+		panic(err)
+	}
+	execCommand("go mod init " + def.GoModule)
+	execCommand("go mod tidy")
+	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway " +
+		"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 " +
+		"google.golang.org/protobuf/cmd/protoc-gen-go " +
+		"google.golang.org/grpc/cmd/protoc-gen-go-grpc " +
+		"github.com/bufbuild/buf/cmd/buf")
+
 	fmt.Println("Running compile.sh...")
 	if err := os.Chdir(filepath.Join(workingDirectory, "proto")); err != nil {
 		panic(err)
@@ -125,11 +137,7 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 	if err := os.Chdir(workingDirectory); err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("Configuring project %s...\n", def.GoModule)
-	execCommand("go mod init " + def.GoModule)
 	execCommand("go mod tidy")
-
 	fmt.Println("Finished!")
 }
 
