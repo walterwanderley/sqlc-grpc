@@ -14,6 +14,7 @@ func fromBooksByTitleYearParams(in *pb.BooksByTitleYearParams) (out BooksByTitle
 	if in == nil {
 		return
 	}
+
 	out.Title = in.GetTitle()
 	out.Year = in.GetYear()
 	return
@@ -23,6 +24,7 @@ func fromCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err er
 	if in == nil {
 		return
 	}
+
 	out.AuthorID = in.GetAuthorID()
 	out.Isbn = in.GetIsbn()
 	out.BookType = BookType(in.GetBookType())
@@ -46,6 +48,7 @@ func fromUpdateBookISBNParams(in *pb.UpdateBookISBNParams) (out UpdateBookISBNPa
 	if in == nil {
 		return
 	}
+
 	out.Title = in.GetTitle()
 	out.Tags = in.GetTags()
 	out.BookID = in.GetBookID()
@@ -57,6 +60,7 @@ func fromUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err er
 	if in == nil {
 		return
 	}
+
 	out.Title = in.GetTitle()
 	out.Tags = in.GetTags()
 	out.BookType = BookType(in.GetBookType())
@@ -65,6 +69,7 @@ func fromUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err er
 }
 
 func toAuthor(in Author) (out *pb.Author, err error) {
+
 	out = new(pb.Author)
 	out.AuthorID = in.AuthorID
 	out.Name = in.Name
@@ -72,6 +77,7 @@ func toAuthor(in Author) (out *pb.Author, err error) {
 }
 
 func toBook(in Book) (out *pb.Book, err error) {
+
 	out = new(pb.Book)
 	out.BookID = in.BookID
 	out.AuthorID = in.AuthorID
@@ -85,6 +91,7 @@ func toBook(in Book) (out *pb.Book, err error) {
 }
 
 func toBooksByTagsRow(in BooksByTagsRow) (out *pb.BooksByTagsRow, err error) {
+
 	out = new(pb.BooksByTagsRow)
 	out.BookID = in.BookID
 	out.Title = in.Title

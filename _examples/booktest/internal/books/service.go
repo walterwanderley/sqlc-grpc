@@ -11,18 +11,18 @@ import (
 
 type Service struct {
 	pb.UnimplementedBooksServiceServer
-	logger *zap.Logger
-	db     *Queries
+	logger  *zap.Logger
+	querier *Queries
 }
 
-func NewService(logger *zap.Logger, db *Queries) *Service {
-	return &Service{logger: logger, db: db}
+func NewService(logger *zap.Logger, querier *Queries) *Service {
+	return &Service{logger: logger, querier: querier}
 }
 
 func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (out *pb.BooksByTagsResponse, err error) {
 	dollar_1 := in.GetDollar_1()
 
-	result, err := s.db.BooksByTags(ctx, dollar_1)
+	result, err := s.querier.BooksByTags(ctx, dollar_1)
 	if err != nil {
 		s.logger.Error("BooksByTags sql call failed", zap.Error(err))
 		return
@@ -37,7 +37,6 @@ func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (ou
 		out.Value = append(out.Value, item)
 	}
 	return
-
 }
 
 func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearParams) (out *pb.BooksByTitleYearResponse, err error) {
@@ -47,7 +46,7 @@ func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearP
 		return
 	}
 
-	result, err := s.db.BooksByTitleYear(ctx, arg)
+	result, err := s.querier.BooksByTitleYear(ctx, arg)
 	if err != nil {
 		s.logger.Error("BooksByTitleYear sql call failed", zap.Error(err))
 		return
@@ -62,19 +61,17 @@ func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearP
 		out.Value = append(out.Value, item)
 	}
 	return
-
 }
 
 func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorParams) (out *pb.Author, err error) {
 	name := in.GetName()
 
-	result, err := s.db.CreateAuthor(ctx, name)
+	result, err := s.querier.CreateAuthor(ctx, name)
 	if err != nil {
 		s.logger.Error("CreateAuthor sql call failed", zap.Error(err))
 		return
 	}
 	return toAuthor(result)
-
 }
 
 func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out *pb.Book, err error) {
@@ -84,49 +81,45 @@ func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out 
 		return
 	}
 
-	result, err := s.db.CreateBook(ctx, arg)
+	result, err := s.querier.CreateBook(ctx, arg)
 	if err != nil {
 		s.logger.Error("CreateBook sql call failed", zap.Error(err))
 		return
 	}
 	return toBook(result)
-
 }
 
 func (s *Service) DeleteBook(ctx context.Context, in *pb.DeleteBookParams) (out *emptypb.Empty, err error) {
 	bookID := in.GetBookID()
 
-	err = s.db.DeleteBook(ctx, bookID)
+	err = s.querier.DeleteBook(ctx, bookID)
 	if err != nil {
 		s.logger.Error("DeleteBook sql call failed", zap.Error(err))
 		return
 	}
 	return &emptypb.Empty{}, nil
-
 }
 
 func (s *Service) GetAuthor(ctx context.Context, in *pb.GetAuthorParams) (out *pb.Author, err error) {
 	authorID := in.GetAuthorID()
 
-	result, err := s.db.GetAuthor(ctx, authorID)
+	result, err := s.querier.GetAuthor(ctx, authorID)
 	if err != nil {
 		s.logger.Error("GetAuthor sql call failed", zap.Error(err))
 		return
 	}
 	return toAuthor(result)
-
 }
 
 func (s *Service) GetBook(ctx context.Context, in *pb.GetBookParams) (out *pb.Book, err error) {
 	bookID := in.GetBookID()
 
-	result, err := s.db.GetBook(ctx, bookID)
+	result, err := s.querier.GetBook(ctx, bookID)
 	if err != nil {
 		s.logger.Error("GetBook sql call failed", zap.Error(err))
 		return
 	}
 	return toBook(result)
-
 }
 
 func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out *emptypb.Empty, err error) {
@@ -136,13 +129,12 @@ func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out 
 		return
 	}
 
-	err = s.db.UpdateBook(ctx, arg)
+	err = s.querier.UpdateBook(ctx, arg)
 	if err != nil {
 		s.logger.Error("UpdateBook sql call failed", zap.Error(err))
 		return
 	}
 	return &emptypb.Empty{}, nil
-
 }
 
 func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNParams) (out *emptypb.Empty, err error) {
@@ -152,11 +144,10 @@ func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNParam
 		return
 	}
 
-	err = s.db.UpdateBookISBN(ctx, arg)
+	err = s.querier.UpdateBookISBN(ctx, arg)
 	if err != nil {
 		s.logger.Error("UpdateBookISBN sql call failed", zap.Error(err))
 		return
 	}
 	return &emptypb.Empty{}, nil
-
 }
