@@ -14,17 +14,21 @@ import (
 	"{{.GoModule}}/internal/validation"
 )
 
+{{$emitParamsPointers := .EmitParamsPointers}}
+{{$emitResultPointers := .EmitResultPointers}}
 {{range .InputAdapters}}
-func from{{.Name}}(in *pb.{{.Name}}) (out {{.Name}}, err error) {
+func from{{.Name}}(in *pb.{{.Name}}) (out {{if $emitParamsPointers}}*{{end}}{{.Name}}, err error) {
 	if in == nil {
 	    return
 	}
+	{{if $emitParamsPointers}}out = new({{.Name}}){{end}}
     {{range .AdapterToGo "in" "out"}}{{.}}
     {{end}}return
 }
 {{end}}
 {{range .OutputAdapters}}
-func to{{.Name}}(in {{.Name}}) (out *pb.{{.Name}}, err error) {
+func to{{.Name}}(in {{if $emitResultPointers}}*{{end}}{{.Name}}) (out *pb.{{.Name}}, err error) {
+    {{if $emitResultPointers}}if in == nil { return }{{end}}
     out = new(pb.{{.Name}})
     {{range .AdapterToProto "in" "out"}}{{.}}
     {{end }}return

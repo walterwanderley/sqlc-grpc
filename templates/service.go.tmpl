@@ -20,23 +20,24 @@ import (
 type Service struct {
     pb.Unimplemented{{ .Package | UpperFirst}}ServiceServer
 	logger *zap.Logger
-	db     *Queries
+	querier     *Queries
+	{{if .EmitDbArgument}}db *sql.DB{{end}}
 }
 	
-func NewService(logger *zap.Logger, db *Queries) *Service {
-	return &Service{logger: logger, db: db}
+func NewService(logger *zap.Logger, querier *Queries{{if .EmitDbArgument}}, db *sql.DB{{end}}) *Service {
+	return &Service{logger: logger, querier: querier{{if .EmitDbArgument}}, db: db{{end}}}
 }
-
+{{$emitDbArgument := .EmitDbArgument}}
 {{ range .Services }}
 func (s *Service) {{.Name}}(ctx context.Context, in *{{.MethodInputType}}) (out *{{.MethodOutputType}}, err error) {
 	{{ range .InputGrpc}}{{ .}}
 	{{end}}
-	{{ .ReturnCallDatabase}} err {{if not .EmptyOutput}}:{{end}}= s.db.{{ .Name}}(ctx{{ .ParamsCallDatabase}})
+	{{ .ReturnCallDatabase}} err {{if not .EmptyOutput}}:{{end}}= s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
 	if err != nil {
 		s.logger.Error("{{.Name}} sql call failed", zap.Error(err))			
 		return
 	}
-	{{ range .OutputGrpc}}{{ .}}		
-	{{end}}
+	{{ range .OutputGrpc}}{{ .}}
+	{{end -}}
 }
 {{ end }}

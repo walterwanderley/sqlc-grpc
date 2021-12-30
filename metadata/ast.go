@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"go/ast"
+	"strings"
 )
 
 func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
@@ -17,12 +18,15 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	for i := 1; i < len(fun.Type.Params.List); i++ {
 		p := fun.Type.Params.List[i]
 		for _, n := range p.Names {
-			inputNames = append(inputNames, n.Name)
 			typ, err := exprToStr(p.Type)
 			if err != nil {
 				return
 			}
+			if typ == "DBTX" {
+				continue
+			}
 			inputTypes = append(inputTypes, typ)
+			inputNames = append(inputNames, n.Name)
 		}
 	}
 
@@ -96,4 +100,10 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 	}
 
 	return true
+}
+
+func canonicalName(typ string) string {
+	name := strings.TrimPrefix(typ, "[]")
+	name = strings.TrimPrefix(name, "*")
+	return name
 }

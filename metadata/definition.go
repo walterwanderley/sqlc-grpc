@@ -23,16 +23,26 @@ func (d *Definition) Database() string {
 	return ""
 }
 
+type PackageOpts struct {
+	Path               string
+	EmitParamsPointers bool
+	EmitResultPointers bool
+	EmitDbArgument     bool
+}
+
 type Package struct {
-	Engine         string
-	Package        string
-	GoModule       string
-	SchemaPath     string
-	SrcPath        string
-	Services       []*Service
-	Messages       map[string]*Message
-	InputAdapters  []*Message
-	OutputAdapters []*Message
+	Engine             string
+	Package            string
+	GoModule           string
+	SchemaPath         string
+	SrcPath            string
+	Services           []*Service
+	Messages           map[string]*Message
+	InputAdapters      []*Message
+	OutputAdapters     []*Message
+	EmitParamsPointers bool
+	EmitResultPointers bool
+	EmitDbArgument     bool
 }
 
 func (p *Package) ProtoImports() []string {
@@ -104,9 +114,9 @@ func (p *Package) importWrappers() bool {
 	return false
 }
 
-func ParsePackage(src string) (*Package, error) {
+func ParsePackage(opts PackageOpts) (*Package, error) {
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, src, nil, parser.ParseComments)
+	pkgs, err := parser.ParseDir(fset, opts.Path, nil, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
@@ -116,9 +126,12 @@ func ParsePackage(src string) (*Package, error) {
 
 	for pkgName, pkg := range pkgs {
 		p := Package{
-			Package:  pkgName,
-			SrcPath:  src,
-			Messages: make(map[string]*Message),
+			Package:            pkgName,
+			SrcPath:            opts.Path,
+			Messages:           make(map[string]*Message),
+			EmitParamsPointers: opts.EmitParamsPointers,
+			EmitResultPointers: opts.EmitResultPointers,
+			EmitDbArgument:     opts.EmitDbArgument,
 		}
 
 		constants := make(map[string]string)
@@ -174,16 +187,15 @@ func ParsePackage(src string) (*Package, error) {
 
 		for _, s := range p.Services {
 			if s.HasCustomParams() {
-				inAdapters[s.InputTypes[0]] = struct{}{}
+				inAdapters[canonicalName(s.InputTypes[0])] = struct{}{}
 			}
 			if s.HasCustomOutput() {
 				for _, n := range s.Output {
-					outAdapters[n] = struct{}{}
+					outAdapters[canonicalName(n)] = struct{}{}
 				}
 			}
 			if s.HasArrayOutput() {
-				typ := strings.TrimPrefix(s.Output[0], "[]")
-				outAdapters[typ] = struct{}{}
+				outAdapters[canonicalName(s.Output[0])] = struct{}{}
 			}
 		}
 

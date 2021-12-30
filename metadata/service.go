@@ -28,7 +28,7 @@ func (s *Service) MethodOutputType() string {
 	case s.EmptyOutput():
 		return "emptypb.Empty"
 	case s.HasCustomOutput():
-		return fmt.Sprintf("pb.%s", s.Output[0])
+		return fmt.Sprintf("pb.%s", canonicalName(s.Output[0]))
 	default:
 		return fmt.Sprintf("pb.%sResponse", s.Name)
 	}
@@ -55,7 +55,7 @@ func (s *Service) InputGrpc() []string {
 	}
 
 	if s.HasCustomParams() {
-		typ := s.InputTypes[0]
+		typ := canonicalName(s.InputTypes[0])
 		in := s.InputNames[0]
 		res = append(res, fmt.Sprintf("%s, err := from%s(in)", in, typ))
 		res = append(res, "if err != nil {")
@@ -80,7 +80,7 @@ func (s *Service) OutputGrpc() []string {
 	if s.HasArrayOutput() {
 		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
-		typ := strings.TrimPrefix(s.Output[0], "[]")
+		typ := canonicalName(s.Output[0])
 		res = append(res, fmt.Sprintf("var item *pb.%s", typ))
 		res = append(res, fmt.Sprintf("item, err = to%s(r)", typ))
 		res = append(res, "if err != nil { return }")
@@ -92,7 +92,7 @@ func (s *Service) OutputGrpc() []string {
 
 	if s.HasCustomOutput() {
 		for _, n := range s.Output {
-			res = append(res, fmt.Sprintf("return to%s(result)", n))
+			res = append(res, fmt.Sprintf("return to%s(result)", canonicalName(n)))
 		}
 		return res
 	}
@@ -121,7 +121,7 @@ func (s *Service) RpcSignature() string {
 	case s.EmptyOutput():
 		b.WriteString("google.protobuf.Empty")
 	case s.HasCustomOutput():
-		b.WriteString(s.Output[0])
+		b.WriteString(canonicalName(s.Output[0]))
 	default:
 		b.WriteString(fmt.Sprintf("%sResponse", s.Name))
 	}

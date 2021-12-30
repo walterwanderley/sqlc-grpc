@@ -15,12 +15,17 @@ const (
 	jsonConfig = "sqlc.json"
 )
 
+type PackageConfig struct {
+	Name                      string `json:"name" yaml:"name"`
+	Path                      string `json:"path" yaml:"path"`
+	Engine                    string `json:"engine" yaml:"engine"`
+	EmitResultStructPointers  bool   `json:"emit_result_struct_pointers" yaml:"emit_result_struct_pointers"`
+	EmitParamsStructPointers  bool   `json:"emit_params_struct_pointers" yaml:"emit_params_struct_pointers"`
+	EmitMethodsWithDBArgument bool   `json:"emit_methods_with_db_argument" yaml:"emit_methods_with_db_argument"`
+}
+
 type sqlcConfig struct {
-	Packages []struct {
-		Name   string `json:"name" yaml:"name"`
-		Path   string `json:"path" yaml:"path"`
-		Engine string `json:"engine" yaml:"engine"`
-	} `json:"packages" yaml:"packages"`
+	Packages []PackageConfig `json:"packages" yaml:"packages"`
 }
 
 func readConfig() (sqlcConfig, error) {

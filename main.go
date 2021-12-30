@@ -59,7 +59,12 @@ func main() {
 	}
 
 	for _, p := range cfg.Packages {
-		pkg, err := metadata.ParsePackage(p.Path)
+		pkg, err := metadata.ParsePackage(metadata.PackageOpts{
+			Path:               p.Path,
+			EmitParamsPointers: p.EmitParamsStructPointers,
+			EmitResultPointers: p.EmitResultStructPointers,
+			EmitDbArgument:     p.EmitMethodsWithDBArgument,
+		})
 		if err != nil {
 			log.Fatal("parser error:", err.Error())
 		}
