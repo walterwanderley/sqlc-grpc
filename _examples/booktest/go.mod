@@ -11,6 +11,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/lib/pq v1.10.4
+	github.com/ngrok/sqlmw v0.0.0-20211220175533-9d16fdc47b31
 	github.com/prometheus/client_golang v1.11.0
 	github.com/soheilhy/cmux v0.1.5
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.28.0

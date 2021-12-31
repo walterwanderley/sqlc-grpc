@@ -13,11 +13,6 @@ import (
 	"runtime"
 	"syscall"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -26,20 +21,24 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 
 	"booktest/internal/server"
+	"booktest/internal/server/trace"
 )
 
 //go:generate sqlc-grpc -m booktest -append
 
 const serviceName = "booktest"
 
-//go:embed proto/apidocs.swagger.json
-var openAPISpec []byte
+var (
+	dbURL string
+
+	//go:embed proto/apidocs.swagger.json
+	openAPISpec []byte
+)
 
 func main() {
 	cfg := server.Config{
 		ServiceName: serviceName,
 	}
-	var dbURL string
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
@@ -55,20 +54,34 @@ func main() {
 	log := logger(dev)
 	defer log.Sync()
 
-	if _, err := maxprocs.Set(); err != nil {
-		log.Error("startup", zap.Error(err))
+	if err := run(cfg, log); err != nil && err.Error() != "mux: server closed" {
+		log.Error("server error", zap.Error(err))
 		os.Exit(1)
+	}
+}
+
+func run(cfg server.Config, log *zap.Logger) error {
+	if _, err := maxprocs.Set(); err != nil {
+		log.Warn("startup", zap.Error(err))
 	}
 	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
 
-	if cfg.TracingEnabled() {
-		cleanup := installExportPipeline(context.Background(), log, cfg.JaegerCollector)
-		defer cleanup()
-	}
-
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
-		log.Fatal("failed to open DB", zap.Error(err))
+		return err
+	}
+
+	if cfg.TracingEnabled() {
+		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
+		if err != nil {
+			return err
+		}
+		defer flush()
+
+		db, err = trace.OpenDB(db.Driver(), dbURL)
+		if err != nil {
+			return err
+		}
 	}
 
 	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), openAPISpec)
@@ -80,11 +93,7 @@ func main() {
 		log.Warn("signal detected...", zap.Any("signal", sig))
 		srv.Shutdown()
 	}()
-	if err := srv.ListenAndServe(); err != nil {
-		if err.Error() != "mux: server closed" {
-			log.Fatal(err.Error())
-		}
-	}
+	return srv.ListenAndServe()
 }
 
 func logger(dev bool) *zap.Logger {
@@ -108,27 +117,4 @@ func logger(dev bool) *zap.Logger {
 		os.Exit(1)
 	}
 	return log
-}
-
-func installExportPipeline(ctx context.Context, log *zap.Logger, url string) func() {
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
-	if err != nil {
-		log.Fatal("creating jaeger exporter", zap.Error(err))
-	}
-
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exp),
-		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(serviceName),
-		)),
-	)
-
-	otel.SetTracerProvider(tp)
-
-	return func() {
-		if err := tp.Shutdown(ctx); err != nil {
-			log.Fatal("stopping tracer provider", zap.Error(err))
-		}
-	}
 }
