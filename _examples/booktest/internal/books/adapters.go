@@ -39,7 +39,7 @@ func fromCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err er
 		}
 		out.Available = v.AsTime()
 	} else {
-		err = fmt.Errorf("Available is required%w", validation.ErrUserInput)
+		err = fmt.Errorf("field Available is required%w", validation.ErrUserInput)
 		return
 	}
 	out.Tags = in.GetTags()
