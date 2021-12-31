@@ -22,7 +22,7 @@ import (
 type Service struct {
     pb.Unimplemented{{ .Package | UpperFirst}}ServiceServer
 	logger *zap.Logger
-	querier     *Queries
+	querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}
 	{{if .EmitDbArgument}}db *sql.DB{{end}}
 }
 

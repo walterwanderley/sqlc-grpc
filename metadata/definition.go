@@ -27,6 +27,7 @@ func (d *Definition) Database() string {
 
 type PackageOpts struct {
 	Path               string
+	EmitInterface      bool
 	EmitParamsPointers bool
 	EmitResultPointers bool
 	EmitDbArgument     bool
@@ -42,6 +43,7 @@ type Package struct {
 	Messages           map[string]*Message
 	InputAdapters      []*Message
 	OutputAdapters     []*Message
+	EmitInterface      bool
 	EmitParamsPointers bool
 	EmitResultPointers bool
 	EmitDbArgument     bool
@@ -131,6 +133,7 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 			Package:            pkgName,
 			SrcPath:            opts.Path,
 			Messages:           make(map[string]*Message),
+			EmitInterface:      opts.EmitInterface,
 			EmitParamsPointers: opts.EmitParamsPointers,
 			EmitResultPointers: opts.EmitResultPointers,
 			EmitDbArgument:     opts.EmitDbArgument,

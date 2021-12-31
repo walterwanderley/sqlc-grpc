@@ -93,6 +93,7 @@ func main() {
 	for _, p := range cfg.Packages {
 		pkg, err := metadata.ParsePackage(metadata.PackageOpts{
 			Path:               p.Path,
+			EmitInterface:      p.EmitInterface,
 			EmitParamsPointers: p.EmitParamsStructPointers,
 			EmitResultPointers: p.EmitResultStructPointers,
 			EmitDbArgument:     p.EmitMethodsWithDBArgument,

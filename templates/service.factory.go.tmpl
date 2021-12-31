@@ -10,6 +10,6 @@ import (
 
 // NewService is a constructor of a pb.{{ .Package | UpperFirst}}ServiceServer implementation.
 // Use this function to customize the server by adding middlewares to it.
-func NewService(logger *zap.Logger, querier *Queries{{if .EmitDbArgument}}, db *sql.DB{{end}}) pb.{{ .Package | UpperFirst}}ServiceServer {
+func NewService(logger *zap.Logger, querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}{{if .EmitDbArgument}}, db *sql.DB{{end}}) pb.{{ .Package | UpperFirst}}ServiceServer {
 	return &Service{logger: logger, querier: querier{{if .EmitDbArgument}}, db: db{{end}}}
 }
