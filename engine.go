@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"fmt"
 	"go/format"
 	"io"
@@ -21,7 +22,7 @@ import (
 //go:embed templates/*
 var templates embed.FS
 
-func process(def *metadata.Definition, outPath string) error {
+func process(def *metadata.Definition, outPath string, appendMode bool) error {
 	rootPath := "templates"
 	return fs.WalkDir(templates, rootPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -79,6 +80,24 @@ func process(def *metadata.Definition, outPath string) error {
 			return nil
 		}
 
+		if strings.HasSuffix(newPath, "service.factory.go") {
+			tpl, err := ioutil.ReadAll(in)
+			if err != nil {
+				return err
+			}
+			for _, pkg := range def.Packages {
+				newPath := filepath.Join(pkg.SrcPath, "service.factory.go")
+				if appendMode && fileExists(newPath) {
+					return nil
+				}
+				err = genFromTemplate(path, string(tpl), pkg, true, newPath)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
 		if strings.HasSuffix(newPath, "adapters.go") {
 			tpl, err := ioutil.ReadAll(in)
 			if err != nil {
@@ -101,7 +120,14 @@ func process(def *metadata.Definition, outPath string) error {
 				return err
 			}
 			goCode := strings.HasSuffix(newPath, ".go")
+			if goCode && appendMode && fileExists(newPath) && !strings.HasSuffix(newPath, "registry.go") {
+				return nil
+			}
 			return genFromTemplate(path, string(tpl), def, goCode, newPath)
+		}
+
+		if appendMode && fileExists(newPath) {
+			return nil
 		}
 
 		out, err := os.Create(newPath)
@@ -177,4 +203,9 @@ func chmodFile(f *os.File) error {
 		}
 	}
 	return nil
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
 }

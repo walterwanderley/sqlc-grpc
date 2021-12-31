@@ -90,6 +90,17 @@ go run . -db [Database Connection URL] -dev -grpcui
 - gRPC UI [http://localhost:5000/grpcui](http://localhost:5000/grpcui)
 - Swagger UI [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
+### Editing the generated code
+
+- It's safe to edit any generated code that not have the `DO NOT EDIT` indication at the very first line.
+
+- After modify a SQL file, execute these commands below:
+
+```sh
+sqlc generate
+go generate
+```
+
 ### Similar Projects
 
 - [xo-grpc](https://github.com/walterwanderley/xo-grpc)

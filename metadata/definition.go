@@ -5,11 +5,13 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"regexp"
 	"sort"
 	"strings"
 )
 
 type Definition struct {
+	Args     string
 	GoModule string
 	Packages []*Package
 }
@@ -114,7 +116,7 @@ func (p *Package) importWrappers() bool {
 	return false
 }
 
-func ParsePackage(opts PackageOpts) (*Package, error) {
+func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, opts.Path, nil, parser.ParseComments)
 	if err != nil {
@@ -169,7 +171,16 @@ func ParsePackage(opts PackageOpts) (*Package, error) {
 			}
 			for _, n := range file.Decls {
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					visitFunc(fun, &p, constants)
+					var ignore bool
+					for _, re := range queriesToIgnore {
+						if re.MatchString(fun.Name.String()) {
+							ignore = true
+							break
+						}
+					}
+					if !ignore {
+						visitFunc(fun, &p, constants)
+					}
 				}
 			}
 		}

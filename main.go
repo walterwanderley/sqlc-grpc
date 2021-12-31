@@ -4,10 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -17,15 +19,21 @@ import (
 )
 
 var (
-	module      string
-	showVersion bool
-	help        bool
+	module           string
+	ignoreQueries    string
+	appendMode       bool
+	compileProtoOnly bool
+	showVersion      bool
+	help             bool
 )
 
 func main() {
 	flag.BoolVar(&help, "h", false, "Help for this program")
 	flag.BoolVar(&showVersion, "v", false, "Show version")
+	flag.BoolVar(&appendMode, "append", false, "Enable append mode. Don't rewrite editable files")
+	flag.BoolVar(&compileProtoOnly, "compile-proto-only", false, "Compile protocol buffers and exit")
 	flag.StringVar(&module, "m", "my-project", "Go module name if there are no go.mod")
+	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.Parse()
 
 	if help {
@@ -39,6 +47,15 @@ func main() {
 		return
 	}
 
+	if compileProtoOnly {
+		err := compileProtos()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Finished!")
+		return
+	}
+
 	cfg, err := readConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -48,12 +65,27 @@ func main() {
 		log.Fatal("no packages")
 	}
 
+	queriesToIgnore := make([]*regexp.Regexp, 0)
+	for _, queryName := range strings.Split(ignoreQueries, ",") {
+		s := strings.TrimSpace(queryName)
+		if s == "" {
+			continue
+		}
+		queriesToIgnore = append(queriesToIgnore, regexp.MustCompile(s))
+	}
+
 	if m := moduleFromGoMod(); m != "" {
 		fmt.Println("Using module path from go.mod:", m)
 		module = m
 	}
 
+	args := strings.Join(os.Args, " ")
+	if !strings.Contains(args, " -append") {
+		args += " -append"
+	}
+
 	def := metadata.Definition{
+		Args:     args,
 		GoModule: module,
 		Packages: make([]*metadata.Package, 0),
 	}
@@ -64,12 +96,17 @@ func main() {
 			EmitParamsPointers: p.EmitParamsStructPointers,
 			EmitResultPointers: p.EmitResultStructPointers,
 			EmitDbArgument:     p.EmitMethodsWithDBArgument,
-		})
+		}, queriesToIgnore)
 		if err != nil {
 			log.Fatal("parser error:", err.Error())
 		}
 		pkg.GoModule = module
 		pkg.Engine = p.Engine
+
+		if len(pkg.Services) == 0 {
+			log.Println("No services on package", pkg.Package)
+			continue
+		}
 
 		def.Packages = append(def.Packages, pkg)
 	}
@@ -77,12 +114,16 @@ func main() {
 		return strings.Compare(def.Packages[i].Package, def.Packages[j].Package) < 0
 	})
 
+	if len(def.Packages) == 0 {
+		log.Fatal("No services found, verify the -i parameter")
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal("unable to get working directory:", err.Error())
 	}
 
-	err = process(&def, wd)
+	err = process(&def, wd, appendMode)
 	if err != nil {
 		log.Fatal("unable to process templates:", err.Error())
 	}
@@ -149,6 +190,25 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 func compileProto(pkg string) error {
 	fmt.Printf("Compiling %s.proto...\n", pkg)
 	return execCommand(fmt.Sprintf("buf generate --path %s.proto -o %s", pkg, pkg))
+}
+
+func compileProtos() error {
+	files, err := ioutil.ReadDir("./")
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if strings.HasSuffix(f.Name(), ".proto") {
+			err := compileProto(strings.TrimSuffix(f.Name(), ".proto"))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	fmt.Println("Generating OpenAPIv2 specs...")
+	return execCommand("buf generate --template buf.doc.yaml")
 }
 
 func execCommand(command string) error {
