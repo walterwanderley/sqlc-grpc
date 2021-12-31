@@ -22,6 +22,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
@@ -78,9 +79,11 @@ func (srv *Server) ListenAndServe() error {
 	healthpb.RegisterHealthServer(srv.grpcServer, srv.healthServer)
 	srv.healthServer.SetServingStatus("ww", healthpb.HealthCheckResponse_SERVING)
 
-	var listen net.Listener
-	dialOptions := []grpc.DialOption{grpc.WithBlock()}
-	var schema string
+	var (
+		listen net.Listener
+		creds  credentials.TransportCredentials
+		schema string
+	)
 	if srv.cfg.TLSEnabled() {
 		schema = "https"
 		tlsCert, err := tls.LoadX509KeyPair(srv.cfg.Cert, srv.cfg.Key)
@@ -99,7 +102,7 @@ func (srv *Server) ListenAndServe() error {
 
 		cp := x509.NewCertPool()
 		cp.AddCert(tlsCert.Leaf)
-		dialOptions = append(dialOptions, grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(cp, "")))
+		creds = credentials.NewClientTLSFromCert(cp, "")
 	} else {
 		schema = "http"
 		var err error
@@ -107,7 +110,7 @@ func (srv *Server) ListenAndServe() error {
 		if err != nil {
 			return err
 		}
-		dialOptions = append(dialOptions, grpc.WithInsecure())
+		creds = insecure.NewCredentials()
 	}
 
 	mux := cmux.New(listen)
@@ -139,7 +142,8 @@ func (srv *Server) ListenAndServe() error {
 	cc, err := grpc.DialContext(
 		ctx,
 		sAddr,
-		dialOptions...,
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(creds),
 	)
 	if err != nil {
 		return err
