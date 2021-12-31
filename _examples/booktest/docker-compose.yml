@@ -10,7 +10,7 @@ services:
       - postgres
 
   postgres:
-    image: postgres:13-alpine
+    image: postgres
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/1-ddl.sql
     environment:
