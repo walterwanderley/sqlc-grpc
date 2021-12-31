@@ -173,7 +173,7 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
 		res = append(res, fmt.Sprintf("%s = v.AsTime()", dst))
-		res = append(res, fmt.Sprintf("} else { err = fmt.Errorf(\"%s is required%%w\", validation.ErrUserInput)", attrName))
+		res = append(res, fmt.Sprintf("} else { err = fmt.Errorf(\"field %s is required%%w\", validation.ErrUserInput)", attrName))
 		res = append(res, "return }")
 	case "uuid.UUID":
 		if newVar {
