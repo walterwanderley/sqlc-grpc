@@ -92,7 +92,7 @@ go run . -db [Database Connection URL] -dev -grpcui
 
 ### Editing the generated code
 
-- It's safe to edit any generated code that not have the `DO NOT EDIT` indication at the very first line.
+- It's safe to edit any generated code that doesn't have the `DO NOT EDIT` indication at the very first line.
 
 - After modify a SQL file, execute these commands below:
 
@@ -100,6 +100,8 @@ go run . -db [Database Connection URL] -dev -grpcui
 sqlc generate
 go generate
 ```
+
+- After modify a *.proto file, execute `buf generate`.
 
 ### Similar Projects
 
