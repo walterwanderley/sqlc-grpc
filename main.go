@@ -4,11 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -19,19 +17,17 @@ import (
 )
 
 var (
-	module           string
-	ignoreQueries    string
-	appendMode       bool
-	compileProtoOnly bool
-	showVersion      bool
-	help             bool
+	module        string
+	ignoreQueries string
+	appendMode    bool
+	showVersion   bool
+	help          bool
 )
 
 func main() {
 	flag.BoolVar(&help, "h", false, "Help for this program")
 	flag.BoolVar(&showVersion, "v", false, "Show version")
 	flag.BoolVar(&appendMode, "append", false, "Enable append mode. Don't rewrite editable files")
-	flag.BoolVar(&compileProtoOnly, "compile-proto-only", false, "Compile protocol buffers and exit")
 	flag.StringVar(&module, "m", "my-project", "Go module name if there are no go.mod")
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.Parse()
@@ -44,15 +40,6 @@ func main() {
 
 	if showVersion {
 		fmt.Println(version)
-		return
-	}
-
-	if compileProtoOnly {
-		err := compileProtos()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Finished!")
 		return
 	}
 
@@ -149,9 +136,6 @@ func moduleFromGoMod() string {
 
 func postProcess(def *metadata.Definition, workingDirectory string) {
 	fmt.Printf("Configuring project %s...\n", def.GoModule)
-	if err := os.Chdir(workingDirectory); err != nil {
-		panic(err)
-	}
 	execCommand("go mod init " + def.GoModule)
 	execCommand("go mod tidy")
 	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway " +
@@ -159,57 +143,11 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 		"google.golang.org/protobuf/cmd/protoc-gen-go " +
 		"google.golang.org/grpc/cmd/protoc-gen-go-grpc " +
 		"github.com/bufbuild/buf/cmd/buf")
-
-	fmt.Println("Running compile.sh...")
-	if err := os.Chdir(filepath.Join(workingDirectory, "proto")); err != nil {
-		panic(err)
-	}
+	fmt.Println("Compiling protocol buffers...")
 	execCommand("buf mod update")
-	for _, pkg := range def.Packages {
-		newDir := filepath.Join(workingDirectory, "proto", pkg.Package)
-		if _, err := os.Stat(newDir); os.IsNotExist(err) {
-			err := os.MkdirAll(newDir, 0750)
-			if err != nil {
-				panic(err)
-			}
-		}
-		if err := compileProto(pkg.Package); err != nil {
-			fmt.Printf("Error on executing compile.sh for package %s: %v\n", pkg.Package, err)
-		}
-	}
-
-	fmt.Println("Generating OpenAPIv2 specs...")
-	execCommand("buf generate --template buf.doc.yaml")
-
-	if err := os.Chdir(workingDirectory); err != nil {
-		panic(err)
-	}
+	execCommand("buf generate")
 	execCommand("go mod tidy")
 	fmt.Println("Finished!")
-}
-
-func compileProto(pkg string) error {
-	fmt.Printf("Compiling %s.proto...\n", pkg)
-	return execCommand(fmt.Sprintf("buf generate --path %s.proto -o %s", pkg, pkg))
-}
-
-func compileProtos() error {
-	files, err := ioutil.ReadDir("./")
-	if err != nil {
-		return err
-	}
-
-	for _, f := range files {
-		if strings.HasSuffix(f.Name(), ".proto") {
-			err := compileProto(strings.TrimSuffix(f.Name(), ".proto"))
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	fmt.Println("Generating OpenAPIv2 specs...")
-	return execCommand("buf generate --template buf.doc.yaml")
 }
 
 func execCommand(command string) error {
