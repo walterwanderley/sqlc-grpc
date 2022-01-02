@@ -1,8 +1,8 @@
 version: "1"
 packages:
   - path: "internal/books"
-    queries: "./queries.sql"
-    schema: "./schema.sql"
+    queries: "./sql/queries.sql"
+    schema: "./sql/schema.sql"
     engine: "postgresql"
     emit_interface: false
     emit_exact_table_names: false

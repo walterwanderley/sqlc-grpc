@@ -12,7 +12,7 @@ services:
   postgres:
     image: postgres
     volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/1-ddl.sql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/1-ddl.sql
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=secret
