@@ -58,14 +58,14 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 				return err
 			}
 			for _, pkg := range def.Packages {
-				dest := filepath.Join(dir, pkg.Package, "v1")
+				dest := filepath.Join(dir, metadata.ToSnakeCase(pkg.Package), "v1")
 				if _, err := os.Stat(dest); os.IsNotExist(err) {
 					err := os.MkdirAll(dest, 0750)
 					if err != nil {
 						return err
 					}
 				}
-				err = genFromTemplate(path, string(tpl), pkg, false, filepath.Join(dest, (pkg.Package+".proto")))
+				err = genFromTemplate(path, string(tpl), pkg, false, filepath.Join(dest, (metadata.ToSnakeCase(pkg.Package)+".proto")))
 				if err != nil {
 					return err
 				}

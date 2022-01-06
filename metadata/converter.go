@@ -72,7 +72,7 @@ func toProtoType(typ string) string {
 	case "uuid.UUID", "net.HardwareAddr", "net.IP":
 		return "string"
 	default:
-		if _, elementType := OriginalAndElementType(typ); elementType != "" {
+		if _, elementType := originalAndElementType(typ); elementType != "" {
 			return elementType
 		}
 		return typ
@@ -107,7 +107,7 @@ func bindToProto(src, dst, attrName, attrType string) []string {
 	case "int16":
 		res = append(res, fmt.Sprintf("%s.%s = int32(%s.%s)", dst, camelCaseProto(attrName), src, attrName))
 	default:
-		_, elementType := OriginalAndElementType(attrType)
+		_, elementType := originalAndElementType(attrType)
 		if elementType != "" {
 			res = append(res, fmt.Sprintf("%s.%s = %s(%s.%s)", dst, camelCaseProto(attrName), elementType, src, attrName))
 		} else {
@@ -215,7 +215,7 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 			res = append(res, fmt.Sprintf("%s = uint16(%s.Get%s())", dst, src, camelCaseProto(attrName)))
 		}
 	default:
-		originalType, elementType := OriginalAndElementType(attrType)
+		originalType, elementType := originalAndElementType(attrType)
 		if newVar {
 			if elementType != "" {
 				res = append(res, fmt.Sprintf("%s := %s(%s.Get%s())", dst, originalType, src, camelCaseProto(attrName)))

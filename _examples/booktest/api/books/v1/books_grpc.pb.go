@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.17.3
-// source: api/books/v1/books.proto
+// source: books/v1/books.proto
 
 package v1
 
@@ -43,7 +43,7 @@ func NewBooksServiceClient(cc grpc.ClientConnInterface) BooksServiceClient {
 
 func (c *booksServiceClient) BooksByTags(ctx context.Context, in *BooksByTagsRequest, opts ...grpc.CallOption) (*BooksByTagsResponse, error) {
 	out := new(BooksByTagsResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/BooksByTags", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/BooksByTags", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *booksServiceClient) BooksByTags(ctx context.Context, in *BooksByTagsReq
 
 func (c *booksServiceClient) BooksByTitleYear(ctx context.Context, in *BooksByTitleYearRequest, opts ...grpc.CallOption) (*BooksByTitleYearResponse, error) {
 	out := new(BooksByTitleYearResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/BooksByTitleYear", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/BooksByTitleYear", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (c *booksServiceClient) BooksByTitleYear(ctx context.Context, in *BooksByTi
 
 func (c *booksServiceClient) CreateAuthor(ctx context.Context, in *CreateAuthorRequest, opts ...grpc.CallOption) (*CreateAuthorResponse, error) {
 	out := new(CreateAuthorResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/CreateAuthor", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/CreateAuthor", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (c *booksServiceClient) CreateAuthor(ctx context.Context, in *CreateAuthorR
 
 func (c *booksServiceClient) CreateBook(ctx context.Context, in *CreateBookRequest, opts ...grpc.CallOption) (*CreateBookResponse, error) {
 	out := new(CreateBookResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/CreateBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/CreateBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (c *booksServiceClient) CreateBook(ctx context.Context, in *CreateBookReque
 
 func (c *booksServiceClient) DeleteBook(ctx context.Context, in *DeleteBookRequest, opts ...grpc.CallOption) (*DeleteBookResponse, error) {
 	out := new(DeleteBookResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/DeleteBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/DeleteBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (c *booksServiceClient) DeleteBook(ctx context.Context, in *DeleteBookReque
 
 func (c *booksServiceClient) GetAuthor(ctx context.Context, in *GetAuthorRequest, opts ...grpc.CallOption) (*GetAuthorResponse, error) {
 	out := new(GetAuthorResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/GetAuthor", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/GetAuthor", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (c *booksServiceClient) GetAuthor(ctx context.Context, in *GetAuthorRequest
 
 func (c *booksServiceClient) GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*GetBookResponse, error) {
 	out := new(GetBookResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/GetBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/GetBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (c *booksServiceClient) GetBook(ctx context.Context, in *GetBookRequest, op
 
 func (c *booksServiceClient) UpdateBook(ctx context.Context, in *UpdateBookRequest, opts ...grpc.CallOption) (*UpdateBookResponse, error) {
 	out := new(UpdateBookResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/UpdateBook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/UpdateBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (c *booksServiceClient) UpdateBook(ctx context.Context, in *UpdateBookReque
 
 func (c *booksServiceClient) UpdateBookISBN(ctx context.Context, in *UpdateBookISBNRequest, opts ...grpc.CallOption) (*UpdateBookISBNResponse, error) {
 	out := new(UpdateBookISBNResponse)
-	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/UpdateBookISBN", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/books.v1.BooksService/UpdateBookISBN", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func _BooksService_BooksByTags_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/BooksByTags",
+		FullMethod: "/books.v1.BooksService/BooksByTags",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).BooksByTags(ctx, req.(*BooksByTagsRequest))
@@ -210,7 +210,7 @@ func _BooksService_BooksByTitleYear_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/BooksByTitleYear",
+		FullMethod: "/books.v1.BooksService/BooksByTitleYear",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).BooksByTitleYear(ctx, req.(*BooksByTitleYearRequest))
@@ -228,7 +228,7 @@ func _BooksService_CreateAuthor_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/CreateAuthor",
+		FullMethod: "/books.v1.BooksService/CreateAuthor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).CreateAuthor(ctx, req.(*CreateAuthorRequest))
@@ -246,7 +246,7 @@ func _BooksService_CreateBook_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/CreateBook",
+		FullMethod: "/books.v1.BooksService/CreateBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).CreateBook(ctx, req.(*CreateBookRequest))
@@ -264,7 +264,7 @@ func _BooksService_DeleteBook_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/DeleteBook",
+		FullMethod: "/books.v1.BooksService/DeleteBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).DeleteBook(ctx, req.(*DeleteBookRequest))
@@ -282,7 +282,7 @@ func _BooksService_GetAuthor_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/GetAuthor",
+		FullMethod: "/books.v1.BooksService/GetAuthor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).GetAuthor(ctx, req.(*GetAuthorRequest))
@@ -300,7 +300,7 @@ func _BooksService_GetBook_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/GetBook",
+		FullMethod: "/books.v1.BooksService/GetBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).GetBook(ctx, req.(*GetBookRequest))
@@ -318,7 +318,7 @@ func _BooksService_UpdateBook_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/UpdateBook",
+		FullMethod: "/books.v1.BooksService/UpdateBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).UpdateBook(ctx, req.(*UpdateBookRequest))
@@ -336,7 +336,7 @@ func _BooksService_UpdateBookISBN_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.books.v1.BooksService/UpdateBookISBN",
+		FullMethod: "/books.v1.BooksService/UpdateBookISBN",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BooksServiceServer).UpdateBookISBN(ctx, req.(*UpdateBookISBNRequest))
@@ -348,7 +348,7 @@ func _BooksService_UpdateBookISBN_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BooksService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.books.v1.BooksService",
+	ServiceName: "books.v1.BooksService",
 	HandlerType: (*BooksServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -389,5 +389,5 @@ var BooksService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/books/v1/books.proto",
+	Metadata: "books/v1/books.proto",
 }

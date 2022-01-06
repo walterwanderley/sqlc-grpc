@@ -1,6 +1,6 @@
-FROM golang:1.16-alpine
+FROM golang:1.17
 
-RUN apk add --no-cache git && go install github.com/cespare/reflex@latest
+RUN go install github.com/cespare/reflex@latest
 
 WORKDIR /app
 COPY go.mod .

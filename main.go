@@ -144,7 +144,13 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 		"google.golang.org/grpc/cmd/protoc-gen-go-grpc " +
 		"github.com/bufbuild/buf/cmd/buf")
 	fmt.Println("Compiling protocol buffers...")
+	if err := os.Chdir("proto"); err != nil {
+		panic(err)
+	}
 	execCommand("buf mod update")
+	if err := os.Chdir(workingDirectory); err != nil {
+		panic(err)
+	}
 	execCommand("buf generate")
 	execCommand("go mod tidy")
 	fmt.Println("Finished!")

@@ -1,15 +1,15 @@
 version: v1
 plugins:
   - name: go
-    out: .
+    out: api
     opt:
       - paths=source_relative
   - name: go-grpc
-    out: .
+    out: api
     opt:
       - paths=source_relative
   - name: grpc-gateway
-    out: .
+    out: api
     opt:
       - paths=source_relative
       - allow_repeated_fields_in_body=true

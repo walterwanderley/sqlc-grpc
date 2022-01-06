@@ -99,7 +99,7 @@ func adjustType(typ string, messages map[string]*Message) string {
 	return typ
 }
 
-func OriginalAndElementType(typ string) (original, element string) {
+func originalAndElementType(typ string) (original, element string) {
 	typ = strings.TrimPrefix(typ, "[]")
 	t := strings.Split(typ, ".")
 	return t[0], strings.Join(t[1:], ".")
