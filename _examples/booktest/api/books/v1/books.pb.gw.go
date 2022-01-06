@@ -464,7 +464,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_CreateAuthor_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -487,7 +487,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateBook_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_CreateBook_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -533,7 +533,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_GetAuthor_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -556,7 +556,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetBook_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_GetBook_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -703,7 +703,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateAuthor_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_CreateAuthor_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -723,7 +723,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateBook_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_CreateBook_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -763,7 +763,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetAuthor_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_GetAuthor_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -783,7 +783,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetBook_0(ctx, mux, outboundMarshaler, w, req, response_BooksService_GetBook_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -836,7 +836,7 @@ type response_BooksService_BooksByTags_0 struct {
 
 func (m response_BooksService_BooksByTags_0) XXX_ResponseBody() interface{} {
 	response := m.Message.(*BooksByTagsResponse)
-	return response.Value
+	return response.List
 }
 
 type response_BooksService_BooksByTitleYear_0 struct {
@@ -845,7 +845,43 @@ type response_BooksService_BooksByTitleYear_0 struct {
 
 func (m response_BooksService_BooksByTitleYear_0) XXX_ResponseBody() interface{} {
 	response := m.Message.(*BooksByTitleYearResponse)
-	return response.Value
+	return response.List
+}
+
+type response_BooksService_CreateAuthor_0 struct {
+	proto.Message
+}
+
+func (m response_BooksService_CreateAuthor_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*CreateAuthorResponse)
+	return response.Author
+}
+
+type response_BooksService_CreateBook_0 struct {
+	proto.Message
+}
+
+func (m response_BooksService_CreateBook_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*CreateBookResponse)
+	return response.Book
+}
+
+type response_BooksService_GetAuthor_0 struct {
+	proto.Message
+}
+
+func (m response_BooksService_GetAuthor_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetAuthorResponse)
+	return response.Author
+}
+
+type response_BooksService_GetBook_0 struct {
+	proto.Message
+}
+
+func (m response_BooksService_GetBook_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetBookResponse)
+	return response.Book
 }
 
 var (

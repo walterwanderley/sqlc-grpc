@@ -19,12 +19,7 @@ func (s *Service) MethodInputType() string {
 }
 
 func (s *Service) MethodOutputType() string {
-	switch {
-	case s.HasCustomOutput():
-		return fmt.Sprintf("pb.%s", canonicalName(s.Output[0]))
-	default:
-		return fmt.Sprintf("pb.%sResponse", s.Name)
-	}
+	return fmt.Sprintf("pb.%sResponse", s.Name)
 }
 
 func (s *Service) ReturnCallDatabase() string {
@@ -71,16 +66,14 @@ func (s *Service) OutputGrpc() []string {
 		res = append(res, fmt.Sprintf("res := new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
 		typ := canonicalName(s.Output[0])
-		res = append(res, fmt.Sprintf("res.Value = append(res.Value, to%s(r))", typ))
+		res = append(res, fmt.Sprintf("res.List = append(res.List, to%s(r))", typ))
 		res = append(res, "}")
 		res = append(res, "return res, nil")
 		return res
 	}
 
 	if s.HasCustomOutput() {
-		for _, n := range s.Output {
-			res = append(res, fmt.Sprintf("return to%s(result), nil", canonicalName(n)))
-		}
+		res = append(res, fmt.Sprintf("return &%s{%s: to%s(result)}, nil", s.MethodOutputType(), camelCaseProto(s.Output[0]), canonicalName(s.Output[0])))
 		return res
 	}
 	if s.EmptyOutput() {
@@ -90,22 +83,6 @@ func (s *Service) OutputGrpc() []string {
 	}
 
 	return res
-}
-
-func (s *Service) RpcSignature() string {
-	var b strings.Builder
-	b.WriteString(s.Name)
-	b.WriteString("(")
-	b.WriteString(fmt.Sprintf("%sRequest", s.Name))
-	b.WriteString(") returns (")
-	switch {
-	case s.HasCustomOutput():
-		b.WriteString(canonicalName(s.Output[0]))
-	default:
-		b.WriteString(fmt.Sprintf("%sResponse", s.Name))
-	}
-	b.WriteString(")")
-	return b.String()
 }
 
 func (s *Service) HasCustomParams() bool {
@@ -173,8 +150,14 @@ func (s *Service) EmptyOutput() bool {
 
 func (s *Service) ProtoOutputs() string {
 	var b strings.Builder
-	for i, name := range s.Output {
-		fmt.Fprintf(&b, "    %s value = %d;\n", toProtoType(name), i+1)
+	for i, outType := range s.Output {
+		name := "value"
+		if s.HasArrayOutput() {
+			name = "list"
+		} else if s.HasCustomOutput() {
+			name = ToSnakeCase(outType)
+		}
+		fmt.Fprintf(&b, "    %s %s = %d;\n", toProtoType(outType), ToSnakeCase(name), i+1)
 	}
 	return b.String()
 }

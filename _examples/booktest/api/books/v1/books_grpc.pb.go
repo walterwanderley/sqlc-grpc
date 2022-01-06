@@ -24,11 +24,11 @@ const _ = grpc.SupportPackageIsVersion7
 type BooksServiceClient interface {
 	BooksByTags(ctx context.Context, in *BooksByTagsRequest, opts ...grpc.CallOption) (*BooksByTagsResponse, error)
 	BooksByTitleYear(ctx context.Context, in *BooksByTitleYearRequest, opts ...grpc.CallOption) (*BooksByTitleYearResponse, error)
-	CreateAuthor(ctx context.Context, in *CreateAuthorRequest, opts ...grpc.CallOption) (*Author, error)
-	CreateBook(ctx context.Context, in *CreateBookRequest, opts ...grpc.CallOption) (*Book, error)
+	CreateAuthor(ctx context.Context, in *CreateAuthorRequest, opts ...grpc.CallOption) (*CreateAuthorResponse, error)
+	CreateBook(ctx context.Context, in *CreateBookRequest, opts ...grpc.CallOption) (*CreateBookResponse, error)
 	DeleteBook(ctx context.Context, in *DeleteBookRequest, opts ...grpc.CallOption) (*DeleteBookResponse, error)
-	GetAuthor(ctx context.Context, in *GetAuthorRequest, opts ...grpc.CallOption) (*Author, error)
-	GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*Book, error)
+	GetAuthor(ctx context.Context, in *GetAuthorRequest, opts ...grpc.CallOption) (*GetAuthorResponse, error)
+	GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*GetBookResponse, error)
 	UpdateBook(ctx context.Context, in *UpdateBookRequest, opts ...grpc.CallOption) (*UpdateBookResponse, error)
 	UpdateBookISBN(ctx context.Context, in *UpdateBookISBNRequest, opts ...grpc.CallOption) (*UpdateBookISBNResponse, error)
 }
@@ -59,8 +59,8 @@ func (c *booksServiceClient) BooksByTitleYear(ctx context.Context, in *BooksByTi
 	return out, nil
 }
 
-func (c *booksServiceClient) CreateAuthor(ctx context.Context, in *CreateAuthorRequest, opts ...grpc.CallOption) (*Author, error) {
-	out := new(Author)
+func (c *booksServiceClient) CreateAuthor(ctx context.Context, in *CreateAuthorRequest, opts ...grpc.CallOption) (*CreateAuthorResponse, error) {
+	out := new(CreateAuthorResponse)
 	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/CreateAuthor", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -68,8 +68,8 @@ func (c *booksServiceClient) CreateAuthor(ctx context.Context, in *CreateAuthorR
 	return out, nil
 }
 
-func (c *booksServiceClient) CreateBook(ctx context.Context, in *CreateBookRequest, opts ...grpc.CallOption) (*Book, error) {
-	out := new(Book)
+func (c *booksServiceClient) CreateBook(ctx context.Context, in *CreateBookRequest, opts ...grpc.CallOption) (*CreateBookResponse, error) {
+	out := new(CreateBookResponse)
 	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/CreateBook", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -86,8 +86,8 @@ func (c *booksServiceClient) DeleteBook(ctx context.Context, in *DeleteBookReque
 	return out, nil
 }
 
-func (c *booksServiceClient) GetAuthor(ctx context.Context, in *GetAuthorRequest, opts ...grpc.CallOption) (*Author, error) {
-	out := new(Author)
+func (c *booksServiceClient) GetAuthor(ctx context.Context, in *GetAuthorRequest, opts ...grpc.CallOption) (*GetAuthorResponse, error) {
+	out := new(GetAuthorResponse)
 	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/GetAuthor", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -95,8 +95,8 @@ func (c *booksServiceClient) GetAuthor(ctx context.Context, in *GetAuthorRequest
 	return out, nil
 }
 
-func (c *booksServiceClient) GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*Book, error) {
-	out := new(Book)
+func (c *booksServiceClient) GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*GetBookResponse, error) {
+	out := new(GetBookResponse)
 	err := c.cc.Invoke(ctx, "/api.books.v1.BooksService/GetBook", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -128,11 +128,11 @@ func (c *booksServiceClient) UpdateBookISBN(ctx context.Context, in *UpdateBookI
 type BooksServiceServer interface {
 	BooksByTags(context.Context, *BooksByTagsRequest) (*BooksByTagsResponse, error)
 	BooksByTitleYear(context.Context, *BooksByTitleYearRequest) (*BooksByTitleYearResponse, error)
-	CreateAuthor(context.Context, *CreateAuthorRequest) (*Author, error)
-	CreateBook(context.Context, *CreateBookRequest) (*Book, error)
+	CreateAuthor(context.Context, *CreateAuthorRequest) (*CreateAuthorResponse, error)
+	CreateBook(context.Context, *CreateBookRequest) (*CreateBookResponse, error)
 	DeleteBook(context.Context, *DeleteBookRequest) (*DeleteBookResponse, error)
-	GetAuthor(context.Context, *GetAuthorRequest) (*Author, error)
-	GetBook(context.Context, *GetBookRequest) (*Book, error)
+	GetAuthor(context.Context, *GetAuthorRequest) (*GetAuthorResponse, error)
+	GetBook(context.Context, *GetBookRequest) (*GetBookResponse, error)
 	UpdateBook(context.Context, *UpdateBookRequest) (*UpdateBookResponse, error)
 	UpdateBookISBN(context.Context, *UpdateBookISBNRequest) (*UpdateBookISBNResponse, error)
 	mustEmbedUnimplementedBooksServiceServer()
@@ -148,19 +148,19 @@ func (UnimplementedBooksServiceServer) BooksByTags(context.Context, *BooksByTags
 func (UnimplementedBooksServiceServer) BooksByTitleYear(context.Context, *BooksByTitleYearRequest) (*BooksByTitleYearResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BooksByTitleYear not implemented")
 }
-func (UnimplementedBooksServiceServer) CreateAuthor(context.Context, *CreateAuthorRequest) (*Author, error) {
+func (UnimplementedBooksServiceServer) CreateAuthor(context.Context, *CreateAuthorRequest) (*CreateAuthorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthor not implemented")
 }
-func (UnimplementedBooksServiceServer) CreateBook(context.Context, *CreateBookRequest) (*Book, error) {
+func (UnimplementedBooksServiceServer) CreateBook(context.Context, *CreateBookRequest) (*CreateBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBook not implemented")
 }
 func (UnimplementedBooksServiceServer) DeleteBook(context.Context, *DeleteBookRequest) (*DeleteBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBook not implemented")
 }
-func (UnimplementedBooksServiceServer) GetAuthor(context.Context, *GetAuthorRequest) (*Author, error) {
+func (UnimplementedBooksServiceServer) GetAuthor(context.Context, *GetAuthorRequest) (*GetAuthorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthor not implemented")
 }
-func (UnimplementedBooksServiceServer) GetBook(context.Context, *GetBookRequest) (*Book, error) {
+func (UnimplementedBooksServiceServer) GetBook(context.Context, *GetBookRequest) (*GetBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBook not implemented")
 }
 func (UnimplementedBooksServiceServer) UpdateBook(context.Context, *UpdateBookRequest) (*UpdateBookResponse, error) {

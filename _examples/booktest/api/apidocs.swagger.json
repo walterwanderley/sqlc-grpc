@@ -26,7 +26,7 @@
         "operationId": "BooksService_CreateAuthor",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v1Author"
             }
@@ -58,7 +58,7 @@
         "operationId": "BooksService_GetAuthor",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v1Author"
             }
@@ -89,7 +89,7 @@
         "operationId": "BooksService_CreateBook",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v1Book"
             }
@@ -183,7 +183,7 @@
         "operationId": "BooksService_GetBook",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v1Book"
             }
@@ -396,7 +396,7 @@
     "v1BooksByTagsResponse": {
       "type": "object",
       "properties": {
-        "value": {
+        "list": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1BooksByTagsRow"
@@ -431,7 +431,7 @@
     "v1BooksByTitleYearResponse": {
       "type": "object",
       "properties": {
-        "value": {
+        "list": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1Book"
@@ -444,6 +444,14 @@
       "properties": {
         "name": {
           "type": "string"
+        }
+      }
+    },
+    "v1CreateAuthorResponse": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "$ref": "#/definitions/v1Author"
         }
       }
     },
@@ -479,8 +487,32 @@
         }
       }
     },
+    "v1CreateBookResponse": {
+      "type": "object",
+      "properties": {
+        "book": {
+          "$ref": "#/definitions/v1Book"
+        }
+      }
+    },
     "v1DeleteBookResponse": {
       "type": "object"
+    },
+    "v1GetAuthorResponse": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "$ref": "#/definitions/v1Author"
+        }
+      }
+    },
+    "v1GetBookResponse": {
+      "type": "object",
+      "properties": {
+        "book": {
+          "$ref": "#/definitions/v1Book"
+        }
+      }
     },
     "v1UpdateBookISBNRequest": {
       "type": "object",

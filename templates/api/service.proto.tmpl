@@ -22,7 +22,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 service {{.Package | UpperFirst}}Service {
     {{range .Services}}
-    rpc {{.RpcSignature}} {
+    rpc {{.Name}}({{.Name}}Request) returns ({{.Name}}Response) {
         option (google.api.http) = {
             {{range .HttpOptions}}{{ .}}
             {{end}}
@@ -33,10 +33,10 @@ service {{.Package | UpperFirst}}Service {
 {{range .Services}}{{if not .HasCustomParams}}
 message {{.Name}}Request { {{.ProtoInputs}}
 }
-{{end}}{{if not .HasCustomOutput}}
+{{end}}
 message {{.Name}}Response {
 {{.ProtoOutputs -}}    
-}{{end}}{{end}}
+}{{end}}
 {{ range $key, $value := .Messages}}
 message {{$value.ProtoName}} {
 {{$value.ProtoAttributes -}}

@@ -27,7 +27,7 @@ service BooksService {
         option (google.api.http) = {
             post: "/books-by-tags"
             body: "dollar_1"
-            response_body: "value"
+            response_body: "list"
             
         };
     }
@@ -35,23 +35,25 @@ service BooksService {
     rpc BooksByTitleYear(BooksByTitleYearRequest) returns (BooksByTitleYearResponse) {
         option (google.api.http) = {
             get: "/books-by-title-year"
-            response_body: "value"
+            response_body: "list"
             
         };
     }
     
-    rpc CreateAuthor(CreateAuthorRequest) returns (Author) {
+    rpc CreateAuthor(CreateAuthorRequest) returns (CreateAuthorResponse) {
         option (google.api.http) = {
             post: "/author"
             body: "*"
+            response_body: "author"
             
         };
     }
     
-    rpc CreateBook(CreateBookRequest) returns (Book) {
+    rpc CreateBook(CreateBookRequest) returns (CreateBookResponse) {
         option (google.api.http) = {
             post: "/book"
             body: "*"
+            response_body: "book"
             
         };
     }
@@ -63,16 +65,18 @@ service BooksService {
         };
     }
     
-    rpc GetAuthor(GetAuthorRequest) returns (Author) {
+    rpc GetAuthor(GetAuthorRequest) returns (GetAuthorResponse) {
         option (google.api.http) = {
             get: "/author/{author_id}"
+            response_body: "author"
             
         };
     }
     
-    rpc GetBook(GetBookRequest) returns (Book) {
+    rpc GetBook(GetBookRequest) returns (GetBookResponse) {
         option (google.api.http) = {
             get: "/book/{book_id}"
+            response_body: "book"
             
         };
     }
@@ -100,15 +104,21 @@ message BooksByTagsRequest {
 }
 
 message BooksByTagsResponse {
-    repeated BooksByTagsRow value = 1;
+    repeated BooksByTagsRow list = 1;
 }
 message BooksByTitleYearResponse {
-    repeated Book value = 1;
+    repeated Book list = 1;
 }
 message CreateAuthorRequest { 
     string name = 1;
 }
 
+message CreateAuthorResponse {
+    Author author = 1;
+}
+message CreateBookResponse {
+    Book book = 1;
+}
 message DeleteBookRequest { 
     int32 book_id = 1;
 }
@@ -119,10 +129,16 @@ message GetAuthorRequest {
     int32 author_id = 1;
 }
 
+message GetAuthorResponse {
+    Author author = 1;
+}
 message GetBookRequest { 
     int32 book_id = 1;
 }
 
+message GetBookResponse {
+    Book book = 1;
+}
 message UpdateBookResponse {
 }
 message UpdateBookISBNResponse {

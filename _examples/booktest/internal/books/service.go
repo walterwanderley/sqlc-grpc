@@ -28,7 +28,7 @@ func (s *Service) BooksByTags(ctx context.Context, req *pb.BooksByTagsRequest) (
 	}
 	res := new(pb.BooksByTagsResponse)
 	for _, r := range result {
-		res.Value = append(res.Value, toBooksByTagsRow(r))
+		res.List = append(res.List, toBooksByTagsRow(r))
 	}
 	return res, nil
 }
@@ -45,12 +45,12 @@ func (s *Service) BooksByTitleYear(ctx context.Context, req *pb.BooksByTitleYear
 	}
 	res := new(pb.BooksByTitleYearResponse)
 	for _, r := range result {
-		res.Value = append(res.Value, toBook(r))
+		res.List = append(res.List, toBook(r))
 	}
 	return res, nil
 }
 
-func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest) (*pb.Author, error) {
+func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest) (*pb.CreateAuthorResponse, error) {
 	name := req.GetName()
 
 	result, err := s.querier.CreateAuthor(ctx, name)
@@ -58,10 +58,10 @@ func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest)
 		s.logger.Error("CreateAuthor sql call failed", zap.Error(err))
 		return nil, err
 	}
-	return toAuthor(result), nil
+	return &pb.CreateAuthorResponse{Author: toAuthor(result)}, nil
 }
 
-func (s *Service) CreateBook(ctx context.Context, req *pb.CreateBookRequest) (*pb.Book, error) {
+func (s *Service) CreateBook(ctx context.Context, req *pb.CreateBookRequest) (*pb.CreateBookResponse, error) {
 	var arg CreateBookParams
 	arg.AuthorID = req.GetAuthorId()
 	arg.Isbn = req.GetIsbn()
@@ -85,7 +85,7 @@ func (s *Service) CreateBook(ctx context.Context, req *pb.CreateBookRequest) (*p
 		s.logger.Error("CreateBook sql call failed", zap.Error(err))
 		return nil, err
 	}
-	return toBook(result), nil
+	return &pb.CreateBookResponse{Book: toBook(result)}, nil
 }
 
 func (s *Service) DeleteBook(ctx context.Context, req *pb.DeleteBookRequest) (*pb.DeleteBookResponse, error) {
@@ -99,7 +99,7 @@ func (s *Service) DeleteBook(ctx context.Context, req *pb.DeleteBookRequest) (*p
 	return &pb.DeleteBookResponse{}, nil
 }
 
-func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.Author, error) {
+func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.GetAuthorResponse, error) {
 	authorID := req.GetAuthorId()
 
 	result, err := s.querier.GetAuthor(ctx, authorID)
@@ -107,10 +107,10 @@ func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.
 		s.logger.Error("GetAuthor sql call failed", zap.Error(err))
 		return nil, err
 	}
-	return toAuthor(result), nil
+	return &pb.GetAuthorResponse{Author: toAuthor(result)}, nil
 }
 
-func (s *Service) GetBook(ctx context.Context, req *pb.GetBookRequest) (*pb.Book, error) {
+func (s *Service) GetBook(ctx context.Context, req *pb.GetBookRequest) (*pb.GetBookResponse, error) {
 	bookID := req.GetBookId()
 
 	result, err := s.querier.GetBook(ctx, bookID)
@@ -118,7 +118,7 @@ func (s *Service) GetBook(ctx context.Context, req *pb.GetBookRequest) (*pb.Book
 		s.logger.Error("GetBook sql call failed", zap.Error(err))
 		return nil, err
 	}
-	return toBook(result), nil
+	return &pb.GetBookResponse{Book: toBook(result)}, nil
 }
 
 func (s *Service) UpdateBook(ctx context.Context, req *pb.UpdateBookRequest) (*pb.UpdateBookResponse, error) {

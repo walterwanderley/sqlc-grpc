@@ -59,7 +59,9 @@ func (s *Service) HttpBody() string {
 
 func (s *Service) HttpResponseBody() string {
 	if s.HasArrayOutput() {
-		return "value"
+		return "list"
+	} else if s.HasCustomOutput() {
+		return ToSnakeCase(s.Output[0])
 	}
 	return ""
 }
