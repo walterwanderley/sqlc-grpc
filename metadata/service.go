@@ -54,11 +54,11 @@ func (s *Service) InputGrpc() []string {
 		m := s.Messages[typ]
 		for i, name := range m.AttrNames {
 			attrName := UpperFirstCharacter(name)
-			res = append(res, bindToGo("in", fmt.Sprintf("%s.%s", in, attrName), attrName, m.AttrTypes[i], false)...)
+			res = append(res, bindToGo("req", fmt.Sprintf("%s.%s", in, attrName), attrName, m.AttrTypes[i], false)...)
 		}
 	} else {
 		for i, n := range s.InputNames {
-			res = append(res, bindToGo("in", n, UpperFirstCharacter(n), s.InputTypes[i], true)...)
+			res = append(res, bindToGo("req", n, UpperFirstCharacter(n), s.InputTypes[i], true)...)
 		}
 	}
 
@@ -68,29 +68,26 @@ func (s *Service) InputGrpc() []string {
 func (s *Service) OutputGrpc() []string {
 	res := make([]string, 0)
 	if s.HasArrayOutput() {
-		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
+		res = append(res, fmt.Sprintf("res := new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
 		typ := canonicalName(s.Output[0])
-		res = append(res, fmt.Sprintf("var item *pb.%s", typ))
-		res = append(res, fmt.Sprintf("item, err = to%s(r)", typ))
-		res = append(res, "if err != nil { return }")
-		res = append(res, "out.Value = append(out.Value, item)")
+		res = append(res, fmt.Sprintf("res.Value = append(res.Value, to%s(r))", typ))
 		res = append(res, "}")
-		res = append(res, "return")
+		res = append(res, "return res, nil")
 		return res
 	}
 
 	if s.HasCustomOutput() {
 		for _, n := range s.Output {
-			res = append(res, fmt.Sprintf("return to%s(result)", canonicalName(n)))
+			res = append(res, fmt.Sprintf("return to%s(result), nil", canonicalName(n)))
 		}
 		return res
 	}
-	res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
-	if !s.EmptyOutput() {
-		res = append(res, "out.Value = result")
+	if s.EmptyOutput() {
+		res = append(res, fmt.Sprintf("return &%s{}, nil", s.MethodOutputType()))
+	} else {
+		res = append(res, fmt.Sprintf("return &%s{Value: result}, nil", s.MethodOutputType()))
 	}
-	res = append(res, "return")
 
 	return res
 }

@@ -18,148 +18,135 @@ type Service struct {
 	querier *Queries
 }
 
-func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsRequest) (out *pb.BooksByTagsResponse, err error) {
-	dollar_1 := in.GetDollar_1()
+func (s *Service) BooksByTags(ctx context.Context, req *pb.BooksByTagsRequest) (*pb.BooksByTagsResponse, error) {
+	dollar_1 := req.GetDollar_1()
 
 	result, err := s.querier.BooksByTags(ctx, dollar_1)
 	if err != nil {
 		s.logger.Error("BooksByTags sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	out = new(pb.BooksByTagsResponse)
+	res := new(pb.BooksByTagsResponse)
 	for _, r := range result {
-		var item *pb.BooksByTagsRow
-		item, err = toBooksByTagsRow(r)
-		if err != nil {
-			return
-		}
-		out.Value = append(out.Value, item)
+		res.Value = append(res.Value, toBooksByTagsRow(r))
 	}
-	return
+	return res, nil
 }
 
-func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearRequest) (out *pb.BooksByTitleYearResponse, err error) {
+func (s *Service) BooksByTitleYear(ctx context.Context, req *pb.BooksByTitleYearRequest) (*pb.BooksByTitleYearResponse, error) {
 	var arg BooksByTitleYearParams
-	arg.Title = in.GetTitle()
-	arg.Year = in.GetYear()
+	arg.Title = req.GetTitle()
+	arg.Year = req.GetYear()
 
 	result, err := s.querier.BooksByTitleYear(ctx, arg)
 	if err != nil {
 		s.logger.Error("BooksByTitleYear sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	out = new(pb.BooksByTitleYearResponse)
+	res := new(pb.BooksByTitleYearResponse)
 	for _, r := range result {
-		var item *pb.Book
-		item, err = toBook(r)
-		if err != nil {
-			return
-		}
-		out.Value = append(out.Value, item)
+		res.Value = append(res.Value, toBook(r))
 	}
-	return
+	return res, nil
 }
 
-func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorRequest) (out *pb.Author, err error) {
-	name := in.GetName()
+func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest) (*pb.Author, error) {
+	name := req.GetName()
 
 	result, err := s.querier.CreateAuthor(ctx, name)
 	if err != nil {
 		s.logger.Error("CreateAuthor sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	return toAuthor(result)
+	return toAuthor(result), nil
 }
 
-func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookRequest) (out *pb.Book, err error) {
+func (s *Service) CreateBook(ctx context.Context, req *pb.CreateBookRequest) (*pb.Book, error) {
 	var arg CreateBookParams
-	arg.AuthorID = in.GetAuthorId()
-	arg.Isbn = in.GetIsbn()
-	arg.BookType = BookType(in.GetBookType())
-	arg.Title = in.GetTitle()
-	arg.Year = in.GetYear()
-	if v := in.GetAvailable(); v != nil {
-		if err = v.CheckValid(); err != nil {
+	arg.AuthorID = req.GetAuthorId()
+	arg.Isbn = req.GetIsbn()
+	arg.BookType = BookType(req.GetBookType())
+	arg.Title = req.GetTitle()
+	arg.Year = req.GetYear()
+	if v := req.GetAvailable(); v != nil {
+		if err := v.CheckValid(); err != nil {
 			err = fmt.Errorf("invalid Available: %s%w", err.Error(), validation.ErrUserInput)
-			return
+			return nil, err
 		}
 		arg.Available = v.AsTime()
 	} else {
-		err = fmt.Errorf("field Available is required%w", validation.ErrUserInput)
-		return
+		err := fmt.Errorf("field Available is required%w", validation.ErrUserInput)
+		return nil, err
 	}
-	arg.Tags = in.GetTags()
+	arg.Tags = req.GetTags()
 
 	result, err := s.querier.CreateBook(ctx, arg)
 	if err != nil {
 		s.logger.Error("CreateBook sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	return toBook(result)
+	return toBook(result), nil
 }
 
-func (s *Service) DeleteBook(ctx context.Context, in *pb.DeleteBookRequest) (out *pb.DeleteBookResponse, err error) {
-	bookID := in.GetBookId()
+func (s *Service) DeleteBook(ctx context.Context, req *pb.DeleteBookRequest) (*pb.DeleteBookResponse, error) {
+	bookID := req.GetBookId()
 
-	err = s.querier.DeleteBook(ctx, bookID)
+	err := s.querier.DeleteBook(ctx, bookID)
 	if err != nil {
 		s.logger.Error("DeleteBook sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	out = new(pb.DeleteBookResponse)
-	return
+	return &pb.DeleteBookResponse{}, nil
 }
 
-func (s *Service) GetAuthor(ctx context.Context, in *pb.GetAuthorRequest) (out *pb.Author, err error) {
-	authorID := in.GetAuthorId()
+func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.Author, error) {
+	authorID := req.GetAuthorId()
 
 	result, err := s.querier.GetAuthor(ctx, authorID)
 	if err != nil {
 		s.logger.Error("GetAuthor sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	return toAuthor(result)
+	return toAuthor(result), nil
 }
 
-func (s *Service) GetBook(ctx context.Context, in *pb.GetBookRequest) (out *pb.Book, err error) {
-	bookID := in.GetBookId()
+func (s *Service) GetBook(ctx context.Context, req *pb.GetBookRequest) (*pb.Book, error) {
+	bookID := req.GetBookId()
 
 	result, err := s.querier.GetBook(ctx, bookID)
 	if err != nil {
 		s.logger.Error("GetBook sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	return toBook(result)
+	return toBook(result), nil
 }
 
-func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookRequest) (out *pb.UpdateBookResponse, err error) {
+func (s *Service) UpdateBook(ctx context.Context, req *pb.UpdateBookRequest) (*pb.UpdateBookResponse, error) {
 	var arg UpdateBookParams
-	arg.Title = in.GetTitle()
-	arg.Tags = in.GetTags()
-	arg.BookType = BookType(in.GetBookType())
-	arg.BookID = in.GetBookId()
+	arg.Title = req.GetTitle()
+	arg.Tags = req.GetTags()
+	arg.BookType = BookType(req.GetBookType())
+	arg.BookID = req.GetBookId()
 
-	err = s.querier.UpdateBook(ctx, arg)
+	err := s.querier.UpdateBook(ctx, arg)
 	if err != nil {
 		s.logger.Error("UpdateBook sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	out = new(pb.UpdateBookResponse)
-	return
+	return &pb.UpdateBookResponse{}, nil
 }
 
-func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNRequest) (out *pb.UpdateBookISBNResponse, err error) {
+func (s *Service) UpdateBookISBN(ctx context.Context, req *pb.UpdateBookISBNRequest) (*pb.UpdateBookISBNResponse, error) {
 	var arg UpdateBookISBNParams
-	arg.Title = in.GetTitle()
-	arg.Tags = in.GetTags()
-	arg.BookID = in.GetBookId()
-	arg.Isbn = in.GetIsbn()
+	arg.Title = req.GetTitle()
+	arg.Tags = req.GetTags()
+	arg.BookID = req.GetBookId()
+	arg.Isbn = req.GetIsbn()
 
-	err = s.querier.UpdateBookISBN(ctx, arg)
+	err := s.querier.UpdateBookISBN(ctx, arg)
 	if err != nil {
 		s.logger.Error("UpdateBookISBN sql call failed", zap.Error(err))
-		return
+		return nil, err
 	}
-	out = new(pb.UpdateBookISBNResponse)
-	return
+	return &pb.UpdateBookISBNResponse{}, nil
 }

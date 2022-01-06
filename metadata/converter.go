@@ -160,8 +160,8 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
-		res = append(res, "return }")
+		res = append(res, fmt.Sprintf("if err := v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
+		res = append(res, "return nil, err }")
 		res = append(res, "if t := v.AsTime(); !t.IsZero() {")
 		res = append(res, fmt.Sprintf("%s.Valid = true", dst))
 		res = append(res, fmt.Sprintf("%s.Time = t } }", dst))
@@ -170,25 +170,25 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("if err = v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
-		res = append(res, "return }")
+		res = append(res, fmt.Sprintf("if err := v.CheckValid(); err != nil { err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
+		res = append(res, "return nil, err }")
 		res = append(res, fmt.Sprintf("%s = v.AsTime()", dst))
-		res = append(res, fmt.Sprintf("} else { err = fmt.Errorf(\"field %s is required%%w\", validation.ErrUserInput)", attrName))
-		res = append(res, "return }")
+		res = append(res, fmt.Sprintf("} else { err := fmt.Errorf(\"field %s is required%%w\", validation.ErrUserInput)", attrName))
+		res = append(res, "return nil, err }")
 	case "uuid.UUID":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if %s, err = uuid.Parse(%s.Get%s()); err != nil {", dst, src, camelCaseProto(attrName)))
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
-		res = append(res, "return }")
+		res = append(res, "return nil, err }")
 	case "net.HardwareAddr":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if %s, err = net.ParseMAC(%s.Get%s()); err != nil {", dst, src, camelCaseProto(attrName)))
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
-		res = append(res, "return }")
+		res = append(res, "return nil, err }")
 	case "net.IP":
 		if newVar {
 			res = append(res, fmt.Sprintf("%s := net.ParseIP(%s.Get%s())", dst, src, camelCaseProto(attrName)))

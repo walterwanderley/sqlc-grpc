@@ -27,13 +27,13 @@ type Service struct {
 
 {{$emitDbArgument := .EmitDbArgument}}
 {{ range .Services }}
-func (s *Service) {{.Name}}(ctx context.Context, in *{{.MethodInputType}}) (out *{{.MethodOutputType}}, err error) {
+func (s *Service) {{.Name}}(ctx context.Context, req *{{.MethodInputType}}) (*{{.MethodOutputType}}, error) {
 	{{ range .InputGrpc}}{{ .}}
 	{{end}}
-	{{ .ReturnCallDatabase}} err {{if not .EmptyOutput}}:{{end}}= s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
+	{{ .ReturnCallDatabase}} err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
 	if err != nil {
 		s.logger.Error("{{.Name}} sql call failed", zap.Error(err))			
-		return
+		return nil, err
 	}
 	{{ range .OutputGrpc}}{{ .}}
 	{{end -}}

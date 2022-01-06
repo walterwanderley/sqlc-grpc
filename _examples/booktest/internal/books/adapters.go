@@ -9,17 +9,17 @@ import (
 	pb "booktest/api/books/v1"
 )
 
-func toAuthor(in Author) (out *pb.Author, err error) {
+func toAuthor(in Author) *pb.Author {
 
-	out = new(pb.Author)
+	out := new(pb.Author)
 	out.AuthorId = in.AuthorID
 	out.Name = in.Name
-	return
+	return out
 }
 
-func toBook(in Book) (out *pb.Book, err error) {
+func toBook(in Book) *pb.Book {
 
-	out = new(pb.Book)
+	out := new(pb.Book)
 	out.BookId = in.BookID
 	out.AuthorId = in.AuthorID
 	out.Isbn = in.Isbn
@@ -28,12 +28,12 @@ func toBook(in Book) (out *pb.Book, err error) {
 	out.Year = in.Year
 	out.Available = timestamppb.New(in.Available)
 	out.Tags = in.Tags
-	return
+	return out
 }
 
-func toBooksByTagsRow(in BooksByTagsRow) (out *pb.BooksByTagsRow, err error) {
+func toBooksByTagsRow(in BooksByTagsRow) *pb.BooksByTagsRow {
 
-	out = new(pb.BooksByTagsRow)
+	out := new(pb.BooksByTagsRow)
 	out.BookId = in.BookID
 	out.Title = in.Title
 	if in.Name.Valid {
@@ -41,5 +41,5 @@ func toBooksByTagsRow(in BooksByTagsRow) (out *pb.BooksByTagsRow, err error) {
 	}
 	out.Isbn = in.Isbn
 	out.Tags = in.Tags
-	return
+	return out
 }
