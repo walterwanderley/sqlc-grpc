@@ -111,7 +111,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 				return err
 			}
 			for _, pkg := range def.Packages {
-				if len(pkg.InputAdapters) > 0 || len(pkg.OutputAdapters) > 0 {
+				if len(pkg.OutputAdapters) > 0 {
 					err = genFromTemplate(path, string(tpl), pkg, true, filepath.Join(pkg.SrcPath, "adapters.go"))
 					if err != nil {
 						return err

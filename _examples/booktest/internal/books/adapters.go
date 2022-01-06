@@ -3,72 +3,11 @@
 package books
 
 import (
-	"fmt"
-
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	pb "booktest/api/books/v1"
-	"booktest/internal/validation"
 )
-
-func fromBooksByTitleYearRequest(in *pb.BooksByTitleYearRequest) (out BooksByTitleYearParams, err error) {
-	if in == nil {
-		return
-	}
-
-	out.Title = in.GetTitle()
-	out.Year = in.GetYear()
-	return
-}
-
-func fromCreateBookRequest(in *pb.CreateBookRequest) (out CreateBookParams, err error) {
-	if in == nil {
-		return
-	}
-
-	out.AuthorID = in.GetAuthorId()
-	out.Isbn = in.GetIsbn()
-	out.BookType = BookType(in.GetBookType())
-	out.Title = in.GetTitle()
-	out.Year = in.GetYear()
-	if v := in.GetAvailable(); v != nil {
-		if err = v.CheckValid(); err != nil {
-			err = fmt.Errorf("invalid Available: %s%w", err.Error(), validation.ErrUserInput)
-			return
-		}
-		out.Available = v.AsTime()
-	} else {
-		err = fmt.Errorf("field Available is required%w", validation.ErrUserInput)
-		return
-	}
-	out.Tags = in.GetTags()
-	return
-}
-
-func fromUpdateBookISBNRequest(in *pb.UpdateBookISBNRequest) (out UpdateBookISBNParams, err error) {
-	if in == nil {
-		return
-	}
-
-	out.Title = in.GetTitle()
-	out.Tags = in.GetTags()
-	out.BookID = in.GetBookId()
-	out.Isbn = in.GetIsbn()
-	return
-}
-
-func fromUpdateBookRequest(in *pb.UpdateBookRequest) (out UpdateBookParams, err error) {
-	if in == nil {
-		return
-	}
-
-	out.Title = in.GetTitle()
-	out.Tags = in.GetTags()
-	out.BookType = BookType(in.GetBookType())
-	out.BookID = in.GetBookId()
-	return
-}
 
 func toAuthor(in Author) (out *pb.Author, err error) {
 

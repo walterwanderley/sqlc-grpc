@@ -4,10 +4,12 @@ package books
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 
 	pb "booktest/api/books/v1"
+	"booktest/internal/validation"
 )
 
 type Service struct {
@@ -37,11 +39,9 @@ func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsRequest) (o
 }
 
 func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearRequest) (out *pb.BooksByTitleYearResponse, err error) {
-	arg, err := fromBooksByTitleYearRequest(in)
-	if err != nil {
-		s.logger.Error("BooksByTitleYear input adapter failed", zap.Error(err))
-		return
-	}
+	var arg BooksByTitleYearParams
+	arg.Title = in.GetTitle()
+	arg.Year = in.GetYear()
 
 	result, err := s.querier.BooksByTitleYear(ctx, arg)
 	if err != nil {
@@ -72,11 +72,23 @@ func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorRequest) 
 }
 
 func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookRequest) (out *pb.Book, err error) {
-	arg, err := fromCreateBookRequest(in)
-	if err != nil {
-		s.logger.Error("CreateBook input adapter failed", zap.Error(err))
+	var arg CreateBookParams
+	arg.AuthorID = in.GetAuthorId()
+	arg.Isbn = in.GetIsbn()
+	arg.BookType = BookType(in.GetBookType())
+	arg.Title = in.GetTitle()
+	arg.Year = in.GetYear()
+	if v := in.GetAvailable(); v != nil {
+		if err = v.CheckValid(); err != nil {
+			err = fmt.Errorf("invalid Available: %s%w", err.Error(), validation.ErrUserInput)
+			return
+		}
+		arg.Available = v.AsTime()
+	} else {
+		err = fmt.Errorf("field Available is required%w", validation.ErrUserInput)
 		return
 	}
+	arg.Tags = in.GetTags()
 
 	result, err := s.querier.CreateBook(ctx, arg)
 	if err != nil {
@@ -121,11 +133,11 @@ func (s *Service) GetBook(ctx context.Context, in *pb.GetBookRequest) (out *pb.B
 }
 
 func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookRequest) (out *pb.UpdateBookResponse, err error) {
-	arg, err := fromUpdateBookRequest(in)
-	if err != nil {
-		s.logger.Error("UpdateBook input adapter failed", zap.Error(err))
-		return
-	}
+	var arg UpdateBookParams
+	arg.Title = in.GetTitle()
+	arg.Tags = in.GetTags()
+	arg.BookType = BookType(in.GetBookType())
+	arg.BookID = in.GetBookId()
 
 	err = s.querier.UpdateBook(ctx, arg)
 	if err != nil {
@@ -137,11 +149,11 @@ func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookRequest) (out
 }
 
 func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNRequest) (out *pb.UpdateBookISBNResponse, err error) {
-	arg, err := fromUpdateBookISBNRequest(in)
-	if err != nil {
-		s.logger.Error("UpdateBookISBN input adapter failed", zap.Error(err))
-		return
-	}
+	var arg UpdateBookISBNParams
+	arg.Title = in.GetTitle()
+	arg.Tags = in.GetTags()
+	arg.BookID = in.GetBookId()
+	arg.Isbn = in.GetIsbn()
 
 	err = s.querier.UpdateBookISBN(ctx, arg)
 	if err != nil {

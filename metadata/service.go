@@ -48,12 +48,14 @@ func (s *Service) InputGrpc() []string {
 	}
 
 	if s.HasCustomParams() {
-		//typ := canonicalName(s.InputTypes[0])
+		typ := s.InputTypes[0]
 		in := s.InputNames[0]
-		res = append(res, fmt.Sprintf("%s, err := from%sRequest(in)", in, s.Name))
-		res = append(res, "if err != nil {")
-		res = append(res, fmt.Sprintf("s.logger.Error(\"%s input adapter failed\", zap.Error(err))", s.Name))
-		res = append(res, "return }")
+		res = append(res, fmt.Sprintf("var %s %s", in, typ))
+		m := s.Messages[typ]
+		for i, name := range m.AttrNames {
+			attrName := UpperFirstCharacter(name)
+			res = append(res, bindToGo("in", fmt.Sprintf("%s.%s", in, attrName), attrName, m.AttrTypes[i], false)...)
+		}
 	} else {
 		for i, n := range s.InputNames {
 			res = append(res, bindToGo("in", n, UpperFirstCharacter(n), s.InputTypes[i], true)...)

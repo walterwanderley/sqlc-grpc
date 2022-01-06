@@ -41,7 +41,6 @@ type Package struct {
 	SrcPath            string
 	Services           []*Service
 	Messages           map[string]*Message
-	InputAdapters      []*Message
 	OutputAdapters     []*Message
 	EmitInterface      bool
 	EmitParamsPointers bool
@@ -201,19 +200,8 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 			}
 		}
 
-		p.InputAdapters = make([]*Message, len(inAdapters))
-		i := 0
-		for k := range inAdapters {
-			p.InputAdapters[i] = p.Messages[k]
-			i++
-		}
-
-		sort.SliceStable(p.InputAdapters, func(i, j int) bool {
-			return strings.Compare(p.InputAdapters[i].Name, p.InputAdapters[j].Name) < 0
-		})
-
 		p.OutputAdapters = make([]*Message, len(outAdapters))
-		i = 0
+		i := 0
 		for k := range outAdapters {
 			p.OutputAdapters[i] = p.Messages[k]
 			i++
