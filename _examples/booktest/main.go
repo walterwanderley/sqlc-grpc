@@ -31,7 +31,7 @@ const serviceName = "booktest"
 var (
 	dbURL string
 
-	//go:embed proto/apidocs.swagger.json
+	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
 )
 

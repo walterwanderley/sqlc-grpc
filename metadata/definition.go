@@ -51,9 +51,6 @@ type Package struct {
 
 func (p *Package) ProtoImports() []string {
 	r := make([]string, 0)
-	if p.importEmpty() {
-		r = append(r, `import "google/protobuf/empty.proto";`)
-	}
 	if p.importTimestamp() {
 		r = append(r, `import "google/protobuf/timestamp.proto";`)
 	}
@@ -61,15 +58,6 @@ func (p *Package) ProtoImports() []string {
 		r = append(r, `import "google/protobuf/wrappers.proto";`)
 	}
 	return r
-}
-
-func (p *Package) importEmpty() bool {
-	for _, s := range p.Services {
-		if s.EmptyInput() || s.EmptyOutput() {
-			return true
-		}
-	}
-	return false
 }
 
 func (p *Package) importTimestamp() bool {

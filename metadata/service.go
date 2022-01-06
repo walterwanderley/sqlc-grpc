@@ -15,18 +15,11 @@ type Service struct {
 }
 
 func (s *Service) MethodInputType() string {
-	switch {
-	case s.EmptyInput():
-		return "emptypb.Empty"
-	default:
-		return fmt.Sprintf("pb.%sParams", s.Name)
-	}
+	return fmt.Sprintf("pb.%sRequest", s.Name)
 }
 
 func (s *Service) MethodOutputType() string {
 	switch {
-	case s.EmptyOutput():
-		return "emptypb.Empty"
 	case s.HasCustomOutput():
 		return fmt.Sprintf("pb.%s", canonicalName(s.Output[0]))
 	default:
@@ -55,9 +48,9 @@ func (s *Service) InputGrpc() []string {
 	}
 
 	if s.HasCustomParams() {
-		typ := canonicalName(s.InputTypes[0])
+		//typ := canonicalName(s.InputTypes[0])
 		in := s.InputNames[0]
-		res = append(res, fmt.Sprintf("%s, err := from%s(in)", in, typ))
+		res = append(res, fmt.Sprintf("%s, err := from%sRequest(in)", in, s.Name))
 		res = append(res, "if err != nil {")
 		res = append(res, fmt.Sprintf("s.logger.Error(\"%s input adapter failed\", zap.Error(err))", s.Name))
 		res = append(res, "return }")
@@ -72,11 +65,6 @@ func (s *Service) InputGrpc() []string {
 
 func (s *Service) OutputGrpc() []string {
 	res := make([]string, 0)
-	if s.EmptyOutput() {
-		res = append(res, "return &emptypb.Empty{}, nil")
-		return res
-	}
-
 	if s.HasArrayOutput() {
 		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "for _, r := range result {")
@@ -96,12 +84,11 @@ func (s *Service) OutputGrpc() []string {
 		}
 		return res
 	}
+	res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 	if !s.EmptyOutput() {
-		res = append(res, fmt.Sprintf("out = new(%s)", s.MethodOutputType()))
 		res = append(res, "out.Value = result")
-		res = append(res, "return")
-		return res
 	}
+	res = append(res, "return")
 
 	return res
 }
@@ -110,16 +97,9 @@ func (s *Service) RpcSignature() string {
 	var b strings.Builder
 	b.WriteString(s.Name)
 	b.WriteString("(")
-	switch {
-	case s.EmptyInput():
-		b.WriteString("google.protobuf.Empty")
-	default:
-		b.WriteString(fmt.Sprintf("%sParams", s.Name))
-	}
+	b.WriteString(fmt.Sprintf("%sRequest", s.Name))
 	b.WriteString(") returns (")
 	switch {
-	case s.EmptyOutput():
-		b.WriteString("google.protobuf.Empty")
 	case s.HasCustomOutput():
 		b.WriteString(canonicalName(s.Output[0]))
 	default:
@@ -179,7 +159,7 @@ func (s *Service) HasArrayOutput() bool {
 func (s *Service) ProtoInputs() string {
 	var b strings.Builder
 	for i, name := range s.InputNames {
-		fmt.Fprintf(&b, "\n    %s %s = %d;", toProtoType(s.InputTypes[i]), lowerFirstCharacter(name), i+1)
+		fmt.Fprintf(&b, "\n    %s %s = %d;", toProtoType(s.InputTypes[i]), ToSnakeCase(name), i+1)
 	}
 	return b.String()
 }

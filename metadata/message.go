@@ -3,6 +3,7 @@ package metadata
 import (
 	"fmt"
 	"go/ast"
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -19,7 +20,7 @@ type Message struct {
 func (m *Message) ProtoAttributes() string {
 	var s strings.Builder
 	for i, name := range m.AttrNames {
-		s.WriteString(fmt.Sprintf("    %s %s = %d;\n", toProtoType(m.AttrTypes[i]), lowerFirstCharacter(name), i+1))
+		s.WriteString(fmt.Sprintf("    %s %s = %d;\n", toProtoType(m.AttrTypes[i]), ToSnakeCase(name), i+1))
 	}
 	return s.String()
 }
@@ -129,4 +130,8 @@ func (m *Message) AdapterToProto(src, dst string) []string {
 		res = append(res, bindToProto(src, dst, UpperFirstCharacter(attr), m.AttrTypes[i])...)
 	}
 	return res
+}
+
+func (m *Message) ProtoName() string {
+	return regexp.MustCompile("Params$").ReplaceAllString(m.Name, "Request")
 }

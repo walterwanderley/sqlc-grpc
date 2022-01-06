@@ -58,7 +58,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 				return err
 			}
 			for _, pkg := range def.Packages {
-				dest := filepath.Join(dir, pkg.Package)
+				dest := filepath.Join(dir, pkg.Package, "v1")
 				if _, err := os.Stat(dest); os.IsNotExist(err) {
 					err := os.MkdirAll(dest, 0750)
 					if err != nil {

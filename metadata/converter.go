@@ -254,16 +254,6 @@ func toKebabCase(str string) string {
 	return strings.ToLower(snake)
 }
 
-func lowerFirstCharacter(str string) string {
-	if strings.ToLower(str) == "id" {
-		return "id"
-	}
-	for i, v := range str {
-		return string(unicode.ToLower(v)) + str[i+1:]
-	}
-	return str
-}
-
 func camelCaseProto(str string) string {
-	return generator.CamelCase(lowerFirstCharacter(str))
+	return generator.CamelCase(ToSnakeCase(str))
 }

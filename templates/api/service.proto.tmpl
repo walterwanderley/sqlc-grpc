@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package {{.Package | SnakeCase}};
+package api.{{.Package | SnakeCase}}.v1;
 
-option go_package = "{{.GoModule}}/proto/{{.Package | SnakeCase}}";
+option go_package = "{{.GoModule}}/api/{{.Package | SnakeCase}}/v1";
 
 import "google/api/annotations.proto";
 {{range .ProtoImports}}{{ .}}
@@ -30,15 +30,15 @@ service {{.Package | UpperFirst}}Service {
     }
     {{end}}
 }
-{{range .Services}}{{if and (not .HasCustomParams) (not .EmptyInput)}}
-message {{.Name}}Params { {{.ProtoInputs}}
+{{range .Services}}{{if not .HasCustomParams}}
+message {{.Name}}Request { {{.ProtoInputs}}
 }
-{{end}}{{if and (not .HasCustomOutput) (not .EmptyOutput)}}
+{{end}}{{if not .HasCustomOutput}}
 message {{.Name}}Response {
 {{.ProtoOutputs -}}    
 }{{end}}{{end}}
 {{ range $key, $value := .Messages}}
-message {{$key}} {
+message {{$value.ProtoName}} {
 {{$value.ProtoAttributes -}}
 }
 {{end}}

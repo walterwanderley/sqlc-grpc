@@ -11,7 +11,7 @@ import (
 
     {{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
 	{{end}}	"{{ .GoModule}}/internal/server"
-    {{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/proto/{{.Package | SnakeCase}}"
+    {{range .Packages}}pb_{{.Package}} "{{ .GoModule}}/api/{{.Package | SnakeCase}}/v1"
 	{{end}}
 )
 

@@ -8,11 +8,11 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
+	pb "booktest/api/books/v1"
 	"booktest/internal/validation"
-	pb "booktest/proto/books"
 )
 
-func fromBooksByTitleYearParams(in *pb.BooksByTitleYearParams) (out BooksByTitleYearParams, err error) {
+func fromBooksByTitleYearRequest(in *pb.BooksByTitleYearRequest) (out BooksByTitleYearParams, err error) {
 	if in == nil {
 		return
 	}
@@ -22,12 +22,12 @@ func fromBooksByTitleYearParams(in *pb.BooksByTitleYearParams) (out BooksByTitle
 	return
 }
 
-func fromCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err error) {
+func fromCreateBookRequest(in *pb.CreateBookRequest) (out CreateBookParams, err error) {
 	if in == nil {
 		return
 	}
 
-	out.AuthorID = in.GetAuthorID()
+	out.AuthorID = in.GetAuthorId()
 	out.Isbn = in.GetIsbn()
 	out.BookType = BookType(in.GetBookType())
 	out.Title = in.GetTitle()
@@ -46,19 +46,19 @@ func fromCreateBookParams(in *pb.CreateBookParams) (out CreateBookParams, err er
 	return
 }
 
-func fromUpdateBookISBNParams(in *pb.UpdateBookISBNParams) (out UpdateBookISBNParams, err error) {
+func fromUpdateBookISBNRequest(in *pb.UpdateBookISBNRequest) (out UpdateBookISBNParams, err error) {
 	if in == nil {
 		return
 	}
 
 	out.Title = in.GetTitle()
 	out.Tags = in.GetTags()
-	out.BookID = in.GetBookID()
+	out.BookID = in.GetBookId()
 	out.Isbn = in.GetIsbn()
 	return
 }
 
-func fromUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err error) {
+func fromUpdateBookRequest(in *pb.UpdateBookRequest) (out UpdateBookParams, err error) {
 	if in == nil {
 		return
 	}
@@ -66,14 +66,14 @@ func fromUpdateBookParams(in *pb.UpdateBookParams) (out UpdateBookParams, err er
 	out.Title = in.GetTitle()
 	out.Tags = in.GetTags()
 	out.BookType = BookType(in.GetBookType())
-	out.BookID = in.GetBookID()
+	out.BookID = in.GetBookId()
 	return
 }
 
 func toAuthor(in Author) (out *pb.Author, err error) {
 
 	out = new(pb.Author)
-	out.AuthorID = in.AuthorID
+	out.AuthorId = in.AuthorID
 	out.Name = in.Name
 	return
 }
@@ -81,8 +81,8 @@ func toAuthor(in Author) (out *pb.Author, err error) {
 func toBook(in Book) (out *pb.Book, err error) {
 
 	out = new(pb.Book)
-	out.BookID = in.BookID
-	out.AuthorID = in.AuthorID
+	out.BookId = in.BookID
+	out.AuthorId = in.AuthorID
 	out.Isbn = in.Isbn
 	out.BookType = string(in.BookType)
 	out.Title = in.Title
@@ -95,7 +95,7 @@ func toBook(in Book) (out *pb.Book, err error) {
 func toBooksByTagsRow(in BooksByTagsRow) (out *pb.BooksByTagsRow, err error) {
 
 	out = new(pb.BooksByTagsRow)
-	out.BookID = in.BookID
+	out.BookId = in.BookID
 	out.Title = in.Title
 	if in.Name.Valid {
 		out.Name = wrapperspb.String(in.Name.String)

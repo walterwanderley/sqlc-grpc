@@ -8,9 +8,9 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	pb_books "booktest/api/books/v1"
 	app_books "booktest/internal/books"
 	"booktest/internal/server"
-	pb_books "booktest/proto/books"
 )
 
 func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {

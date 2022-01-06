@@ -16,7 +16,7 @@ plugins:
       - generate_unbound_methods=true
       - logtostderr=true
   - name: openapiv2
-    out: proto
+    out: api
     opt:
       - allow_repeated_fields_in_body=true
       - generate_unbound_methods=true

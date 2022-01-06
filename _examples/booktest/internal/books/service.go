@@ -6,9 +6,8 @@ import (
 	"context"
 
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/types/known/emptypb"
 
-	pb "booktest/proto/books"
+	pb "booktest/api/books/v1"
 )
 
 type Service struct {
@@ -17,7 +16,7 @@ type Service struct {
 	querier *Queries
 }
 
-func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (out *pb.BooksByTagsResponse, err error) {
+func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsRequest) (out *pb.BooksByTagsResponse, err error) {
 	dollar_1 := in.GetDollar_1()
 
 	result, err := s.querier.BooksByTags(ctx, dollar_1)
@@ -37,8 +36,8 @@ func (s *Service) BooksByTags(ctx context.Context, in *pb.BooksByTagsParams) (ou
 	return
 }
 
-func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearParams) (out *pb.BooksByTitleYearResponse, err error) {
-	arg, err := fromBooksByTitleYearParams(in)
+func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearRequest) (out *pb.BooksByTitleYearResponse, err error) {
+	arg, err := fromBooksByTitleYearRequest(in)
 	if err != nil {
 		s.logger.Error("BooksByTitleYear input adapter failed", zap.Error(err))
 		return
@@ -61,7 +60,7 @@ func (s *Service) BooksByTitleYear(ctx context.Context, in *pb.BooksByTitleYearP
 	return
 }
 
-func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorParams) (out *pb.Author, err error) {
+func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorRequest) (out *pb.Author, err error) {
 	name := in.GetName()
 
 	result, err := s.querier.CreateAuthor(ctx, name)
@@ -72,8 +71,8 @@ func (s *Service) CreateAuthor(ctx context.Context, in *pb.CreateAuthorParams) (
 	return toAuthor(result)
 }
 
-func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out *pb.Book, err error) {
-	arg, err := fromCreateBookParams(in)
+func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookRequest) (out *pb.Book, err error) {
+	arg, err := fromCreateBookRequest(in)
 	if err != nil {
 		s.logger.Error("CreateBook input adapter failed", zap.Error(err))
 		return
@@ -87,19 +86,20 @@ func (s *Service) CreateBook(ctx context.Context, in *pb.CreateBookParams) (out 
 	return toBook(result)
 }
 
-func (s *Service) DeleteBook(ctx context.Context, in *pb.DeleteBookParams) (out *emptypb.Empty, err error) {
-	bookID := in.GetBookID()
+func (s *Service) DeleteBook(ctx context.Context, in *pb.DeleteBookRequest) (out *pb.DeleteBookResponse, err error) {
+	bookID := in.GetBookId()
 
 	err = s.querier.DeleteBook(ctx, bookID)
 	if err != nil {
 		s.logger.Error("DeleteBook sql call failed", zap.Error(err))
 		return
 	}
-	return &emptypb.Empty{}, nil
+	out = new(pb.DeleteBookResponse)
+	return
 }
 
-func (s *Service) GetAuthor(ctx context.Context, in *pb.GetAuthorParams) (out *pb.Author, err error) {
-	authorID := in.GetAuthorID()
+func (s *Service) GetAuthor(ctx context.Context, in *pb.GetAuthorRequest) (out *pb.Author, err error) {
+	authorID := in.GetAuthorId()
 
 	result, err := s.querier.GetAuthor(ctx, authorID)
 	if err != nil {
@@ -109,8 +109,8 @@ func (s *Service) GetAuthor(ctx context.Context, in *pb.GetAuthorParams) (out *p
 	return toAuthor(result)
 }
 
-func (s *Service) GetBook(ctx context.Context, in *pb.GetBookParams) (out *pb.Book, err error) {
-	bookID := in.GetBookID()
+func (s *Service) GetBook(ctx context.Context, in *pb.GetBookRequest) (out *pb.Book, err error) {
+	bookID := in.GetBookId()
 
 	result, err := s.querier.GetBook(ctx, bookID)
 	if err != nil {
@@ -120,8 +120,8 @@ func (s *Service) GetBook(ctx context.Context, in *pb.GetBookParams) (out *pb.Bo
 	return toBook(result)
 }
 
-func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out *emptypb.Empty, err error) {
-	arg, err := fromUpdateBookParams(in)
+func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookRequest) (out *pb.UpdateBookResponse, err error) {
+	arg, err := fromUpdateBookRequest(in)
 	if err != nil {
 		s.logger.Error("UpdateBook input adapter failed", zap.Error(err))
 		return
@@ -132,11 +132,12 @@ func (s *Service) UpdateBook(ctx context.Context, in *pb.UpdateBookParams) (out 
 		s.logger.Error("UpdateBook sql call failed", zap.Error(err))
 		return
 	}
-	return &emptypb.Empty{}, nil
+	out = new(pb.UpdateBookResponse)
+	return
 }
 
-func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNParams) (out *emptypb.Empty, err error) {
-	arg, err := fromUpdateBookISBNParams(in)
+func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNRequest) (out *pb.UpdateBookISBNResponse, err error) {
+	arg, err := fromUpdateBookISBNRequest(in)
 	if err != nil {
 		s.logger.Error("UpdateBookISBN input adapter failed", zap.Error(err))
 		return
@@ -147,5 +148,6 @@ func (s *Service) UpdateBookISBN(ctx context.Context, in *pb.UpdateBookISBNParam
 		s.logger.Error("UpdateBookISBN sql call failed", zap.Error(err))
 		return
 	}
-	return &emptypb.Empty{}, nil
+	out = new(pb.UpdateBookISBNResponse)
+	return
 }

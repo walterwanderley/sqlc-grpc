@@ -1,11 +1,10 @@
 syntax = "proto3";
 
-package books;
+package api.books.v1;
 
-option go_package = "booktest/proto/books";
+option go_package = "booktest/api/books/v1";
 
 import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
@@ -24,7 +23,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 service BooksService {
     
-    rpc BooksByTags(BooksByTagsParams) returns (BooksByTagsResponse) {
+    rpc BooksByTags(BooksByTagsRequest) returns (BooksByTagsResponse) {
         option (google.api.http) = {
             post: "/books-by-tags"
             body: "dollar_1"
@@ -33,7 +32,7 @@ service BooksService {
         };
     }
     
-    rpc BooksByTitleYear(BooksByTitleYearParams) returns (BooksByTitleYearResponse) {
+    rpc BooksByTitleYear(BooksByTitleYearRequest) returns (BooksByTitleYearResponse) {
         option (google.api.http) = {
             get: "/books-by-title-year"
             response_body: "value"
@@ -41,7 +40,7 @@ service BooksService {
         };
     }
     
-    rpc CreateAuthor(CreateAuthorParams) returns (Author) {
+    rpc CreateAuthor(CreateAuthorRequest) returns (Author) {
         option (google.api.http) = {
             post: "/author"
             body: "*"
@@ -49,7 +48,7 @@ service BooksService {
         };
     }
     
-    rpc CreateBook(CreateBookParams) returns (Book) {
+    rpc CreateBook(CreateBookRequest) returns (Book) {
         option (google.api.http) = {
             post: "/book"
             body: "*"
@@ -57,28 +56,28 @@ service BooksService {
         };
     }
     
-    rpc DeleteBook(DeleteBookParams) returns (google.protobuf.Empty) {
+    rpc DeleteBook(DeleteBookRequest) returns (DeleteBookResponse) {
         option (google.api.http) = {
-            delete: "/book/{bookID}"
+            delete: "/book/{book_id}"
             
         };
     }
     
-    rpc GetAuthor(GetAuthorParams) returns (Author) {
+    rpc GetAuthor(GetAuthorRequest) returns (Author) {
         option (google.api.http) = {
-            get: "/author/{authorID}"
+            get: "/author/{author_id}"
             
         };
     }
     
-    rpc GetBook(GetBookParams) returns (Book) {
+    rpc GetBook(GetBookRequest) returns (Book) {
         option (google.api.http) = {
-            get: "/book/{bookID}"
+            get: "/book/{book_id}"
             
         };
     }
     
-    rpc UpdateBook(UpdateBookParams) returns (google.protobuf.Empty) {
+    rpc UpdateBook(UpdateBookRequest) returns (UpdateBookResponse) {
         option (google.api.http) = {
             put: "/book"
             body: "*"
@@ -86,7 +85,7 @@ service BooksService {
         };
     }
     
-    rpc UpdateBookISBN(UpdateBookISBNParams) returns (google.protobuf.Empty) {
+    rpc UpdateBookISBN(UpdateBookISBNRequest) returns (UpdateBookISBNResponse) {
         option (google.api.http) = {
             put: "/book-isbn"
             body: "*"
@@ -96,7 +95,7 @@ service BooksService {
     
 }
 
-message BooksByTagsParams { 
+message BooksByTagsRequest { 
     repeated string dollar_1 = 1;
 }
 
@@ -106,33 +105,39 @@ message BooksByTagsResponse {
 message BooksByTitleYearResponse {
     repeated Book value = 1;
 }
-message CreateAuthorParams { 
+message CreateAuthorRequest { 
     string name = 1;
 }
 
-message DeleteBookParams { 
-    int32 bookID = 1;
+message DeleteBookRequest { 
+    int32 book_id = 1;
 }
 
-message GetAuthorParams { 
-    int32 authorID = 1;
+message DeleteBookResponse {
+}
+message GetAuthorRequest { 
+    int32 author_id = 1;
 }
 
-message GetBookParams { 
-    int32 bookID = 1;
+message GetBookRequest { 
+    int32 book_id = 1;
 }
 
+message UpdateBookResponse {
+}
+message UpdateBookISBNResponse {
+}
 
 message Author {
-    int32 authorID = 1;
+    int32 author_id = 1;
     string name = 2;
 }
 
 message Book {
-    int32 bookID = 1;
-    int32 authorID = 2;
+    int32 book_id = 1;
+    int32 author_id = 2;
     string isbn = 3;
-    string bookType = 4;
+    string book_type = 4;
     string title = 5;
     int32 year = 6;
     google.protobuf.Timestamp available = 7;
@@ -143,39 +148,39 @@ message BookType {
 }
 
 message BooksByTagsRow {
-    int32 bookID = 1;
+    int32 book_id = 1;
     string title = 2;
     google.protobuf.StringValue name = 3;
     string isbn = 4;
     repeated string tags = 5;
 }
 
-message BooksByTitleYearParams {
+message BooksByTitleYearRequest {
     string title = 1;
     int32 year = 2;
 }
 
-message CreateBookParams {
-    int32 authorID = 1;
+message CreateBookRequest {
+    int32 author_id = 1;
     string isbn = 2;
-    string bookType = 3;
+    string book_type = 3;
     string title = 4;
     int32 year = 5;
     google.protobuf.Timestamp available = 6;
     repeated string tags = 7;
 }
 
-message UpdateBookISBNParams {
+message UpdateBookISBNRequest {
     string title = 1;
     repeated string tags = 2;
-    int32 bookID = 3;
+    int32 book_id = 3;
     string isbn = 4;
 }
 
-message UpdateBookParams {
+message UpdateBookRequest {
     string title = 1;
     repeated string tags = 2;
-    string bookType = 3;
-    int32 bookID = 4;
+    string book_type = 3;
+    int32 book_id = 4;
 }
 

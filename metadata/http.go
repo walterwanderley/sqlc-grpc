@@ -40,7 +40,7 @@ func (s *Service) HttpPath() string {
 
 	if (method == "get" || method == "delete") &&
 		len(s.InputNames) == 1 && !s.HasCustomParams() && !s.HasArrayParams() {
-		path = fmt.Sprintf("%s/{%s}", path, s.InputNames[0])
+		path = fmt.Sprintf("%s/{%s}", path, ToSnakeCase(s.InputNames[0]))
 	}
 	return path
 }

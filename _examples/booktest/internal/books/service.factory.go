@@ -5,7 +5,7 @@ package books
 import (
 	"go.uber.org/zap"
 
-	pb "booktest/proto/books"
+	pb "booktest/api/books/v1"
 )
 
 // NewService is a constructor of a pb.BooksServiceServer implementation.

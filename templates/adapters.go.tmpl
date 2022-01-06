@@ -12,14 +12,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	pb "{{ .GoModule}}/proto/{{.Package}}"
+	pb "{{ .GoModule}}/api/{{.Package}}/v1"
 	"{{.GoModule}}/internal/validation"
 )
 
 {{$emitParamsPointers := .EmitParamsPointers}}
 {{$emitResultPointers := .EmitResultPointers}}
 {{range .InputAdapters}}
-func from{{.Name}}(in *pb.{{.Name}}) (out {{if $emitParamsPointers}}*{{end}}{{.Name}}, err error) {
+func from{{.ProtoName}}(in *pb.{{.ProtoName}}) (out {{if $emitParamsPointers}}*{{end}}{{.Name}}, err error) {
 	if in == nil {
 	    return
 	}
