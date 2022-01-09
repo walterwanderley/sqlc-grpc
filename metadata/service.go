@@ -9,24 +9,9 @@ type Service struct {
 	Name       string
 	InputNames []string
 	InputTypes []string
-	Output     []string
+	Output     string
 	Sql        string
 	Messages   map[string]*Message
-}
-
-func (s *Service) MethodInputType() string {
-	return fmt.Sprintf("pb.%sRequest", s.Name)
-}
-
-func (s *Service) MethodOutputType() string {
-	return fmt.Sprintf("pb.%sResponse", s.Name)
-}
-
-func (s *Service) ReturnCallDatabase() string {
-	if !s.EmptyOutput() {
-		return "result,"
-	}
-	return ""
 }
 
 func (s *Service) ParamsCallDatabase() string {
@@ -46,7 +31,7 @@ func (s *Service) InputGrpc() []string {
 		typ := s.InputTypes[0]
 		in := s.InputNames[0]
 		res = append(res, fmt.Sprintf("var %s %s", in, typ))
-		m := s.Messages[typ]
+		m := s.Messages[canonicalName(typ)]
 		for i, name := range m.AttrNames {
 			attrName := UpperFirstCharacter(name)
 			res = append(res, bindToGo("req", fmt.Sprintf("%s.%s", in, attrName), attrName, m.AttrTypes[i], false)...)
@@ -63,23 +48,22 @@ func (s *Service) InputGrpc() []string {
 func (s *Service) OutputGrpc() []string {
 	res := make([]string, 0)
 	if s.HasArrayOutput() {
-		res = append(res, fmt.Sprintf("res := new(%s)", s.MethodOutputType()))
+		res = append(res, fmt.Sprintf("res := new(pb.%sResponse)", s.Name))
 		res = append(res, "for _, r := range result {")
-		typ := canonicalName(s.Output[0])
-		res = append(res, fmt.Sprintf("res.List = append(res.List, to%s(r))", typ))
+		res = append(res, fmt.Sprintf("res.List = append(res.List, to%s(r))", canonicalName(s.Output)))
 		res = append(res, "}")
 		res = append(res, "return res, nil")
 		return res
 	}
 
 	if s.HasCustomOutput() {
-		res = append(res, fmt.Sprintf("return &%s{%s: to%s(result)}, nil", s.MethodOutputType(), camelCaseProto(s.Output[0]), canonicalName(s.Output[0])))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{%s: to%s(result)}, nil", s.Name, camelCaseProto(canonicalName(s.Output)), canonicalName(s.Output)))
 		return res
 	}
 	if s.EmptyOutput() {
-		res = append(res, fmt.Sprintf("return &%s{}, nil", s.MethodOutputType()))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{}, nil", s.Name))
 	} else {
-		res = append(res, fmt.Sprintf("return &%s{Value: result}, nil", s.MethodOutputType()))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result}, nil", s.Name))
 	}
 
 	return res
@@ -102,7 +86,7 @@ func (s *Service) HasSimpleParams() bool {
 		return true
 	}
 
-	if msg, ok := s.Messages[s.InputTypes[0]]; ok {
+	if msg, ok := s.Messages[canonicalName(s.InputTypes[0])]; ok {
 		return !msg.HasComplexAttribute()
 	}
 
@@ -122,14 +106,14 @@ func (s *Service) HasCustomOutput() bool {
 		return false
 	}
 
-	return customType(s.Output[0])
+	return customType(s.Output)
 }
 
 func (s *Service) HasArrayOutput() bool {
 	if s.EmptyOutput() {
 		return false
 	}
-	return strings.HasPrefix(s.Output[0], "[]") && s.Output[0] != "[]byte"
+	return strings.HasPrefix(s.Output, "[]") && s.Output != "[]byte"
 }
 
 func (s *Service) ProtoInputs() string {
@@ -145,19 +129,18 @@ func (s *Service) EmptyInput() bool {
 }
 
 func (s *Service) EmptyOutput() bool {
-	return len(s.Output) == 0
+	return s.Output == ""
 }
 
 func (s *Service) ProtoOutputs() string {
-	var b strings.Builder
-	for i, outType := range s.Output {
-		name := "value"
-		if s.HasArrayOutput() {
-			name = "list"
-		} else if s.HasCustomOutput() {
-			name = ToSnakeCase(outType)
-		}
-		fmt.Fprintf(&b, "    %s %s = %d;\n", toProtoType(outType), ToSnakeCase(name), i+1)
+	if s.EmptyOutput() {
+		return ""
 	}
-	return b.String()
+	name := "value"
+	if s.HasArrayOutput() {
+		name = "list"
+	} else if s.HasCustomOutput() {
+		name = ToSnakeCase(canonicalName(s.Output))
+	}
+	return fmt.Sprintf("    %s %s = 1;\n", toProtoType(s.Output), name)
 }

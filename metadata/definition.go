@@ -73,11 +73,11 @@ func (p *Package) importTimestamp() bool {
 				return true
 			}
 		}
-		for _, n := range s.Output {
-			if n == "time.Time" || n == "sql.NullTime" {
-				return true
-			}
+
+		if s.Output == "time.Time" || s.Output == "sql.NullTime" {
+			return true
 		}
+
 	}
 	return false
 }
@@ -96,11 +96,11 @@ func (p *Package) importWrappers() bool {
 				return true
 			}
 		}
-		for _, n := range s.Output {
-			if strings.HasPrefix(n, "sql.Null") && n != "sql.NullTime" {
-				return true
-			}
+
+		if strings.HasPrefix(s.Output, "sql.Null") && s.Output != "sql.NullTime" {
+			return true
 		}
+
 	}
 	return false
 }
@@ -183,20 +183,11 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 			return strings.Compare(p.Services[i].Name, p.Services[j].Name) < 0
 		})
 
-		inAdapters := make(map[string]struct{})
 		outAdapters := make(map[string]struct{})
 
 		for _, s := range p.Services {
-			if s.HasCustomParams() {
-				inAdapters[canonicalName(s.InputTypes[0])] = struct{}{}
-			}
-			if s.HasCustomOutput() {
-				for _, n := range s.Output {
-					outAdapters[canonicalName(n)] = struct{}{}
-				}
-			}
-			if s.HasArrayOutput() {
-				outAdapters[canonicalName(s.Output[0])] = struct{}{}
+			if s.HasCustomOutput() || s.HasArrayOutput() {
+				outAdapters[canonicalName(s.Output)] = struct{}{}
 			}
 		}
 

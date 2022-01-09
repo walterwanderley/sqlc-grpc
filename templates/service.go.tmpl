@@ -27,10 +27,10 @@ type Service struct {
 
 {{$emitDbArgument := .EmitDbArgument}}
 {{ range .Services }}
-func (s *Service) {{.Name}}(ctx context.Context, req *{{.MethodInputType}}) (*{{.MethodOutputType}}, error) {
+func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.{{.Name}}Response, error) {
 	{{ range .InputGrpc}}{{ .}}
 	{{end}}
-	{{ .ReturnCallDatabase}} err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
+	{{if not .EmptyOutput}}result, {{end}}err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
 	if err != nil {
 		s.logger.Error("{{.Name}} sql call failed", zap.Error(err))			
 		return nil, err

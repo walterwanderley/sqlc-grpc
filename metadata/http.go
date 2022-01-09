@@ -40,7 +40,7 @@ func (s *Service) HttpPath() string {
 
 	if (method == "get" || method == "delete") &&
 		len(s.InputNames) == 1 && !s.HasCustomParams() && !s.HasArrayParams() {
-		path = fmt.Sprintf("%s/{%s}", path, ToSnakeCase(s.InputNames[0]))
+		path = fmt.Sprintf("%s/{%s}", path, ToSnakeCase(canonicalName(s.InputNames[0])))
 	}
 	return path
 }
@@ -61,7 +61,7 @@ func (s *Service) HttpResponseBody() string {
 	if s.HasArrayOutput() {
 		return "list"
 	} else if s.HasCustomOutput() {
-		return ToSnakeCase(s.Output[0])
+		return ToSnakeCase(canonicalName(s.Output))
 	}
 	return ""
 }

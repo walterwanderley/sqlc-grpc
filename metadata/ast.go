@@ -12,7 +12,6 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 
 	inputNames := make([]string, 0)
 	inputTypes := make([]string, 0)
-	output := make([]string, 0)
 
 	// context is the first parameter
 	for i := 1; i < len(fun.Type.Params.List); i++ {
@@ -30,14 +29,16 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 		}
 	}
 
-	// error is the last result
-	for i := 0; i < len(fun.Type.Results.List)-1; i++ {
+	var output string
+	// two is the maximum results for a valid method, error is the last result
+	if len(fun.Type.Results.List) > 1 {
 		p := fun.Type.Results.List[0]
-		typ, err := exprToStr(p.Type)
+		var err error
+		output, err = exprToStr(p.Type)
 		if err != nil {
 			return
 		}
-		output = append(output, typ)
+
 	}
 	def.Services = append(def.Services, &Service{
 		Name:       fun.Name.String(),
@@ -87,6 +88,10 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 	}
 
 	if firstParam != "context.Context" {
+		return false
+	}
+
+	if len(fun.Type.Results.List) > 2 {
 		return false
 	}
 

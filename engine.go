@@ -143,11 +143,6 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		}
 		defer out.Close()
 
-		err = chmodFile(out)
-		if err != nil {
-			return err
-		}
-
 		_, err = io.Copy(out, in)
 		return err
 	})
@@ -160,11 +155,6 @@ func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath 
 		return err
 	}
 	defer w.Close()
-
-	err = chmodFile(w)
-	if err != nil {
-		return err
-	}
 
 	var b bytes.Buffer
 
@@ -200,16 +190,6 @@ func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath 
 	fmt.Fprintf(w, "%s", string(src))
 	return nil
 
-}
-
-func chmodFile(f *os.File) error {
-	if strings.HasSuffix(f.Name(), ".sh") {
-		err := f.Chmod(os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func fileExists(path string) bool {
