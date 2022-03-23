@@ -6,12 +6,13 @@ import (
 )
 
 type Service struct {
-	Name       string
-	InputNames []string
-	InputTypes []string
-	Output     string
-	Sql        string
-	Messages   map[string]*Message
+	Name              string
+	InputNames        []string
+	InputTypes        []string
+	Output            string
+	Sql               string
+	Messages          map[string]*Message
+	CustomHttpOptions []string
 }
 
 func (s *Service) ParamsCallDatabase() string {

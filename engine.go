@@ -14,9 +14,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/walterwanderley/sqlc-grpc/metadata"
-
+	"github.com/emicklei/proto"
 	"golang.org/x/tools/imports"
+
+	"github.com/walterwanderley/sqlc-grpc/metadata"
 )
 
 //go:embed templates/*
@@ -65,7 +66,12 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 						return err
 					}
 				}
-				err = genFromTemplate(path, string(tpl), pkg, false, filepath.Join(dest, (metadata.ToSnakeCase(pkg.Package)+".proto")))
+				destFile := filepath.Join(dest, (metadata.ToSnakeCase(pkg.Package) + ".proto"))
+				if appendMode && fileExists(destFile) {
+					loadOptions(destFile, pkg)
+				}
+
+				err = genFromTemplate(path, string(tpl), pkg, false, destFile)
 				if err != nil {
 					return err
 				}
@@ -146,6 +152,80 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		_, err = io.Copy(out, in)
 		return err
 	})
+}
+
+func loadOptions(protoFile string, pkg *metadata.Package) {
+	f, err := os.Open(protoFile)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer f.Close()
+	parser := proto.NewParser(f)
+	def, err := parser.Parse()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	var hasPackageOptions bool
+	proto.Walk(def, proto.WithOption(func(opt *proto.Option) {
+		if hasPackageOptions {
+			return
+		}
+		if opt.Name == "(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger)" {
+			res := make([]string, 0)
+			res = append(res, fmt.Sprintf("option %s = {", opt.Name))
+			res = append(res, printProtoLiteral(opt.Constant.OrderedMap, 1)...)
+			res = append(res, "};")
+			pkg.CustomOpenAPIOptions = res
+			hasPackageOptions = true
+		}
+	}))
+
+	proto.Walk(def, proto.WithRPC(func(rpc *proto.RPC) {
+		res := make([]string, 0)
+
+		for _, e := range rpc.Elements {
+			opt, ok := e.(*proto.Option)
+			if !ok {
+				continue
+			}
+			res = append(res, fmt.Sprintf("option %s = {", opt.Name))
+			for _, item := range opt.Constant.OrderedMap {
+				if item.IsString {
+					res = append(res, fmt.Sprintf("    %s: \"%s\"", item.Name, item.Source))
+				}
+			}
+			res = append(res, "};")
+		}
+
+		for _, s := range pkg.Services {
+			if s.Name == rpc.Name {
+				s.CustomHttpOptions = res
+				break
+			}
+		}
+
+	}))
+
+}
+
+func printProtoLiteral(literal proto.LiteralMap, deep int) []string {
+	res := make([]string, 0)
+	layout := fmt.Sprintf("%%-%ds", deep*4)
+	prefix := fmt.Sprintf(layout, "")
+	for _, item := range literal {
+		if item.IsString {
+			res = append(res, fmt.Sprintf("%s%s: \"%s\"", prefix, item.Name, item.Source))
+		} else {
+			res = append(res, fmt.Sprintf("%s%s: {", prefix, item.Name))
+			res = append(res, printProtoLiteral(item.OrderedMap, deep+1)...)
+			res = append(res, fmt.Sprintf("%s};", prefix))
+		}
+
+	}
+	return res
 }
 
 func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath string) error {

@@ -67,16 +67,21 @@ func (s *Service) HttpResponseBody() string {
 }
 
 func (s *Service) HttpOptions() []string {
+	if len(s.CustomHttpOptions) > 0 {
+		return s.CustomHttpOptions
+	}
 	res := make([]string, 0)
-	res = append(res, fmt.Sprintf("%s: \"%s\"", s.HttpMethod(), s.HttpPath()))
+	res = append(res, "option (google.api.http) = {")
+	res = append(res, fmt.Sprintf("    %s: \"%s\"", s.HttpMethod(), s.HttpPath()))
 	body := s.HttpBody()
 	if body != "" {
-		res = append(res, fmt.Sprintf("body: \"%s\"", body))
+		res = append(res, fmt.Sprintf("    body: \"%s\"", body))
 	}
 	responseBody := s.HttpResponseBody()
 	if responseBody != "" {
-		res = append(res, fmt.Sprintf("response_body: \"%s\"", responseBody))
+		res = append(res, fmt.Sprintf("    response_body: \"%s\"", responseBody))
 	}
+	res = append(res, "};")
 	return res
 }
 

@@ -34,18 +34,19 @@ type PackageOpts struct {
 }
 
 type Package struct {
-	Engine             string
-	Package            string
-	GoModule           string
-	SchemaPath         string
-	SrcPath            string
-	Services           []*Service
-	Messages           map[string]*Message
-	OutputAdapters     []*Message
-	EmitInterface      bool
-	EmitParamsPointers bool
-	EmitResultPointers bool
-	EmitDbArgument     bool
+	Engine               string
+	Package              string
+	GoModule             string
+	SchemaPath           string
+	SrcPath              string
+	Services             []*Service
+	Messages             map[string]*Message
+	OutputAdapters       []*Message
+	EmitInterface        bool
+	EmitParamsPointers   bool
+	EmitResultPointers   bool
+	EmitDbArgument       bool
+	CustomOpenAPIOptions []string
 }
 
 func (p *Package) ProtoImports() []string {

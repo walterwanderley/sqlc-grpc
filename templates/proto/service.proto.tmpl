@@ -9,7 +9,8 @@ import "google/api/annotations.proto";
 {{end}}
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+{{if .CustomOpenAPIOptions}}{{range .CustomOpenAPIOptions}}{{ .}}
+{{end}}{{else}}option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
         title: "{{.GoModule}}";
         version: "1.0";
@@ -19,14 +20,12 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
             url: "https://github.com/walterwanderley/sqlc-grpc";
         };
     };
-};
+};{{end}}
 service {{.Package | UpperFirst}}Service {
     {{range .Services}}
     rpc {{.Name}}({{.Name}}Request) returns ({{.Name}}Response) {
-        option (google.api.http) = {
-            {{range .HttpOptions}}{{ .}}
-            {{end}}
-        };
+        {{range .HttpOptions}}{{ .}}
+        {{end}}
     }
     {{end}}
 }
