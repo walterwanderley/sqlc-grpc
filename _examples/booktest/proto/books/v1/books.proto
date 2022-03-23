@@ -28,16 +28,16 @@ service BooksService {
             post: "/books-by-tags"
             body: "dollar_1"
             response_body: "list"
-            
         };
+        
     }
     
     rpc BooksByTitleYear(BooksByTitleYearRequest) returns (BooksByTitleYearResponse) {
         option (google.api.http) = {
             get: "/books-by-title-year"
             response_body: "list"
-            
         };
+        
     }
     
     rpc CreateAuthor(CreateAuthorRequest) returns (CreateAuthorResponse) {
@@ -45,8 +45,8 @@ service BooksService {
             post: "/author"
             body: "*"
             response_body: "author"
-            
         };
+        
     }
     
     rpc CreateBook(CreateBookRequest) returns (CreateBookResponse) {
@@ -54,47 +54,47 @@ service BooksService {
             post: "/book"
             body: "*"
             response_body: "book"
-            
         };
+        
     }
     
     rpc DeleteBook(DeleteBookRequest) returns (DeleteBookResponse) {
         option (google.api.http) = {
             delete: "/book/{book_id}"
-            
         };
+        
     }
     
     rpc GetAuthor(GetAuthorRequest) returns (GetAuthorResponse) {
         option (google.api.http) = {
             get: "/author/{author_id}"
             response_body: "author"
-            
         };
+        
     }
     
     rpc GetBook(GetBookRequest) returns (GetBookResponse) {
         option (google.api.http) = {
             get: "/book/{book_id}"
             response_body: "book"
-            
         };
+        
     }
     
     rpc UpdateBook(UpdateBookRequest) returns (UpdateBookResponse) {
         option (google.api.http) = {
             put: "/book"
             body: "*"
-            
         };
+        
     }
     
     rpc UpdateBookISBN(UpdateBookISBNRequest) returns (UpdateBookISBNResponse) {
         option (google.api.http) = {
             put: "/book-isbn"
             body: "*"
-            
         };
+        
     }
     
 }
