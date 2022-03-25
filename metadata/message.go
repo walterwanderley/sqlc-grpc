@@ -7,33 +7,82 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/emicklei/proto"
 )
 
 type Message struct {
-	Name        string
-	AttrNames   []string
-	AttrTypes   []string
-	IsArray     bool
-	ElementType string
+	Name                string
+	Fields              []*Field
+	IsArray             bool
+	ElementType         string
+	CustomProtoComments []string
+	CustomProtoOptions  []string
 }
 
 func (m *Message) ProtoAttributes() string {
 	var s strings.Builder
-	for i, name := range m.AttrNames {
-		s.WriteString(fmt.Sprintf("    %s %s = %d;\n", toProtoType(m.AttrTypes[i]), ToSnakeCase(name), i+1))
+	for i, f := range m.Fields {
+		s.WriteString(f.Proto(i + 1))
 	}
 	return s.String()
 }
 
 func (m *Message) adjustType(messages map[string]*Message) {
-	for i, t := range m.AttrTypes {
-		m.AttrTypes[i] = adjustType(t, messages)
+	for _, f := range m.Fields {
+		f.Type = adjustType(f.Type, messages)
+	}
+}
+
+func (m *Message) loadOptions(protoMessage *proto.Message) {
+	if protoMessage.Comment != nil {
+		m.CustomProtoComments = clearLines(protoMessage.Comment.Lines)
+	}
+	for _, e := range protoMessage.Elements {
+		if opt, ok := e.(*proto.Option); ok {
+			m.CustomProtoOptions = append(m.CustomProtoOptions, fmt.Sprintf("    option %s = {", opt.Name))
+			m.CustomProtoOptions = append(m.CustomProtoOptions, printProtoLiteral(opt.Constant.OrderedMap, 2)...)
+			m.CustomProtoOptions = append(m.CustomProtoOptions, "    };")
+		}
+
+		if f, ok := e.(*proto.NormalField); ok {
+			for _, field := range m.Fields {
+				if ToSnakeCase(field.Name) == f.Name {
+					if f.Comment != nil {
+						field.CustomProtoComments = clearLines(f.Comment.Lines)
+					}
+					var hasComplexOption bool
+					for i, opt := range f.Options {
+						var prefix string
+						if i > 0 {
+							prefix = "        "
+						}
+						var suffix string
+						if i+1 < len(f.Options) {
+							suffix = ", "
+						}
+						if opt.Constant.Source != "" {
+							if hasComplexOption {
+								field.CustomProtoOptions = append(field.CustomProtoOptions, fmt.Sprintf("%s%s = %s%s", prefix, opt.Name, opt.Constant.Source, suffix))
+							} else {
+								field.CustomProtoOptions = append(field.CustomProtoOptions, fmt.Sprintf("%s = %s%s", opt.Name, opt.Constant.Source, suffix))
+							}
+							continue
+						}
+						hasComplexOption = true
+						field.CustomProtoOptions = append(field.CustomProtoOptions, fmt.Sprintf("%s%s = {\n", prefix, opt.Name))
+						field.CustomProtoOptions = append(field.CustomProtoOptions, printProtoLiteral(opt.Constant.OrderedMap, 3)...)
+						field.CustomProtoOptions = append(field.CustomProtoOptions, fmt.Sprintf("        }%s", suffix))
+					}
+					break
+				}
+			}
+		}
 	}
 }
 
 func createStructMessage(name string, s *ast.StructType) (*Message, error) {
-	names := make([]string, 0)
-	types := make([]string, 0)
+	fields := make([]*Field, 0)
 	for _, f := range s.Fields.List {
 		if len(f.Names) == 0 || !firstIsUpper(f.Names[0].Name) {
 			continue
@@ -42,13 +91,11 @@ func createStructMessage(name string, s *ast.StructType) (*Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		types = append(types, typ)
-		names = append(names, f.Names[0].Name)
+		fields = append(fields, &Field{Name: f.Names[0].Name, Type: typ})
 	}
 	return &Message{
-		Name:      name,
-		AttrNames: names,
-		AttrTypes: types,
+		Name:   name,
+		Fields: fields,
 	}, nil
 }
 
@@ -106,8 +153,8 @@ func originalAndElementType(typ string) (original, element string) {
 }
 
 func (m *Message) HasComplexAttribute() bool {
-	for _, t := range m.AttrTypes {
-		if customType(t) || strings.HasPrefix(t, "[]") {
+	for _, f := range m.Fields {
+		if customType(f.Type) || strings.HasPrefix(f.Type, "[]") {
 			return true
 		}
 	}
@@ -117,17 +164,17 @@ func (m *Message) HasComplexAttribute() bool {
 
 func (m *Message) AdapterToGo(src, dst string) []string {
 	res := make([]string, 0)
-	for i, attr := range m.AttrNames {
-		attrName := UpperFirstCharacter(attr)
-		res = append(res, bindToGo(src, fmt.Sprintf("%s.%s", dst, attrName), attrName, m.AttrTypes[i], false)...)
+	for _, f := range m.Fields {
+		attrName := UpperFirstCharacter(f.Name)
+		res = append(res, bindToGo(src, fmt.Sprintf("%s.%s", dst, attrName), attrName, f.Type, false)...)
 	}
 	return res
 }
 
 func (m *Message) AdapterToProto(src, dst string) []string {
 	res := make([]string, 0)
-	for i, attr := range m.AttrNames {
-		res = append(res, bindToProto(src, dst, UpperFirstCharacter(attr), m.AttrTypes[i])...)
+	for _, f := range m.Fields {
+		res = append(res, bindToProto(src, dst, UpperFirstCharacter(f.Name), f.Type)...)
 	}
 	return res
 }

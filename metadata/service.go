@@ -6,13 +6,14 @@ import (
 )
 
 type Service struct {
-	Name              string
-	InputNames        []string
-	InputTypes        []string
-	Output            string
-	Sql               string
-	Messages          map[string]*Message
-	CustomHttpOptions []string
+	Name                string
+	InputNames          []string
+	InputTypes          []string
+	Output              string
+	Sql                 string
+	Messages            map[string]*Message
+	CustomProtoComments []string
+	CustomProtoOptions  []string
 }
 
 func (s *Service) ParamsCallDatabase() string {
@@ -33,9 +34,9 @@ func (s *Service) InputGrpc() []string {
 		in := s.InputNames[0]
 		res = append(res, fmt.Sprintf("var %s %s", in, typ))
 		m := s.Messages[canonicalName(typ)]
-		for i, name := range m.AttrNames {
-			attrName := UpperFirstCharacter(name)
-			res = append(res, bindToGo("req", fmt.Sprintf("%s.%s", in, attrName), attrName, m.AttrTypes[i], false)...)
+		for _, f := range m.Fields {
+			attrName := UpperFirstCharacter(f.Name)
+			res = append(res, bindToGo("req", fmt.Sprintf("%s.%s", in, attrName), attrName, f.Type, false)...)
 		}
 	} else {
 		for i, n := range s.InputNames {
@@ -115,14 +116,6 @@ func (s *Service) HasArrayOutput() bool {
 		return false
 	}
 	return strings.HasPrefix(s.Output, "[]") && s.Output != "[]byte"
-}
-
-func (s *Service) ProtoInputs() string {
-	var b strings.Builder
-	for i, name := range s.InputNames {
-		fmt.Fprintf(&b, "\n    %s %s = %d;", toProtoType(s.InputTypes[i]), ToSnakeCase(name), i+1)
-	}
-	return b.String()
 }
 
 func (s *Service) EmptyInput() bool {

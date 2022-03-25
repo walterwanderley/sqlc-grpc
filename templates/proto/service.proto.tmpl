@@ -2,15 +2,11 @@ syntax = "proto3";
 
 package {{.Package | SnakeCase}}.v1;
 
-option go_package = "{{.GoModule}}/api/{{.Package | SnakeCase}}/v1";
-
-import "google/api/annotations.proto";
 {{range .ProtoImports}}{{ .}}
 {{end}}
-import "protoc-gen-openapiv2/options/annotations.proto";
-
-{{if .CustomOpenAPIOptions}}{{range .CustomOpenAPIOptions}}{{ .}}
-{{end}}{{else}}option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+{{if .CustomProtoOptions}}{{range .CustomProtoOptions}}{{ .}}
+{{end}}{{else}}option go_package = "{{.GoModule}}/api/{{.Package | SnakeCase}}/v1";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
         title: "{{.GoModule}}";
         version: "1.0";
@@ -21,24 +17,26 @@ import "protoc-gen-openapiv2/options/annotations.proto";
         };
     };
 };{{end}}
+{{range .CustomServiceProtoComments}}// {{ .}}
+{{end -}}
 service {{.Package | UpperFirst}}Service {
-    {{range .Services}}
+    {{range .CustomServiceProtoOptions}}{{ .}}
+    {{end}}
+    {{- range .Services}}
+    {{range .CustomProtoComments}}// {{ .}}
+    {{end -}}
     rpc {{.Name}}({{.Name}}Request) returns ({{.Name}}Response) {
         {{range .HttpOptions}}{{ .}}
         {{end}}
-    }
-    {{end}}
+    }{{end}}
 }
-{{range .Services}}{{if not .HasCustomParams}}
-message {{.Name}}Request { {{.ProtoInputs}}
-}
-{{end}}
-message {{.Name}}Response {
-{{.ProtoOutputs -}}    
-}
-{{end}}
-{{- range $key, $value := .Messages}}
+
+{{range $key, $value := .Messages}}
+{{range $value.CustomProtoComments}}// {{ .}}
+{{end -}}
 message {{$value.ProtoName}} {
+{{range $value.CustomProtoOptions}}{{ .}}
+{{end -}}
 {{$value.ProtoAttributes -}}
 }
 {{end}}

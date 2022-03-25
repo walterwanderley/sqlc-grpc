@@ -2,14 +2,12 @@ syntax = "proto3";
 
 package books.v1;
 
-option go_package = "booktest/api/books/v1";
-
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
-
 import "protoc-gen-openapiv2/options/annotations.proto";
 
+option go_package = "booktest/api/books/v1";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
         title: "booktest";
@@ -31,7 +29,6 @@ service BooksService {
         };
         
     }
-    
     rpc BooksByTitleYear(BooksByTitleYearRequest) returns (BooksByTitleYearResponse) {
         option (google.api.http) = {
             get: "/books-by-title-year"
@@ -39,7 +36,6 @@ service BooksService {
         };
         
     }
-    
     rpc CreateAuthor(CreateAuthorRequest) returns (CreateAuthorResponse) {
         option (google.api.http) = {
             post: "/author"
@@ -48,7 +44,6 @@ service BooksService {
         };
         
     }
-    
     rpc CreateBook(CreateBookRequest) returns (CreateBookResponse) {
         option (google.api.http) = {
             post: "/book"
@@ -57,14 +52,12 @@ service BooksService {
         };
         
     }
-    
     rpc DeleteBook(DeleteBookRequest) returns (DeleteBookResponse) {
         option (google.api.http) = {
             delete: "/book/{book_id}"
         };
         
     }
-    
     rpc GetAuthor(GetAuthorRequest) returns (GetAuthorResponse) {
         option (google.api.http) = {
             get: "/author/{author_id}"
@@ -72,7 +65,6 @@ service BooksService {
         };
         
     }
-    
     rpc GetBook(GetBookRequest) returns (GetBookResponse) {
         option (google.api.http) = {
             get: "/book/{book_id}"
@@ -80,7 +72,6 @@ service BooksService {
         };
         
     }
-    
     rpc UpdateBook(UpdateBookRequest) returns (UpdateBookResponse) {
         option (google.api.http) = {
             put: "/book"
@@ -88,7 +79,6 @@ service BooksService {
         };
         
     }
-    
     rpc UpdateBookISBN(UpdateBookISBNRequest) returns (UpdateBookISBNResponse) {
         option (google.api.http) = {
             put: "/book-isbn"
@@ -96,61 +86,8 @@ service BooksService {
         };
         
     }
-    
 }
 
-message BooksByTagsRequest { 
-    repeated string dollar_1 = 1;
-}
-
-message BooksByTagsResponse {
-    repeated BooksByTagsRow list = 1;
-}
-
-message BooksByTitleYearResponse {
-    repeated Book list = 1;
-}
-
-message CreateAuthorRequest { 
-    string name = 1;
-}
-
-message CreateAuthorResponse {
-    Author author = 1;
-}
-
-message CreateBookResponse {
-    Book book = 1;
-}
-
-message DeleteBookRequest { 
-    int32 book_id = 1;
-}
-
-message DeleteBookResponse {
-}
-
-message GetAuthorRequest { 
-    int32 author_id = 1;
-}
-
-message GetAuthorResponse {
-    Author author = 1;
-}
-
-message GetBookRequest { 
-    int32 book_id = 1;
-}
-
-message GetBookResponse {
-    Book book = 1;
-}
-
-message UpdateBookResponse {
-}
-
-message UpdateBookISBNResponse {
-}
 
 message Author {
     int32 author_id = 1;
@@ -171,6 +108,14 @@ message Book {
 message BookType {
 }
 
+message BooksByTagsRequest {
+    repeated string dollar_1 = 1;
+}
+
+message BooksByTagsResponse {
+    repeated BooksByTagsRow list = 1;
+}
+
 message BooksByTagsRow {
     int32 book_id = 1;
     string title = 2;
@@ -184,6 +129,18 @@ message BooksByTitleYearRequest {
     int32 year = 2;
 }
 
+message BooksByTitleYearResponse {
+    repeated Book list = 1;
+}
+
+message CreateAuthorRequest {
+    string name = 1;
+}
+
+message CreateAuthorResponse {
+    Author author = 1;
+}
+
 message CreateBookRequest {
     int32 author_id = 1;
     string isbn = 2;
@@ -194,6 +151,33 @@ message CreateBookRequest {
     repeated string tags = 7;
 }
 
+message CreateBookResponse {
+    Book book = 1;
+}
+
+message DeleteBookRequest {
+    int32 book_id = 1;
+}
+
+message DeleteBookResponse {
+}
+
+message GetAuthorRequest {
+    int32 author_id = 1;
+}
+
+message GetAuthorResponse {
+    Author author = 1;
+}
+
+message GetBookRequest {
+    int32 book_id = 1;
+}
+
+message GetBookResponse {
+    Book book = 1;
+}
+
 message UpdateBookISBNRequest {
     string title = 1;
     repeated string tags = 2;
@@ -201,10 +185,16 @@ message UpdateBookISBNRequest {
     string isbn = 4;
 }
 
+message UpdateBookISBNResponse {
+}
+
 message UpdateBookRequest {
     string title = 1;
     repeated string tags = 2;
     string book_type = 3;
     int32 book_id = 4;
+}
+
+message UpdateBookResponse {
 }
 

@@ -5,9 +5,12 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/emicklei/proto"
 )
 
 type Definition struct {
@@ -34,36 +37,136 @@ type PackageOpts struct {
 }
 
 type Package struct {
-	Engine               string
-	Package              string
-	GoModule             string
-	SchemaPath           string
-	SrcPath              string
-	Services             []*Service
-	Messages             map[string]*Message
-	OutputAdapters       []*Message
-	EmitInterface        bool
-	EmitParamsPointers   bool
-	EmitResultPointers   bool
-	EmitDbArgument       bool
-	CustomOpenAPIOptions []string
+	Engine                     string
+	Package                    string
+	GoModule                   string
+	SchemaPath                 string
+	SrcPath                    string
+	Services                   []*Service
+	Messages                   map[string]*Message
+	OutputAdapters             []*Message
+	EmitInterface              bool
+	EmitParamsPointers         bool
+	EmitResultPointers         bool
+	EmitDbArgument             bool
+	CustomProtoOptions         []string
+	CustomProtoImports         []string
+	CustomServiceProtoComments []string
+	CustomServiceProtoOptions  []string
 }
 
 func (p *Package) ProtoImports() []string {
 	r := make([]string, 0)
+	r = append(r, `import "google/api/annotations.proto";`)
 	if p.importTimestamp() {
 		r = append(r, `import "google/protobuf/timestamp.proto";`)
 	}
 	if p.importWrappers() {
 		r = append(r, `import "google/protobuf/wrappers.proto";`)
 	}
+	r = append(r, `import "protoc-gen-openapiv2/options/annotations.proto";`)
+	imports := strings.Join(r, " ")
+	for _, i := range p.CustomProtoImports {
+		if !strings.Contains(imports, i) {
+			r = append(r, fmt.Sprintf("import \"%s\";", i))
+		}
+	}
 	return r
+}
+
+func (p *Package) LoadOptions(protoFile string) {
+	f, err := os.Open(protoFile)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer f.Close()
+	parser := proto.NewParser(f)
+	def, err := parser.Parse()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	proto.Walk(def, proto.WithImport(func(i *proto.Import) {
+		p.CustomProtoImports = append(p.CustomProtoImports, i.Filename)
+	}))
+
+	proto.Walk(def, proto.WithOption(func(opt *proto.Option) {
+		if _, ok := opt.Parent.(*proto.Proto); ok {
+			if opt.Constant.Source != "" {
+				p.CustomProtoOptions = append(p.CustomProtoOptions, fmt.Sprintf("option %s = \"%s\";", opt.Name, opt.Constant.Source))
+			} else {
+				p.CustomProtoOptions = append(p.CustomProtoOptions, fmt.Sprintf("option %s = {", opt.Name))
+				p.CustomProtoOptions = append(p.CustomProtoOptions, printProtoLiteral(opt.Constant.OrderedMap, 1)...)
+				p.CustomProtoOptions = append(p.CustomProtoOptions, "};")
+			}
+		}
+	}))
+
+	proto.Walk(def, proto.WithService(func(s *proto.Service) {
+		if s.Name != UpperFirstCharacter(p.Package)+"Service" {
+			return
+		}
+		if s.Comment != nil {
+			p.CustomServiceProtoComments = clearLines(s.Comment.Lines)
+		}
+		for _, e := range s.Elements {
+			opt, ok := e.(*proto.Option)
+			if !ok {
+				continue
+			}
+			p.CustomServiceProtoOptions = append(p.CustomServiceProtoOptions, fmt.Sprintf("option %s = {", opt.Name))
+			p.CustomServiceProtoOptions = append(p.CustomServiceProtoOptions, printProtoLiteral(opt.Constant.OrderedMap, 1)...)
+			p.CustomServiceProtoOptions = append(p.CustomServiceProtoOptions, "};")
+		}
+
+	}))
+
+	proto.Walk(def, proto.WithRPC(func(rpc *proto.RPC) {
+		res := make([]string, 0)
+
+		for _, e := range rpc.Elements {
+			opt, ok := e.(*proto.Option)
+			if !ok {
+				continue
+			}
+			res = append(res, fmt.Sprintf("option %s = {", opt.Name))
+			res = append(res, printProtoLiteral(opt.Constant.OrderedMap, 1)...)
+			res = append(res, "};")
+		}
+
+		for _, s := range p.Services {
+			if s.Name == rpc.Name {
+				s.CustomProtoOptions = res
+				if rpc.Comment != nil {
+					s.CustomProtoComments = clearLines(rpc.Comment.Lines)
+				}
+				break
+			}
+		}
+	}))
+
+	proto.Walk(def, proto.WithMessage(func(protoMessage *proto.Message) {
+		msg, ok := p.Messages[protoMessage.Name]
+		if !ok {
+			if strings.HasSuffix(protoMessage.Name, "Request") {
+				msg, ok = p.Messages[protoMessage.Name[0:len(protoMessage.Name)-7]+"Params"]
+				if !ok {
+					return
+				}
+			} else {
+				return
+			}
+		}
+		msg.loadOptions(protoMessage)
+	}))
 }
 
 func (p *Package) importTimestamp() bool {
 	for _, m := range p.Messages {
-		for _, typ := range m.AttrTypes {
-			if typ == "time.Time" || typ == "sql.NullTime" {
+		for _, f := range m.Fields {
+			if f.Type == "time.Time" || f.Type == "sql.NullTime" {
 				return true
 			}
 		}
@@ -85,8 +188,8 @@ func (p *Package) importTimestamp() bool {
 
 func (p *Package) importWrappers() bool {
 	for _, m := range p.Messages {
-		for _, typ := range m.AttrTypes {
-			if strings.HasPrefix(typ, "sql.Null") && typ != "sql.NullTime" {
+		for _, f := range m.Fields {
+			if strings.HasPrefix(f.Type, "sql.Null") && f.Type != "sql.NullTime" {
 				return true
 			}
 		}
@@ -218,4 +321,39 @@ func addConstant(constants map[string]string, name string, obj *ast.Object) {
 		}
 	}
 
+}
+
+func printProtoLiteral(literal proto.LiteralMap, deep int) []string {
+	res := make([]string, 0)
+	layout := fmt.Sprintf("%%-%ds", deep*4)
+	prefix := fmt.Sprintf(layout, "")
+	for _, item := range literal {
+		if item.IsString {
+			res = append(res, fmt.Sprintf("%s%s: \"%s\"", prefix, item.Name, item.Source))
+		} else {
+			if len(item.Array) > 0 {
+				items := make([]string, 0)
+				for _, i := range item.Array {
+					items = append(items, fmt.Sprintf(`"%s"`, i.Source))
+				}
+				res = append(res, fmt.Sprintf("%s%s: [%s]", prefix, item.Name, strings.Join(items, ", ")))
+			} else {
+				res = append(res, fmt.Sprintf("%s%s: {", prefix, item.Name))
+				res = append(res, printProtoLiteral(item.OrderedMap, deep+1)...)
+				res = append(res, fmt.Sprintf("%s};", prefix))
+			}
+		}
+	}
+	return res
+}
+
+func clearLines(lines []string) []string {
+	res := make([]string, 0)
+	for _, l := range lines {
+		line := strings.TrimSpace(l)
+		if len(line) > 0 {
+			res = append(res, line)
+		}
+	}
+	return res
 }

@@ -137,7 +137,7 @@ func moduleFromGoMod() string {
 func postProcess(def *metadata.Definition, workingDirectory string) {
 	fmt.Printf("Configuring project %s...\n", def.GoModule)
 	execCommand("go mod init " + def.GoModule)
-	execCommand("go mod tidy")
+	execCommand("go mod tidy -go=1.16")
 	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway " +
 		"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 " +
 		"google.golang.org/protobuf/cmd/protoc-gen-go " +
@@ -152,7 +152,7 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 		panic(err)
 	}
 	execCommand("buf generate")
-	execCommand("go mod tidy")
+	execCommand("go mod tidy -go=1.16")
 	fmt.Println("Finished!")
 }
 

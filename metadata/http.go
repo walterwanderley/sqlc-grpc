@@ -67,8 +67,8 @@ func (s *Service) HttpResponseBody() string {
 }
 
 func (s *Service) HttpOptions() []string {
-	if len(s.CustomHttpOptions) > 0 {
-		return s.CustomHttpOptions
+	if len(s.CustomProtoOptions) > 0 {
+		return s.CustomProtoOptions
 	}
 	res := make([]string, 0)
 	res = append(res, "option (google.api.http) = {")

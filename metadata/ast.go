@@ -38,16 +38,49 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 		if err != nil {
 			return
 		}
-
 	}
-	def.Services = append(def.Services, &Service{
+	service := Service{
 		Name:       fun.Name.String(),
 		InputNames: inputNames,
 		InputTypes: inputTypes,
 		Output:     output,
 		Sql:        constants[fun.Name.String()],
 		Messages:   def.Messages,
-	})
+	}
+	def.Services = append(def.Services, &service)
+
+	if !service.HasCustomParams() {
+		reqMessageName := fun.Name.String() + "Params"
+		if _, ok := def.Messages[reqMessageName]; !ok {
+			fields := make([]*Field, 0)
+			for i, name := range service.InputNames {
+				fields = append(fields, &Field{Name: name, Type: service.InputTypes[i]})
+			}
+			def.Messages[reqMessageName] = &Message{
+				Name:   reqMessageName,
+				Fields: fields,
+			}
+		}
+	}
+
+	resMessageName := fun.Name.String() + "Response"
+	if _, ok := def.Messages[resMessageName]; !ok {
+		fields := make([]*Field, 0)
+		if !service.EmptyOutput() {
+
+			name := "value"
+			if service.HasArrayOutput() {
+				name = "list"
+			} else if service.HasCustomOutput() {
+				name = ToSnakeCase(canonicalName(service.Output))
+			}
+			fields = append(fields, &Field{Name: name, Type: toProtoType(service.Output)})
+		}
+		def.Messages[resMessageName] = &Message{
+			Name:   resMessageName,
+			Fields: fields,
+		}
+	}
 }
 
 func isMethodValid(fun *ast.FuncDecl) bool {

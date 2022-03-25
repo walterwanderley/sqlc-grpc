@@ -260,7 +260,7 @@
         },
         "parameters": [
           {
-            "name": "body",
+            "name": "dollar1",
             "in": "body",
             "required": true,
             "schema": {
