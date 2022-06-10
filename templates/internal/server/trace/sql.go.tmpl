@@ -37,7 +37,7 @@ func (in *sqlInterceptor) ConnExecContext(ctx context.Context, conn driver.Exece
 	return result, err
 }
 
-func (in *sqlInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (driver.Rows, error) {
+func (in *sqlInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (context.Context, driver.Rows, error) {
 	ctx, span := otel.Tracer("").Start(ctx, "DB.ConnQueryContext")
 	defer span.End()
 	span.SetAttributes(attribute.String("query", query), attribute.String("query.args", printArgs(args)))
@@ -47,7 +47,7 @@ func (in *sqlInterceptor) ConnQueryContext(ctx context.Context, conn driver.Quer
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 	}
-	return rows, err
+	return ctx, rows, err
 }
 
 func printArgs(args []driver.NamedValue) string {
