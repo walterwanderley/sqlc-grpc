@@ -12,13 +12,11 @@ plugins:
     out: api
     opt:
       - paths=source_relative
-      - allow_repeated_fields_in_body=true
       - generate_unbound_methods=true
       - logtostderr=true
   - name: openapiv2
     out: api
     opt:
-      - allow_repeated_fields_in_body=true
       - generate_unbound_methods=true
       - logtostderr=true
       - allow_merge=true
