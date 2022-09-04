@@ -178,6 +178,11 @@ message GetBookResponse {
     Book book = 1;
 }
 
+message NullBookType {
+    string book_type = 1;
+    bool valid = 2;
+}
+
 message UpdateBookISBNRequest {
     string title = 1;
     repeated string tags = 2;
