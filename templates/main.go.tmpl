@@ -18,7 +18,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	// database driver
-	_ {{if eq .Database "mysql"}}"github.com/go-sql-driver/mysql"{{else}}"github.com/jackc/pgx/v4/stdlib"{{end}}
+	_ {{if eq .Database "mysql"}}"github.com/go-sql-driver/mysql"{{else if eq .Database "sqlite"}}"github.com/mattn/go-sqlite3"{{else}}"github.com/jackc/pgx/v4/stdlib"{{end}}
 
 	{{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
 	{{end}}	"{{ .GoModule}}/internal/server"
@@ -67,10 +67,11 @@ func run(cfg server.Config, log *zap.Logger) error {
 	}
 	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
 
-	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else}}pgx{{end}}", dbURL)
+	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL)
 	if err != nil {
 		return err
 	}
+	{{if eq .Database "sqlite"}}db.SetMaxOpenConns(1){{end}}
 
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
