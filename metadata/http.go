@@ -24,7 +24,7 @@ func (s *Service) HttpMethod() string {
 
 func trimHeaderComments(s string) string {
 	s = strings.TrimSpace(s)
-	if !strings.HasPrefix(s, "--") {
+	if !strings.HasPrefix(s, "--") && !strings.HasPrefix(s, "/*") {
 		return s
 	}
 	i := strings.Index(s, "\n")

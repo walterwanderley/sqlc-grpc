@@ -65,6 +65,10 @@ func (s *Service) OutputGrpc() []string {
 	if s.EmptyOutput() {
 		res = append(res, fmt.Sprintf("return &pb.%sResponse{}, nil", s.Name))
 	} else {
+		if s.Output == "sql.Result" {
+			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: toExecResult(result)}, nil", s.Name))
+			return res
+		}
 		res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result}, nil", s.Name))
 	}
 

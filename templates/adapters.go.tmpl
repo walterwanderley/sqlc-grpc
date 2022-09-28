@@ -26,3 +26,13 @@ func to{{.Name}}(in {{if $emitResultPointers}}*{{end}}{{.Name}}) *pb.{{.Name}} {
     {{end }}return out
 }
 {{end}}
+{{if .HasExecResult}}
+func toExecResult(in sql.Result) *pb.ExecResult {
+	lastInsertId, _ := in.LastInsertId()
+	rowsAffected, _ := in.RowsAffected()
+	return &pb.ExecResult{
+		LastInsertId: lastInsertId,
+		RowsAffected: rowsAffected,
+	}
+}
+{{end}}

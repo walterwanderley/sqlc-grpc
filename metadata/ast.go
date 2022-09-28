@@ -67,6 +67,9 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	if _, ok := def.Messages[resMessageName]; !ok {
 		fields := make([]*Field, 0)
 		if !service.EmptyOutput() {
+			if service.Output == "sql.Result" {
+				def.HasExecResult = true
+			}
 
 			name := "value"
 			if service.HasArrayOutput() {

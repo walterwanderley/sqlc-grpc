@@ -53,6 +53,7 @@ type Package struct {
 	CustomProtoImports         []string
 	CustomServiceProtoComments []string
 	CustomServiceProtoOptions  []string
+	HasExecResult              bool
 }
 
 func (p *Package) ProtoImports() []string {
