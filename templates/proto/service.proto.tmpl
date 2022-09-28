@@ -40,3 +40,9 @@ message {{$value.ProtoName}} {
 {{$value.ProtoAttributes -}}
 }
 {{end}}
+{{if .HasExecResult}}
+message ExecResult {
+    int64 rowsAffected = 1;
+    int64 lastInsertId = 2;
+}
+{{end}}

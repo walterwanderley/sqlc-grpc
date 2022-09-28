@@ -1,0 +1,14 @@
+version: "1"
+packages:
+  - path: "internal/authors"
+    queries: "./sql/queries.sql"
+    schema: "./sql/schema.sql"
+    engine: "sqlite"
+    emit_interface: false
+    emit_exact_table_names: false
+    emit_empty_slices: false
+    emit_exported_queries: false
+    emit_json_tags: false
+    emit_result_struct_pointers: false
+    emit_params_struct_pointers: false
+    emit_methods_with_db_argument: false
