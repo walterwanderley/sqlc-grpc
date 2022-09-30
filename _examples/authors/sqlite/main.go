@@ -24,7 +24,7 @@ import (
 	"authors/internal/server/trace"
 )
 
-//go:generate sqlc-grpc -m authors -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -append
 
 const serviceName = "authors"
 
@@ -71,6 +71,9 @@ func run(cfg server.Config, log *zap.Logger) error {
 		return err
 	}
 	db.SetMaxOpenConns(1)
+	if err := ensureSchema(db); err != nil {
+		log.Fatal("migration error", zap.Error(err))
+	}
 
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)

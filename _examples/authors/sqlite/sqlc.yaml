@@ -2,7 +2,7 @@ version: "1"
 packages:
   - path: "internal/authors"
     queries: "./sql/queries.sql"
-    schema: "./sql/schema.sql"
+    schema: "./sql/migrations"
     engine: "sqlite"
     emit_interface: false
     emit_exact_table_names: false
