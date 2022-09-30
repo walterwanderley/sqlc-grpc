@@ -126,6 +126,10 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 			return nil
 		}
 
+		if strings.HasSuffix(newPath, "migration.go") && def.MigrationPath == "" {
+			return nil
+		}
+
 		if strings.HasSuffix(path, ".tmpl") {
 			tpl, err := ioutil.ReadAll(in)
 			if err != nil {

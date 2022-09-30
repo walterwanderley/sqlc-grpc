@@ -19,6 +19,7 @@ import (
 var (
 	module        string
 	ignoreQueries string
+	migrationPath string
 	appendMode    bool
 	showVersion   bool
 	help          bool
@@ -30,6 +31,7 @@ func main() {
 	flag.BoolVar(&appendMode, "append", false, "Enable append mode. Don't rewrite editable files")
 	flag.StringVar(&module, "m", "my-project", "Go module name if there are no go.mod")
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
+	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
 	flag.Parse()
 
 	if help {
@@ -41,6 +43,16 @@ func main() {
 	if showVersion {
 		fmt.Println(version)
 		return
+	}
+
+	if migrationPath != "" {
+		fi, err := os.Stat(migrationPath)
+		if err != nil {
+			log.Fatal("invalid -migration-path: ", err.Error())
+		}
+		if !fi.IsDir() {
+			log.Fatal("-migration-path must be a directory")
+		}
 	}
 
 	cfg, err := readConfig()
@@ -72,9 +84,10 @@ func main() {
 	}
 
 	def := metadata.Definition{
-		Args:     args,
-		GoModule: module,
-		Packages: make([]*metadata.Package, 0),
+		Args:          args,
+		GoModule:      module,
+		MigrationPath: migrationPath,
+		Packages:      make([]*metadata.Package, 0),
 	}
 
 	for _, p := range cfg.Packages {

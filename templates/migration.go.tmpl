@@ -1,0 +1,36 @@
+package main
+
+import (
+	"database/sql"
+	"embed"
+	"fmt"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/{{.Database}}"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+)
+
+//go:embed {{.MigrationPath}}
+var migrations embed.FS
+
+const schemaVersion = 1
+
+func ensureSchema(db *sql.DB) error {
+	source, err := iofs.New(migrations, "{{.MigrationPath}}")
+	if err != nil {
+		return err
+	}
+	target, err := sqlite.WithInstance(db, new({{.Database}}.Config))
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithInstance("iofs", source, "{{.Database}}", target)
+	if err != nil {
+		return err
+	}
+	err = m.Migrate(schemaVersion)
+	if err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+	return source.Close()
+}
