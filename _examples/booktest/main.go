@@ -49,6 +49,7 @@ func main() {
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&cfg.EnableGrpcUI, "grpcui", false, "Serve gRPC Web UI")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
+
 	flag.Parse()
 
 	log := logger(dev)
@@ -70,7 +71,6 @@ func run(cfg server.Config, log *zap.Logger) error {
 	if err != nil {
 		return err
 	}
-
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
 		if err != nil {

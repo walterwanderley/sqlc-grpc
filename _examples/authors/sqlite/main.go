@@ -29,7 +29,8 @@ import (
 const serviceName = "authors"
 
 var (
-	dbURL string
+	dbURL          string
+	replicationURL string
 
 	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
@@ -49,6 +50,7 @@ func main() {
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&cfg.EnableGrpcUI, "grpcui", false, "Serve gRPC Web UI")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
+	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
 	flag.Parse()
 
 	log := logger(dev)
@@ -70,11 +72,6 @@ func run(cfg server.Config, log *zap.Logger) error {
 	if err != nil {
 		return err
 	}
-	db.SetMaxOpenConns(1)
-	if err := ensureSchema(db); err != nil {
-		log.Fatal("migration error", zap.Error(err))
-	}
-
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
 		if err != nil {
@@ -87,7 +84,18 @@ func run(cfg server.Config, log *zap.Logger) error {
 			return err
 		}
 	}
-
+	db.SetMaxOpenConns(1)
+	if replicationURL != "" {
+		log.Info("replication", zap.String("url", replicationURL))
+		lsdb, err := replicate(context.Background(), dbURL, replicationURL)
+		if err != nil {
+			log.Fatal("init replication error", zap.Error(err))
+		}
+		defer lsdb.SoftClose()
+	}
+	if err := ensureSchema(db); err != nil {
+		log.Fatal("migration error", zap.Error(err))
+	}
 	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), openAPISpec)
 
 	done := make(chan os.Signal, 1)

@@ -1,0 +1,62 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"    
+    environment:
+      - "AWS_ACCESS_KEY_ID=minio"
+      - "AWS_SECRET_ACCESS_KEY=minio123"
+      - "LITESTREAM_ENDPOINT=minio:9000"
+      - "LITESTREAM_FORCE_PATH_STYLE=true"
+      - "LITESTREAM_SCHEME=http"
+    volumes:
+      - .:/app
+    depends_on:
+      - minio
+      - jaeger
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus
+    command: --config.file=/etc/config/prometheus.yml        
+    volumes:
+      - ./configs/prometheus.yml:/etc/config/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources/
+      - ./configs/grafana/dashboards:/etc/grafana/provisioning/dashboards/
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    ports:
+      - "16686:16686"
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      - "MINIO_ROOT_USER=minio"
+      - "MINIO_ROOT_PASSWORD=minio123"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minio minio123;
+      /usr/bin/mc rm -r --force myminio/somebucketname;
+      /usr/bin/mc mb myminio/somebucketname;
+      /usr/bin/mc policy set public myminio/somebucketname;
+      exit 0;
+      "

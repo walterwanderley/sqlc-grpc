@@ -3,6 +3,7 @@ module authors
 go 1.16
 
 require (
+	github.com/benbjohnson/litestream v0.3.9
 	github.com/bufbuild/buf v1.8.0
 	github.com/flowchartsman/swaggerui v0.0.0-20210303154956-0e71c297862e
 	github.com/fullstorydev/grpcui v1.3.1
