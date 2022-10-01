@@ -1,12 +1,15 @@
 package main
-
+{{$migrateDriver := .Database}}
+{{- if eq $migrateDriver "postgresql" -}}
+{{- $migrateDriver = "postgres" -}}
+{{- end -}}
 import (
 	"database/sql"
 	"embed"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/{{.Database}}"
+	"github.com/golang-migrate/migrate/v4/database/{{$migrateDriver}}"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
@@ -20,7 +23,7 @@ func ensureSchema(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	target, err := sqlite.WithInstance(db, new({{.Database}}.Config))
+	target, err := {{$migrateDriver}}.WithInstance(db, new({{$migrateDriver}}.Config))
 	if err != nil {
 		return err
 	}
