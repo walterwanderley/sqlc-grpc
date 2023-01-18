@@ -8,11 +8,15 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"syscall"
+	"time"
 
+	"github.com/flowchartsman/swaggerui"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -21,16 +25,23 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"authors/internal/server"
+	"authors/internal/server/litefs"
+	"authors/internal/server/litestream"
 	"authors/internal/server/trace"
 )
 
-//go:generate sqlc-grpc -m authors -migration-path sql/migrations -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -litefs -append
 
-const serviceName = "authors"
+const (
+	serviceName    = "authors"
+	forwardTimeout = 10 * time.Second
+)
 
 var (
 	dbURL          string
 	replicationURL string
+	litefsConfig   litefs.Config
+	liteFS         *litefs.LiteFS
 
 	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
@@ -45,13 +56,13 @@ func main() {
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
 	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
-	flag.StringVar(&cfg.Cert, "cert", "", "The path to the server certificate file in PEM format")
-	flag.StringVar(&cfg.Key, "key", "", "The path to the server private key in PEM format")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
-	flag.BoolVar(&cfg.EnableGrpcUI, "grpcui", false, "Serve gRPC Web UI")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
+	litefs.SetFlags(&litefsConfig)
 	flag.Parse()
+
+	dbURL = filepath.Join(litefsConfig.MountDir, dbURL)
 
 	log := logger(dev)
 	defer log.Sync()
@@ -68,10 +79,29 @@ func run(cfg server.Config, log *zap.Logger) error {
 	}
 	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
 
+	if litefsConfig.MountDir != "" {
+		err := litefsConfig.Validate()
+		if err != nil {
+			log.Fatal("liteFS parameters validation error", zap.Error(err))
+		}
+
+		liteFS, err = litefs.Start(log, litefsConfig)
+		if err != nil {
+			log.Fatal("cannot start LiteFS", zap.Error(err))
+		}
+		defer liteFS.Close()
+
+		cfg.Middlewares = append(cfg.Middlewares, liteFS.ForwardToLeader(forwardTimeout, "POST", "PUT", "DELETE"))
+
+		<-liteFS.ReadyCh()
+		log.Info("LiteFS cluster is ready")
+	}
+
 	db, err := sql.Open("sqlite3", dbURL)
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
 		if err != nil {
@@ -84,26 +114,27 @@ func run(cfg server.Config, log *zap.Logger) error {
 			return err
 		}
 	}
-	db.SetMaxOpenConns(1)
 	if replicationURL != "" {
-		log.Info("replication", zap.String("url", replicationURL))
-		lsdb, err := replicate(context.Background(), dbURL, replicationURL)
+		log.Info("litestream replication", zap.String("url", replicationURL))
+		lsdb, err := litestream.Replicate(context.Background(), dbURL, replicationURL)
 		if err != nil {
 			log.Fatal("init replication error", zap.Error(err))
 		}
 		defer lsdb.SoftClose()
 	}
 	if err := ensureSchema(db); err != nil {
-		log.Fatal("migration error", zap.Error(err))
+		log.Error("migration error", zap.Error(err))
 	}
-	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), openAPISpec)
+	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-done
 		log.Warn("signal detected...", zap.Any("signal", sig))
-		srv.Shutdown()
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		srv.Shutdown(ctx)
 	}()
 	return srv.ListenAndServe()
 }
@@ -129,4 +160,15 @@ func logger(dev bool) *zap.Logger {
 		os.Exit(1)
 	}
 	return log
+}
+
+func httpHandlers(mux *http.ServeMux) {
+	mux.HandleFunc("/liveness", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
+
+	if liteFS != nil {
+		mux.HandleFunc("/nodes/", liteFS.ForwardToLeaderFunc(liteFS.ClusterHandler, forwardTimeout, "POST", "DELETE"))
+	}
 }

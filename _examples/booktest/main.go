@@ -8,11 +8,14 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
 
+	"github.com/flowchartsman/swaggerui"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -44,10 +47,7 @@ func main() {
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
 	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
-	flag.StringVar(&cfg.Cert, "cert", "", "The path to the server certificate file in PEM format")
-	flag.StringVar(&cfg.Key, "key", "", "The path to the server private key in PEM format")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
-	flag.BoolVar(&cfg.EnableGrpcUI, "grpcui", false, "Serve gRPC Web UI")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 
 	flag.Parse()
@@ -71,6 +71,7 @@ func run(cfg server.Config, log *zap.Logger) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
 		if err != nil {
@@ -84,14 +85,16 @@ func run(cfg server.Config, log *zap.Logger) error {
 		}
 	}
 
-	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), openAPISpec)
+	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-done
 		log.Warn("signal detected...", zap.Any("signal", sig))
-		srv.Shutdown()
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		srv.Shutdown(ctx)
 	}()
 	return srv.ListenAndServe()
 }
@@ -117,4 +120,12 @@ func logger(dev bool) *zap.Logger {
 		os.Exit(1)
 	}
 	return log
+}
+
+func httpHandlers(mux *http.ServeMux) {
+	mux.HandleFunc("/liveness", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
+
 }

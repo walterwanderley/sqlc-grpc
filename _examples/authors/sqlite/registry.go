@@ -20,10 +20,10 @@ func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
 	}
 }
 
-func registerHandlers() []server.RegisterHandler {
-	var handlers []server.RegisterHandler
+func registerHandlers() []server.RegisterHandlerFromEndpoint {
+	var handlers []server.RegisterHandlerFromEndpoint
 
-	handlers = append(handlers, pb_authors.RegisterAuthorsServiceHandler)
+	handlers = append(handlers, pb_authors.RegisterAuthorsServiceHandlerFromEndpoint)
 
 	return handlers
 }
