@@ -89,9 +89,9 @@ go run . -db [Database Connection URL] -dev
 
 - Swagger UI [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
-### Example SQLite with LiteFS
+### SQLite with LiteFS
 
-Use the **-litefs** command line parameter to add suport to [LiteFS](https://github.com/superfly/litefs).
+Use the **-litefs** command line parameter to replicate SQLite with [LiteFS](https://github.com/superfly/litefs) as a library.
 Example: [https://github.com/walterwanderley/sqlc-grpc/tree/main/_examples/authors/sqlite](https://github.com/walterwanderley/sqlc-grpc/tree/main/_examples/authors/sqlite)
 
 ### Editing the generated code
