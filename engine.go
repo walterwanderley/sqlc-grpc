@@ -8,7 +8,6 @@ import (
 	"go/format"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,6 +33,13 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		newPath = strings.TrimSuffix(newPath, ".tmpl")
 
 		if d.IsDir() {
+			if strings.HasSuffix(newPath, "litestream") && def.Database() != "sqlite" {
+				return nil
+			}
+
+			if strings.HasSuffix(newPath, "litefs") && !(def.Database() == "sqlite" && def.LiteFS) {
+				return nil
+			}
 			if _, err := os.Stat(newPath); os.IsNotExist(err) {
 				err := os.MkdirAll(newPath, 0750)
 				if err != nil {
@@ -53,7 +59,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 
 		if strings.HasSuffix(newPath, "service.proto") {
 			dir := strings.TrimSuffix(newPath, "service.proto")
-			tpl, err := ioutil.ReadAll(in)
+			tpl, err := io.ReadAll(in)
 			if err != nil {
 				return err
 			}
@@ -79,7 +85,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		}
 
 		if strings.HasSuffix(newPath, "service.go") {
-			tpl, err := ioutil.ReadAll(in)
+			tpl, err := io.ReadAll(in)
 			if err != nil {
 				return err
 			}
@@ -93,7 +99,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		}
 
 		if strings.HasSuffix(newPath, "service.factory.go") {
-			tpl, err := ioutil.ReadAll(in)
+			tpl, err := io.ReadAll(in)
 			if err != nil {
 				return err
 			}
@@ -111,7 +117,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		}
 
 		if strings.HasSuffix(newPath, "adapters.go") {
-			tpl, err := ioutil.ReadAll(in)
+			tpl, err := io.ReadAll(in)
 			if err != nil {
 				return err
 			}
@@ -130,12 +136,16 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 			return nil
 		}
 
-		if strings.HasSuffix(newPath, "replication.go") && def.Database() != "sqlite" {
+		if strings.HasSuffix(newPath, "litestream.go") && def.Database() != "sqlite" {
+			return nil
+		}
+
+		if (strings.HasSuffix(newPath, "litefs.go") || strings.HasSuffix(newPath, "forward.go")) && !(def.Database() == "sqlite" && def.LiteFS) {
 			return nil
 		}
 
 		if strings.HasSuffix(path, ".tmpl") {
-			tpl, err := ioutil.ReadAll(in)
+			tpl, err := io.ReadAll(in)
 			if err != nil {
 				return err
 			}

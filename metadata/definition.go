@@ -18,6 +18,7 @@ type Definition struct {
 	GoModule      string
 	Packages      []*Package
 	MigrationPath string
+	LiteFS        bool
 }
 
 func (d *Definition) Database() string {

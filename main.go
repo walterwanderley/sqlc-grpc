@@ -20,6 +20,7 @@ var (
 	module        string
 	ignoreQueries string
 	migrationPath string
+	liteFS        bool
 	appendMode    bool
 	showVersion   bool
 	help          bool
@@ -32,6 +33,7 @@ func main() {
 	flag.StringVar(&module, "m", "my-project", "Go module name if there are no go.mod")
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
+	flag.BoolVar(&liteFS, "litefs", false, "Enable support to LiteFS")
 	flag.Parse()
 
 	if help {
@@ -88,6 +90,7 @@ func main() {
 		GoModule:      module,
 		MigrationPath: migrationPath,
 		Packages:      make([]*metadata.Package, 0),
+		LiteFS:        liteFS,
 	}
 
 	for _, p := range cfg.Packages {

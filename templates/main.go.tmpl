@@ -12,7 +12,9 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
 
+	"github.com/flowchartsman/swaggerui"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -22,16 +24,24 @@ import (
 
 	{{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
 	{{end}}	"{{ .GoModule}}/internal/server"
+	"{{ .GoModule}}/internal/server/litefs"
+	"{{ .GoModule}}/internal/server/litestream"
 	"{{ .GoModule}}/internal/server/trace"
 )
 
 //go:generate {{ .Args}}
-
+{{if .LiteFS}}
+const (
+	serviceName    = "{{ .GoModule}}"
+	forwardTimeout = 10 * time.Second
+){{else}}
 const serviceName = "{{ .GoModule}}"
-
+{{end}}
 var (
 	dbURL string
 	{{if eq .Database "sqlite"}}replicationURL string{{end}}
+	{{if .LiteFS}}litefsConfig   litefs.Config
+	liteFS         *litefs.LiteFS{{end}}
 
 	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
@@ -46,13 +56,13 @@ func main() {
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
 	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
-	flag.StringVar(&cfg.Cert, "cert", "", "The path to the server certificate file in PEM format")
-	flag.StringVar(&cfg.Key, "key", "", "The path to the server private key in PEM format")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
-	flag.BoolVar(&cfg.EnableGrpcUI, "grpcui", false, "Serve gRPC Web UI")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	{{if eq .Database "sqlite"}}flag.StringVar(&replicationURL, "replication", "", "S3 replication URL"){{end}}
+	{{if .LiteFS}}litefs.SetFlags(&litefsConfig){{end}}
 	flag.Parse()
+
+	{{if .LiteFS}}dbURL = filepath.Join(litefsConfig.MountDir, dbURL){{end}}
 
 	log := logger(dev)
 	defer log.Sync()
@@ -69,10 +79,31 @@ func run(cfg server.Config, log *zap.Logger) error {
 	}
 	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
 
+	{{if .LiteFS}}
+	if litefsConfig.MountDir != "" {
+		err := litefsConfig.Validate()
+		if err != nil {
+			log.Fatal("liteFS parameters validation error", zap.Error(err))
+		}
+
+		liteFS, err = litefs.Start(log, litefsConfig)
+		if err != nil {
+			log.Fatal("cannot start LiteFS", zap.Error(err))
+		}
+		defer liteFS.Close()
+
+		cfg.Middlewares = append(cfg.Middlewares, liteFS.ForwardToLeader(forwardTimeout, "POST", "PUT", "DELETE"))
+
+		<-liteFS.ReadyCh()
+		log.Info("LiteFS cluster is ready")
+	}
+	{{end}}
+
 	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL)
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 	if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
 		if err != nil {
@@ -85,23 +116,24 @@ func run(cfg server.Config, log *zap.Logger) error {
 			return err
 		}
 	}
-	{{if eq .Database "sqlite"}}db.SetMaxOpenConns(1)
-	if replicationURL != "" {
-		log.Info("replication", zap.String("url", replicationURL))
-		lsdb, err := replicate(context.Background(), dbURL, replicationURL)
+	{{if eq .Database "sqlite"}}if replicationURL != "" {
+		log.Info("litestream replication", zap.String("url", replicationURL))
+		lsdb, err := litestream.Replicate(context.Background(), dbURL, replicationURL)
 		if err != nil { log.Fatal("init replication error", zap.Error(err)) }
 		defer lsdb.SoftClose()
 	}
 	{{end -}}
-	{{if .MigrationPath}}if err := ensureSchema(db); err != nil { log.Fatal("migration error", zap.Error(err)) }{{end}}
-	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), openAPISpec)
+	{{if .MigrationPath}}if err := ensureSchema(db); err != nil { log.Error("migration error", zap.Error(err)) }{{end}}
+	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-done
 		log.Warn("signal detected...", zap.Any("signal", sig))
-		srv.Shutdown()
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		srv.Shutdown(ctx)
 	}()
 	return srv.ListenAndServe()
 }
@@ -127,4 +159,15 @@ func logger(dev bool) *zap.Logger {
 		os.Exit(1)
 	}
 	return log
+}
+
+func httpHandlers(mux *http.ServeMux) {
+	mux.HandleFunc("/liveness", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
+
+	{{if .LiteFS}}if liteFS != nil {
+		mux.HandleFunc("/nodes/", liteFS.ForwardToLeaderFunc(liteFS.ClusterHandler, forwardTimeout, "POST", "DELETE"))
+	}{{end}}
 }

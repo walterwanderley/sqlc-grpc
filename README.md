@@ -82,13 +82,17 @@ sqlc-grpc -m "my/module/path"
 5. Run the generated server
 
 ```sh
-go run . -db [Database Connection URL] -dev -grpcui
+go run . -db [Database Connection URL] -dev
 ```
 
 6. Enjoy!
 
-- gRPC UI [http://localhost:5000/grpcui](http://localhost:5000/grpcui)
 - Swagger UI [http://localhost:5000/swagger](http://localhost:5000/swagger)
+
+### Example SQLite with LiteFS
+
+Use the **-litefs** command line parameter to add suport to [LiteFS](https://github.com/superfly/litefs).
+Example: [https://github.com/walterwanderley/sqlc-grpc/tree/main/_examples/authors/sqlite](https://github.com/walterwanderley/sqlc-grpc/tree/main/_examples/authors/sqlite)
 
 ### Editing the generated code
 
