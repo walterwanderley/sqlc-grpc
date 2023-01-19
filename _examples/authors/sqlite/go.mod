@@ -16,7 +16,7 @@ require (
 	github.com/ngrok/sqlmw v0.0.0-20220520173518-97c9c04efc79
 	github.com/prometheus/client_golang v1.14.0
 	github.com/superfly/litefs v0.3.0
-	github.com/walterwanderley/litefs-raft v0.0.0-20230118230611-170a0ed22d1d
+	github.com/walterwanderley/litefs-raft v0.0.0-20230119012345-fa5a41317732
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.37.0
 	go.opentelemetry.io/otel v1.11.2
 	go.opentelemetry.io/otel/exporters/jaeger v1.11.2
