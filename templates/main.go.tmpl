@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -67,7 +68,7 @@ func main() {
 	log := logger(dev)
 	defer log.Sync()
 
-	if err := run(cfg, log); err != nil && err.Error() != "mux: server closed" {
+	if err := run(cfg, log); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Error("server error", zap.Error(err))
 		os.Exit(1)
 	}
