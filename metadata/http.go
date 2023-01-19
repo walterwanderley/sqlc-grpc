@@ -9,13 +9,13 @@ import (
 func (s *Service) HttpMethod() string {
 	query := trimHeaderComments(strings.ReplaceAll(s.Sql, "`", ""))
 	query = strings.ToUpper(query)
-	if strings.HasPrefix(query, "SELECT ") && s.HasSimpleParams() {
+	if strings.HasPrefix(query, "SELECT") && s.HasSimpleParams() {
 		return "get"
 	}
-	if strings.HasPrefix(query, "DELETE ") && s.HasSimpleParams() {
+	if strings.HasPrefix(query, "DELETE") && s.HasSimpleParams() {
 		return "delete"
 	}
-	if strings.HasPrefix(query, "UPDATE ") {
+	if strings.HasPrefix(query, "UPDATE") {
 		return "put"
 	}
 
