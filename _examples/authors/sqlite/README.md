@@ -20,7 +20,7 @@ go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8081 -litef
 
 - Start instance 3:
 ```sh
-go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8082 -litefs-hostname node1 \
+go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8082 -litefs-hostname node3 \
 -litefs-config-dir /tmp/raft3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
 -litefs-advertise-url http://localhost:20204 -litefs-raft-port 9082 -litefs-raft-addr localhost:9082 \
 -litefs-bootstrap-cluster=false -dev
