@@ -24,11 +24,11 @@ import (
 )
 
 type LiteFS struct {
-	raft       *raft.Raft
-	store      *litefs.Store
-	fileSystem *fuse.FileSystem
-	httpServer *litehttp.Server
-	leaser     *litefsraft.RaftLeaser
+	raft          *raft.Raft
+	store         *litefs.Store
+	fileSystem    *fuse.FileSystem
+	httpServer    *litehttp.Server
+	forwarderInfo ForwarderInfo
 }
 
 func (lfs *LiteFS) ReadyCh() chan struct{} {
@@ -42,6 +42,10 @@ type node struct {
 }
 
 func (lfs *LiteFS) ClusterHandler(w http.ResponseWriter, r *http.Request) {
+	if lfs.raft == nil {
+		http.Error(w, "cluster is running in static mode", http.StatusInternalServerError)
+		return
+	}
 	switch r.Method {
 	case http.MethodPost:
 		var nodeInfo node
@@ -130,19 +134,38 @@ func (lfs *LiteFS) Close() (err error) {
 
 func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
 	fsm := litefsraft.NewFSM()
-	r, err := startRaft(cfg, fsm)
-	if err != nil {
-		return nil, fmt.Errorf("cannot start RAFT: %w", err)
-	}
 
-	localInfo := litefsraft.PrimaryRedirectInfo{
-		PrimaryInfo: litefs.PrimaryInfo{
-			Hostname:     cfg.Hostname,
-			AdvertiseURL: cfg.AdvertiseURL,
-		},
-		RedirectURL: cfg.RedirectURL,
+	var (
+		leaser        litefs.Leaser
+		r             *raft.Raft
+		forwarderInfo ForwarderInfo
+	)
+	if cfg.RaftPort > 0 {
+		r, err := startRaft(cfg, fsm)
+		if err != nil {
+			return nil, fmt.Errorf("cannot start RAFT: %w", err)
+		}
+		localInfo := litefsraft.PrimaryRedirectInfo{
+			PrimaryInfo: litefs.PrimaryInfo{
+				Hostname:     cfg.Hostname,
+				AdvertiseURL: cfg.AdvertiseURL,
+			},
+			RedirectURL: cfg.RedirectURL,
+		}
+		leaser = litefsraft.New(r, localInfo, fsm, 10*time.Second)
+		forwarderInfo = func() (isLeader bool, redirectURL string) {
+			isLeader = r.State() == raft.Leader
+			redirectURL = fsm.RedirectURL()
+			return
+		}
+	} else {
+		leaser = litefs.NewStaticLeaser(cfg.Candidate, cfg.Hostname, cfg.AdvertiseURL)
+		forwarderInfo = func() (isLeader bool, redirectURL string) {
+			isLeader = cfg.Candidate
+			redirectURL = cfg.RedirectURL
+			return
+		}
 	}
-	leaser := litefsraft.New(r, localInfo, fsm, 10*time.Second)
 
 	store := litefs.NewStore(cfg.ConfigDir, cfg.Candidate)
 	store.Client = litehttp.NewClient()
@@ -164,11 +187,11 @@ func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
 	store.Invalidator = fsys
 
 	return &LiteFS{
-		raft:       r,
-		store:      store,
-		fileSystem: fsys,
-		httpServer: server,
-		leaser:     leaser,
+		raft:          r,
+		store:         store,
+		fileSystem:    fsys,
+		httpServer:    server,
+		forwarderInfo: forwarderInfo,
 	}, nil
 }
 
@@ -278,7 +301,7 @@ func SetFlags(cfg *Config) {
 	flag.StringVar(&cfg.Hostname, "litefs-hostname", "", "LiteFS instance identify")
 	flag.StringVar(&cfg.AdvertiseURL, "litefs-advertise-url", "", "LiteFS advertise URL")
 	flag.IntVar(&cfg.Port, "litefs-port", 20202, "LiteFS server port")
-	flag.IntVar(&cfg.RaftPort, "litefs-raft-port", 20201, "Raft port")
+	flag.IntVar(&cfg.RaftPort, "litefs-raft-port", 0, "Raft port")
 	flag.StringVar(&cfg.RaftAdvertiseAddress, "litefs-raft-addr", "", "Raft advertise address")
 	flag.StringVar(&cfg.Members, "litefs-members", "", "Comma separated list of clusters members. Example: -litefs-members \"Hostname1=RaftAddress1, Hostname2=RaftAddress2\"")
 	flag.BoolVar(&cfg.Candidate, "litefs-candidate", true, "Specifies whether the node can become the primary")

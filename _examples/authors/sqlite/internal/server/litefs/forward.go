@@ -9,11 +9,11 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/hashicorp/raft"
 )
 
 var HttpClient = http.DefaultClient
+
+type ForwarderInfo func() (isLeader bool, redirectURL string)
 
 func (lfs *LiteFS) ForwardToLeader(timeout time.Duration, methods ...string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
@@ -32,12 +32,13 @@ func (lfs *LiteFS) ForwardToLeaderFunc(h http.HandlerFunc, timeout time.Duration
 			}
 		}
 
-		if !match || lfs.raft.State() == raft.Leader {
+		isLeader, redirectURL := lfs.forwarderInfo()
+
+		if !match || isLeader {
 			h(w, r)
 			return
 		}
 
-		redirectURL := lfs.leaser.RedirectURL()
 		if redirectURL == "" {
 			http.Error(w, "leader redirect URL not found", http.StatusInternalServerError)
 			return

@@ -1,64 +1,13 @@
 # SQLite with LiteFS example
 
-### Start a cluster with 3 instances:
+## Steps to generate this code
 
-- Start instance 1:
+0. Install the required tools.
+
 ```sh
-go run . -db authors.db -port 8080 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/raft1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
--litefs-advertise-url http://localhost:20202 -litefs-members="node2=localhost:9081, node3=localhost:9082" \
--litefs-raft-port 9080 -litefs-raft-addr localhost:9080 -dev
+go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+go install github.com/bufbuild/buf/cmd/buf@latest
 ```
-
-- Start instance 2:
-```sh
-go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8081 -litefs-hostname node2 \
--litefs-config-dir /tmp/raft2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
--litefs-advertise-url http://localhost:20203 -litefs-raft-port 9081 -litefs-raft-addr localhost:9081 \
--litefs-bootstrap-cluster=false -dev
-```
-
-- Start instance 3:
-```sh
-go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8082 -litefs-hostname node3 \
--litefs-config-dir /tmp/raft3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
--litefs-advertise-url http://localhost:20204 -litefs-raft-port 9082 -litefs-raft-addr localhost:9082 \
--litefs-bootstrap-cluster=false -dev
-```
-
-- List nodes:
-```sh
-curl http://localhost:8080/nodes/
-```
-
-- Get the leader:
-```sh
-curl http://localhost:8080/nodes/leader
-```
-
-- Add new node to cluster:
-```sh
-curl -X POST -d '{"id": "{-litefs-hostname}", "addr": "{-litefs-raft-addr}", readOnly: false}' http://localhost:8080/nodes/
-```
-
-- Remove a node from cluster:
-```sh
-curl -X DELETE http://localhost:8080/nodes/{id}
-```
-
-### Explore the API
-
-- [http://localhost:8080/swagger/](http://localhost:8080/swagger/)
-- [http://localhost:8081/swagger/](http://localhost:8080/swagger/)
-- [http://localhost:8082/swagger/](http://localhost:8080/swagger/)
-
-**POST/PUT/DELETE** requests are forwarded to the Leader.
-
-### Litestream
-
-Check a [Litestream](https://litestream.io) example in docker-compose.yml
-
-### Steps to generate this code
 
 1. Create a directory to store SQL scripts.
 
@@ -127,3 +76,93 @@ sqlc generate
 ```sh
 sqlc-grpc -m example -migration-path sql/migrations -litefs
 ```
+
+### Running a cluster with 3 instances in STATIC leasing mode:
+
+>**Note:** In this mode you configure a single node to be the primary/leader.
+The downside of this approach is that you will lose write availability if that node goes down.
+
+- Start instance 1:
+```sh
+go run . -db authors.db -port 8080 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
+-litefs-config-dir /tmp/raft1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
+-litefs-advertise-url http://localhost:20202 -dev
+```
+
+- Start instance 2:
+```sh
+go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
+-litefs-config-dir /tmp/raft2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
+-litefs-advertise-url http://localhost:20202 \
+-litefs-candidate=false -dev
+```
+
+- Start instance 3:
+```sh
+go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
+-litefs-config-dir /tmp/raft3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
+-litefs-advertise-url http://localhost:20202 \
+-litefs-candidate=false -dev
+```
+
+### Running a cluster with 3 instances in RAFT-based leasing mode:
+
+>**Note:** In this mode the primary/leader is elected using the RAFT protocol. 
+If the leader node goes down another node will be elected.
+The downside of this approach is that "[adding distributed consensus to your application nodes can be problematic when they're under high load as they can loose leadership easily](https://github.com/superfly/litefs/issues/259#issuecomment-1398766012)".
+
+- Start instance 1:
+```sh
+go run . -db authors.db -port 8080 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
+-litefs-config-dir /tmp/raft1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
+-litefs-advertise-url http://localhost:20202 -litefs-members="node2=localhost:9081, node3=localhost:9082" \
+-litefs-raft-port 9080 -litefs-raft-addr localhost:9080 -dev
+```
+
+- Start instance 2:
+```sh
+go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8081 -litefs-hostname node2 \
+-litefs-config-dir /tmp/raft2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
+-litefs-advertise-url http://localhost:20203 -litefs-raft-port 9081 -litefs-raft-addr localhost:9081 \
+-litefs-bootstrap-cluster=false -dev
+```
+
+- Start instance 3:
+```sh
+go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8082 -litefs-hostname node1 \
+-litefs-config-dir /tmp/raft3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
+-litefs-advertise-url http://localhost:20204 -litefs-raft-port 9082 -litefs-raft-addr localhost:9082 \
+-litefs-bootstrap-cluster=false -dev
+```
+
+- List nodes:
+```sh
+curl http://localhost:8080/nodes/
+```
+
+- Get the leader:
+```sh
+curl http://localhost:8080/nodes/leader
+```
+
+- Add new node to cluster:
+```sh
+curl -X POST -d '{"id": "{-litefs-hostname}", "addr": "{-litefs-raft-addr}", readOnly: false}' http://localhost:8080/nodes/
+```
+
+- Remove a node from cluster:
+```sh
+curl -X DELETE http://localhost:8080/nodes/{id}
+```
+
+## Explore the API
+
+- [http://localhost:8080/swagger/](http://localhost:8080/swagger/)
+- [http://localhost:8081/swagger/](http://localhost:8081/swagger/)
+- [http://localhost:8082/swagger/](http://localhost:8082/swagger/)
+
+**POST/PUT/DELETE** requests are forwarded to the Leader.
+
+## Litestream
+
+Check out a [Litestream](https://litestream.io) example in [docker-compose.yml](https://github.com/walterwanderley/sqlc-grpc/blob/main/_examples/authors/sqlite/docker-compose.yml).
