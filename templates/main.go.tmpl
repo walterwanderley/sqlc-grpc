@@ -56,7 +56,7 @@ func main() {
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
-	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
+	{{if .DistributedTracing}}flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)"){{end}}
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	{{if eq .Database "sqlite"}}flag.StringVar(&replicationURL, "replication", "", "S3 replication URL"){{end}}
@@ -105,7 +105,7 @@ func run(cfg server.Config, log *zap.Logger) error {
 		return err
 	}
 	defer db.Close()
-	if cfg.TracingEnabled() {
+	{{if .DistributedTracing}}if cfg.TracingEnabled() {
 		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
 		if err != nil {
 			return err
@@ -116,7 +116,7 @@ func run(cfg server.Config, log *zap.Logger) error {
 		if err != nil {
 			return err
 		}
-	}
+	}{{end}}
 	{{if eq .Database "sqlite"}}if replicationURL != "" {
 		log.Info("litestream replication", zap.String("url", replicationURL))
 		lsdb, err := litestream.Replicate(context.Background(), dbURL, replicationURL)

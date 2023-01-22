@@ -17,13 +17,14 @@ import (
 )
 
 var (
-	module        string
-	ignoreQueries string
-	migrationPath string
-	liteFS        bool
-	appendMode    bool
-	showVersion   bool
-	help          bool
+	module             string
+	ignoreQueries      string
+	migrationPath      string
+	liteFS             bool
+	distributedTracing bool
+	appendMode         bool
+	showVersion        bool
+	help               bool
 )
 
 func main() {
@@ -34,6 +35,7 @@ func main() {
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
 	flag.BoolVar(&liteFS, "litefs", false, "Enable support to LiteFS")
+	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing with Jeager")
 	flag.Parse()
 
 	if help {
@@ -86,11 +88,12 @@ func main() {
 	}
 
 	def := metadata.Definition{
-		Args:          args,
-		GoModule:      module,
-		MigrationPath: migrationPath,
-		Packages:      make([]*metadata.Package, 0),
-		LiteFS:        liteFS,
+		Args:               args,
+		GoModule:           module,
+		MigrationPath:      migrationPath,
+		Packages:           make([]*metadata.Package, 0),
+		LiteFS:             liteFS,
+		DistributedTracing: distributedTracing,
 	}
 
 	for _, p := range cfg.Packages {

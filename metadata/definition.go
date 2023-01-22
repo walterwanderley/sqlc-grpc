@@ -14,11 +14,12 @@ import (
 )
 
 type Definition struct {
-	Args          string
-	GoModule      string
-	Packages      []*Package
-	MigrationPath string
-	LiteFS        bool
+	Args               string
+	GoModule           string
+	Packages           []*Package
+	MigrationPath      string
+	LiteFS             bool
+	DistributedTracing bool
 }
 
 func (d *Definition) Database() string {

@@ -8,7 +8,7 @@ import (
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	{{if .DistributedTracing}}"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"{{end}}
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -18,7 +18,7 @@ type Config struct {
 	ServiceName     string
 	Port            int
 	PrometheusPort  int
-	JaegerCollector string
+	{{if .DistributedTracing}}JaegerCollector string{{end}}
 	EnableCors      bool
 	Middlewares     []HttpMiddlewareType
 }
@@ -27,11 +27,11 @@ type Config struct {
 func (c Config) PrometheusEnabled() bool {
 	return c.PrometheusPort > 0
 }
-
+{{if .DistributedTracing}}
 // TracingEnabled check configuration
 func (c Config) TracingEnabled() bool {
 	return c.JaegerCollector != ""
-}
+}{{end}}
 
 func (c Config) grpcOpts(log *zap.Logger) []grpc.ServerOption {
 	interceptors := make([]grpc.UnaryServerInterceptor, 0)
@@ -41,9 +41,9 @@ func (c Config) grpcOpts(log *zap.Logger) []grpc.ServerOption {
 	if c.PrometheusEnabled() {
 		interceptors = append(interceptors, grpc_prometheus.UnaryServerInterceptor)
 	}
-	if c.TracingEnabled() {
+	{{if .DistributedTracing}}if c.TracingEnabled() {
 		interceptors = append(interceptors, otelgrpc.UnaryServerInterceptor())
-	}
+	}{{end}}
 	interceptors = append(interceptors, errorMapper)
 
 	opts := make([]grpc.ServerOption, 0)

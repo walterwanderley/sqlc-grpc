@@ -33,6 +33,9 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 		newPath = strings.TrimSuffix(newPath, ".tmpl")
 
 		if d.IsDir() {
+			if strings.HasSuffix(newPath, "trace") && !def.DistributedTracing {
+				return nil
+			}
 			if strings.HasSuffix(newPath, "litestream") && def.Database() != "sqlite" {
 				return nil
 			}
@@ -129,6 +132,10 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 					}
 				}
 			}
+			return nil
+		}
+
+		if (strings.HasSuffix(newPath, "sql.go") || strings.HasSuffix(newPath, "tracing.go")) && !def.DistributedTracing {
 			return nil
 		}
 
