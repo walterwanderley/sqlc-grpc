@@ -5,11 +5,8 @@
 0. Install the required tools.
 
 ```sh
-go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
-```
-
-```sh
-go install github.com/walterwanderley/sqlc-grpc@latest
+go install github.com/walterwanderley/sqlc-grpc@latest \
+  github.com/kyleconroy/sqlc/cmd/sqlc@latest
 ```
 
 1. Create a directory to store SQL scripts.
