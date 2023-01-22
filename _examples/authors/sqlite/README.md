@@ -6,7 +6,10 @@
 
 ```sh
 go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
-go install github.com/bufbuild/buf/cmd/buf@latest
+```
+
+```sh
+go install github.com/walterwanderley/sqlc-grpc@latest
 ```
 
 1. Create a directory to store SQL scripts.
