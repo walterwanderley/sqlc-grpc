@@ -39,3 +39,11 @@ func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.
 	{{end -}}
 }
 {{ end }}
+{{if not .EmitInterface}}{{if not .EmitDbArgument}}
+func (s *Service) WithTx(tx *sql.Tx) *Service {
+	return &Service{
+		logger: s.logger,
+		querier: s.querier.WithTx(tx),
+	}
+}
+{{end}}{{end}}
