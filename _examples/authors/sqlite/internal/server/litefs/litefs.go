@@ -133,14 +133,13 @@ func (lfs *LiteFS) Close() (err error) {
 }
 
 func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
-	fsm := litefsraft.NewFSM()
-
 	var (
 		leaser        litefs.Leaser
 		r             *raft.Raft
 		forwarderInfo ForwarderInfo
 	)
 	if cfg.RaftPort > 0 {
+		fsm := litefsraft.NewFSM()
 		r, err := startRaft(cfg, fsm)
 		if err != nil {
 			return nil, fmt.Errorf("cannot start RAFT: %w", err)
