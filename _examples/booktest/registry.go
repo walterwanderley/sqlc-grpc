@@ -15,7 +15,7 @@ import (
 
 func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
 	return func(grpcServer *grpc.Server) {
-		pb_books.RegisterBooksServiceServer(grpcServer, app_books.NewService(logger, app_books.New(db)))
+		pb_books.RegisterBooksServiceServer(grpcServer, app_books.NewService(logger, app_books.New(db), db))
 
 	}
 }

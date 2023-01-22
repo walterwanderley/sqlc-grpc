@@ -28,7 +28,6 @@ import (
 	"authors/internal/server"
 	"authors/internal/server/litefs"
 	"authors/internal/server/litestream"
-	"authors/internal/server/trace"
 )
 
 //go:generate sqlc-grpc -m authors -migration-path sql/migrations -litefs -append
@@ -56,7 +55,7 @@ func main() {
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
-	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
+
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
@@ -103,18 +102,7 @@ func run(cfg server.Config, log *zap.Logger) error {
 		return err
 	}
 	defer db.Close()
-	if cfg.TracingEnabled() {
-		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
-		if err != nil {
-			return err
-		}
-		defer flush()
 
-		db, err = trace.OpenDB(db.Driver(), dbURL)
-		if err != nil {
-			return err
-		}
-	}
 	if replicationURL != "" {
 		log.Info("litestream replication", zap.String("url", replicationURL))
 		lsdb, err := litestream.Replicate(context.Background(), dbURL, replicationURL)

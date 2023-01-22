@@ -28,7 +28,7 @@ import (
 	"booktest/internal/server/trace"
 )
 
-//go:generate sqlc-grpc -m booktest -append
+//go:generate sqlc-grpc -m booktest -tracing -append
 
 const serviceName = "booktest"
 

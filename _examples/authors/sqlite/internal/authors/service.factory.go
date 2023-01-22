@@ -3,6 +3,8 @@
 package authors
 
 import (
+	"database/sql"
+
 	"go.uber.org/zap"
 
 	pb "authors/api/authors/v1"
@@ -10,6 +12,6 @@ import (
 
 // NewService is a constructor of a pb.AuthorsServiceServer implementation.
 // Use this function to customize the server by adding middlewares to it.
-func NewService(logger *zap.Logger, querier *Queries) pb.AuthorsServiceServer {
+func NewService(logger *zap.Logger, querier *Queries, db *sql.DB) pb.AuthorsServiceServer {
 	return &Service{logger: logger, querier: querier}
 }

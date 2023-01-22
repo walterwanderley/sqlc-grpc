@@ -15,7 +15,7 @@ import (
 
 func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
 	return func(grpcServer *grpc.Server) {
-		pb_authors.RegisterAuthorsServiceServer(grpcServer, app_authors.NewService(logger, app_authors.New(db)))
+		pb_authors.RegisterAuthorsServiceServer(grpcServer, app_authors.NewService(logger, app_authors.New(db), db))
 
 	}
 }

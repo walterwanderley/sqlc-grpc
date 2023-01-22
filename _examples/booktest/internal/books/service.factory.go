@@ -3,6 +3,8 @@
 package books
 
 import (
+	"database/sql"
+
 	"go.uber.org/zap"
 
 	pb "booktest/api/books/v1"
@@ -10,6 +12,6 @@ import (
 
 // NewService is a constructor of a pb.BooksServiceServer implementation.
 // Use this function to customize the server by adding middlewares to it.
-func NewService(logger *zap.Logger, querier *Queries) pb.BooksServiceServer {
+func NewService(logger *zap.Logger, querier *Queries, db *sql.DB) pb.BooksServiceServer {
 	return &Service{logger: logger, querier: querier}
 }

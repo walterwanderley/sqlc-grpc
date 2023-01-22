@@ -67,3 +67,10 @@ func (s *Service) ListAuthors(ctx context.Context, req *pb.ListAuthorsRequest) (
 	}
 	return res, nil
 }
+
+func (s *Service) WithTx(tx *sql.Tx) *Service {
+	return &Service{
+		logger:  s.logger,
+		querier: s.querier.WithTx(tx),
+	}
+}

@@ -14,7 +14,6 @@ services:
       - .:/app
     depends_on:
       - minio
-      - jaeger
       - prometheus
 
   prometheus:
@@ -32,11 +31,6 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
-
-  jaeger:
-    image: jaegertracing/all-in-one
-    ports:
-      - "16686:16686"
 
   minio:
     image: minio/minio

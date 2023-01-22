@@ -4,6 +4,7 @@ package books
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"go.uber.org/zap"
@@ -149,4 +150,11 @@ func (s *Service) UpdateBookISBN(ctx context.Context, req *pb.UpdateBookISBNRequ
 		return nil, err
 	}
 	return &pb.UpdateBookISBNResponse{}, nil
+}
+
+func (s *Service) WithTx(tx *sql.Tx) *Service {
+	return &Service{
+		logger:  s.logger,
+		querier: s.querier.WithTx(tx),
+	}
 }

@@ -13,14 +13,9 @@ require (
 	github.com/hashicorp/raft v1.3.11
 	github.com/hashicorp/raft-boltdb v0.0.0-20220329195025-15018e9b97e0
 	github.com/mattn/go-sqlite3 v1.14.16
-	github.com/ngrok/sqlmw v0.0.0-20220520173518-97c9c04efc79
 	github.com/prometheus/client_golang v1.14.0
 	github.com/superfly/litefs v0.3.0
 	github.com/walterwanderley/litefs-raft v0.0.0-20230119012345-fa5a41317732
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.37.0
-	go.opentelemetry.io/otel v1.11.2
-	go.opentelemetry.io/otel/exporters/jaeger v1.11.2
-	go.opentelemetry.io/otel/sdk v1.11.2
 	go.uber.org/automaxprocs v1.5.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.5.0
