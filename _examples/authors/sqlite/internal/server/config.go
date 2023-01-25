@@ -18,8 +18,8 @@ type Config struct {
 	ServiceName    string
 	Port           int
 	PrometheusPort int
+	EnableCors     bool
 
-	EnableCors  bool
 	Middlewares []HttpMiddlewareType
 }
 

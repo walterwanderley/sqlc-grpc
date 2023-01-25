@@ -18,9 +18,10 @@ type Config struct {
 	ServiceName     string
 	Port            int
 	PrometheusPort  int
-	JaegerCollector string
 	EnableCors      bool
-	Middlewares     []HttpMiddlewareType
+	JaegerCollector string
+
+	Middlewares []HttpMiddlewareType
 }
 
 // PrometheusEnabled check configuration

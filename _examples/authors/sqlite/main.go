@@ -55,9 +55,9 @@ func main() {
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
 	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
-
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
+
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
 	litefs.SetFlags(&litefsConfig)
 	flag.Parse()

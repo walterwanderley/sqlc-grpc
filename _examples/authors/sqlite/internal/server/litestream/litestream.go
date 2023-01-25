@@ -17,6 +17,11 @@ import (
 )
 
 func Replicate(ctx context.Context, dsn, replicaURL string) (*litestream.DB, error) {
+	if i := strings.Index(dsn, "?"); i > 0 {
+		dsn = dsn[0:i]
+	}
+	dsn = strings.TrimPrefix(dsn, "file:")
+
 	lsdb := litestream.NewDB(dsn)
 
 	u, err := url.Parse(replicaURL)
@@ -31,7 +36,7 @@ func Replicate(ctx context.Context, dsn, replicaURL string) (*litestream.DB, err
 
 	if s := os.Getenv("LITESTREAM_SCHEME"); s != "" {
 		if s != "https" && s != "http" {
-			panic(fmt.Sprintf("Unsupported LITESTREAM_SCHEME value: %q", s))
+			return nil, fmt.Errorf("unsupported LITESTREAM_SCHEME value: %q", s)
 		} else {
 			scheme = s
 		}
@@ -51,7 +56,7 @@ func Replicate(ctx context.Context, dsn, replicaURL string) (*litestream.DB, err
 
 	if fps := os.Getenv("LITESTREAM_FORCE_PATH_STYLE"); fps != "" {
 		if b, err := strconv.ParseBool(fps); err != nil {
-			panic(fmt.Sprintf("Invalid LITESTREAM_FORCE_PATH_STYLE value: %q", fps))
+			return nil, fmt.Errorf("invalid LITESTREAM_FORCE_PATH_STYLE value: %q", fps)
 		} else {
 			forcePathStyle = b
 		}
