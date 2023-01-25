@@ -18,8 +18,9 @@ type Config struct {
 	ServiceName     string
 	Port            int
 	PrometheusPort  int
-	{{if .DistributedTracing}}JaegerCollector string{{end}}
 	EnableCors      bool
+	{{if .DistributedTracing}}JaegerCollector string{{end}}
+
 	Middlewares     []HttpMiddlewareType
 }
 
