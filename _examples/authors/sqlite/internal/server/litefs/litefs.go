@@ -24,11 +24,11 @@ import (
 )
 
 type LiteFS struct {
-	raft          *raft.Raft
-	store         *litefs.Store
-	fileSystem    *fuse.FileSystem
-	httpServer    *litehttp.Server
-	forwarderInfo ForwarderInfo
+	raft           *raft.Raft
+	store          *litefs.Store
+	fileSystem     *fuse.FileSystem
+	httpServer     *litehttp.Server
+	redirectTarget RedirectTarget
 }
 
 func (lfs *LiteFS) ReadyCh() chan struct{} {
@@ -133,10 +133,13 @@ func (lfs *LiteFS) Close() (err error) {
 }
 
 func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
+	store := litefs.NewStore(cfg.ConfigDir, cfg.Candidate)
+	store.Client = litehttp.NewClient()
+
 	var (
-		leaser        litefs.Leaser
-		r             *raft.Raft
-		forwarderInfo ForwarderInfo
+		leaser         litefs.Leaser
+		r              *raft.Raft
+		redirectTarget RedirectTarget
 	)
 	if cfg.RaftPort > 0 {
 		fsm := litefsraft.NewFSM()
@@ -152,22 +155,16 @@ func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
 			RedirectURL: cfg.RedirectURL,
 		}
 		leaser = litefsraft.New(r, localInfo, fsm, 10*time.Second)
-		forwarderInfo = func() (isLeader bool, redirectURL string) {
-			isLeader = r.State() == raft.Leader
-			redirectURL = fsm.RedirectURL()
-			return
+		redirectTarget = func() string {
+			return fsm.RedirectURL()
 		}
 	} else {
 		leaser = litefs.NewStaticLeaser(cfg.Candidate, cfg.Hostname, cfg.AdvertiseURL)
-		forwarderInfo = func() (isLeader bool, redirectURL string) {
-			isLeader = cfg.Candidate
-			redirectURL = cfg.RedirectURL
-			return
+		redirectTarget = func() string {
+			return cfg.RedirectURL
 		}
 	}
 
-	store := litefs.NewStore(cfg.ConfigDir, cfg.Candidate)
-	store.Client = litehttp.NewClient()
 	store.Leaser = leaser
 
 	server := litehttp.NewServer(store, fmt.Sprintf(":%d", cfg.Port))
@@ -186,11 +183,11 @@ func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
 	store.Invalidator = fsys
 
 	return &LiteFS{
-		raft:          r,
-		store:         store,
-		fileSystem:    fsys,
-		httpServer:    server,
-		forwarderInfo: forwarderInfo,
+		raft:           r,
+		store:          store,
+		fileSystem:     fsys,
+		httpServer:     server,
+		redirectTarget: redirectTarget,
 	}, nil
 }
 

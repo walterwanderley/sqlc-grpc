@@ -91,7 +91,8 @@ func run(cfg server.Config, log *zap.Logger) error {
 		}
 		defer liteFS.Close()
 
-		cfg.Middlewares = append(cfg.Middlewares, liteFS.ForwardToLeader(forwardTimeout, "POST", "PUT", "DELETE"))
+		cfg.Middlewares = append(cfg.Middlewares, liteFS.ForwardToLeader(forwardTimeout, "POST", "PUT", "PATCH", "DELETE"))
+		cfg.Middlewares = append(cfg.Middlewares, liteFS.ConsistentReader(forwardTimeout, "GET"))
 
 		<-liteFS.ReadyCh()
 		log.Info("LiteFS cluster is ready")

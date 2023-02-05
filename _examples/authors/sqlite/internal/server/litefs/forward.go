@@ -5,15 +5,18 @@ package litefs
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/superfly/litefs"
 )
 
-var HttpClient = http.DefaultClient
+const txCookieName = "_txid"
 
-type ForwarderInfo func() (isLeader bool, redirectURL string)
+type RedirectTarget func() string
 
 func (lfs *LiteFS) ForwardToLeader(timeout time.Duration, methods ...string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
@@ -32,25 +35,30 @@ func (lfs *LiteFS) ForwardToLeaderFunc(h http.HandlerFunc, timeout time.Duration
 			}
 		}
 
-		isLeader, redirectURL := lfs.forwarderInfo()
-
-		if !match || isLeader {
+		if !match {
 			h(w, r)
 			return
 		}
 
-		if redirectURL == "" {
+		isLeader := lfs.store.IsPrimary()
+		if isLeader {
+			h(&responseWriter{w: w, lfs: lfs}, r)
+			return
+		}
+
+		target := lfs.redirectTarget()
+		if target == "" {
 			http.Error(w, "leader redirect URL not found", http.StatusInternalServerError)
 			return
 		}
 
 		if r.URL.Query().Get("forward") == "false" {
-			w.Header().Set("location", string(redirectURL))
+			w.Header().Set("location", string(target))
 			w.WriteHeader(http.StatusMovedPermanently)
 			return
 		}
 
-		resp, err := forwardTo(redirectURL, r, timeout)
+		resp, err := forwardTo(target, r, timeout)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -67,6 +75,82 @@ func (lfs *LiteFS) ForwardToLeaderFunc(h http.HandlerFunc, timeout time.Duration
 		}
 		w.WriteHeader(resp.StatusCode)
 		io.Copy(w, resp.Body)
+	}
+}
+
+func (lfs *LiteFS) ConsistentReader(timeout time.Duration, methods ...string) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(lfs.ConsistentReaderFunc(h.ServeHTTP, timeout, methods...))
+	}
+}
+
+func (lfs *LiteFS) ConsistentReaderFunc(h http.HandlerFunc, timeout time.Duration, methods ...string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var match bool
+
+		for _, method := range methods {
+			if r.Method == method {
+				match = true
+				break
+			}
+		}
+
+		if !match || lfs.store.IsPrimary() {
+			h(w, r)
+			return
+		}
+
+		var txID uint64
+		if cookie, _ := r.Cookie(txCookieName); cookie != nil {
+			txID, _ = strconv.ParseUint(cookie.Value, 10, 64)
+		}
+
+		ticker := time.NewTicker(time.Millisecond)
+		defer ticker.Stop()
+
+		ctx, cancel := context.WithTimeout(r.Context(), timeout)
+		defer cancel()
+
+		var pos litefs.Pos
+	LOOP:
+		for {
+			if pos = lfs.store.DBs()[0].Pos(); pos.TXID >= txID {
+				break LOOP
+			}
+
+			select {
+			case <-ctx.Done():
+				if r.URL.Query().Get("forward") == "false" {
+					http.Error(w, "cosistent reader timeout", http.StatusGatewayTimeout)
+					return
+				}
+				target := lfs.redirectTarget()
+				if target == "" {
+					http.Error(w, "leader redirect URL not found", http.StatusInternalServerError)
+					return
+				}
+				resp, err := forwardTo(target, r, timeout)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				defer resp.Body.Close()
+				for k, v := range resp.Header {
+					for i, value := range v {
+						if i == 0 {
+							w.Header().Set(k, value)
+							continue
+						}
+						w.Header().Add(k, value)
+					}
+				}
+				w.WriteHeader(resp.StatusCode)
+				io.Copy(w, resp.Body)
+				return
+			case <-ticker.C:
+			}
+		}
+		h(w, r)
 	}
 }
 
@@ -94,6 +178,32 @@ func forwardTo(addr string, req *http.Request, timeout time.Duration) (*http.Res
 			newReq.Header.Add(k, value)
 		}
 	}
-	log.Println("redirect to:", newURL)
-	return HttpClient.Do(newReq)
+	return http.DefaultClient.Do(newReq)
+}
+
+type responseWriter struct {
+	w          http.ResponseWriter
+	lfs        *LiteFS
+	statusCode int
+}
+
+func (rw *responseWriter) Header() http.Header {
+	return rw.w.Header()
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	if rw.statusCode == 0 || (rw.statusCode >= 200 && rw.statusCode < 300) {
+		http.SetCookie(rw.w, &http.Cookie{
+			Name:     txCookieName,
+			Value:    fmt.Sprint(rw.lfs.store.DBs()[0].Pos().TXID),
+			Expires:  time.Now().Add(5 * time.Minute),
+			HttpOnly: true,
+		})
+	}
+	return rw.w.Write(b)
+}
+
+func (rw *responseWriter) WriteHeader(statusCode int) {
+	rw.statusCode = statusCode
+	rw.w.WriteHeader(statusCode)
 }
