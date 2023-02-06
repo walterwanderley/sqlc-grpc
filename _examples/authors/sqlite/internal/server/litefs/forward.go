@@ -104,6 +104,10 @@ func (lfs *LiteFS) ConsistentReaderFunc(h http.HandlerFunc, timeout time.Duratio
 		if cookie, _ := r.Cookie(txCookieName); cookie != nil {
 			txID, _ = strconv.ParseUint(cookie.Value, 10, 64)
 		}
+		if txID == 0 {
+			h(w, r)
+			return
+		}
 
 		ticker := time.NewTicker(time.Millisecond)
 		defer ticker.Stop()
