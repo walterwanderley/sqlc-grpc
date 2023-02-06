@@ -87,14 +87,14 @@ The downside of this approach is that you will lose write availability if that n
 - Start instance 1:
 ```sh
 go run . -db authors.db -port 8080 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/raft1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
+-litefs-config-dir /tmp/cfg1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
 -litefs-advertise-url http://localhost:20202 -dev
 ```
 
 - Start instance 2:
 ```sh
 go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/raft2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
+-litefs-config-dir /tmp/cfg2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
 -litefs-advertise-url http://localhost:20202 \
 -litefs-candidate=false -dev
 ```
@@ -102,7 +102,7 @@ go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8080 -litef
 - Start instance 3:
 ```sh
 go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/raft3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
+-litefs-config-dir /tmp/cfg3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
 -litefs-advertise-url http://localhost:20202 \
 -litefs-candidate=false -dev
 ```
