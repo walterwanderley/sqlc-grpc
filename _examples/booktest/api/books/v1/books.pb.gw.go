@@ -630,7 +630,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 // RegisterBooksServiceHandlerFromEndpoint is same as RegisterBooksServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterBooksServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
-	conn, err := grpc.Dial(endpoint, opts...)
+	conn, err := grpc.DialContext(ctx, endpoint, opts...)
 	if err != nil {
 		return err
 	}

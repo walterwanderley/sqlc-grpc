@@ -247,6 +247,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/v1BooksByTagsRow"
               }
             }
@@ -285,6 +286,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/v1Book"
               }
             }
@@ -340,6 +342,7 @@
         "details": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
@@ -399,6 +402,7 @@
         "list": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1BooksByTagsRow"
           }
         }
@@ -434,6 +438,7 @@
         "list": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1Book"
           }
         }
