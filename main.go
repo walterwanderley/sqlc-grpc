@@ -157,11 +157,11 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 	fmt.Printf("Configuring project %s...\n", def.GoModule)
 	execCommand("go mod init " + def.GoModule)
 	execCommand("go mod tidy")
-	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway " +
-		"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 " +
-		"google.golang.org/protobuf/cmd/protoc-gen-go " +
-		"google.golang.org/grpc/cmd/protoc-gen-go-grpc " +
-		"github.com/bufbuild/buf/cmd/buf")
+	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway")
+	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2")
+	execCommand("go install google.golang.org/protobuf/cmd/protoc-gen-go")
+	execCommand("go install google.golang.org/grpc/cmd/protoc-gen-go-grpc")
+	execCommand("go install github.com/bufbuild/buf/cmd/buf")
 	fmt.Println("Compiling protocol buffers...")
 	if err := os.Chdir("proto"); err != nil {
 		panic(err)
