@@ -9,7 +9,7 @@ Booktest example taken from [sqlc][sqlc] Git repository [examples][sqlc-git].
 
 ```sh
 ./gen.sh
-docker-compose up
+docker compose up
 ```
 
 ### Exploring

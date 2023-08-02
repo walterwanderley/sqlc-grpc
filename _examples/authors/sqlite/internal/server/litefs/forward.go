@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/superfly/litefs"
+	"github.com/superfly/ltx"
 )
 
 const txCookieName = "_txid"
@@ -100,13 +100,15 @@ func (lfs *LiteFS) ConsistentReaderFunc(h http.HandlerFunc, timeout time.Duratio
 			return
 		}
 
-		var txID uint64
+		var txID ltx.TXID
 		if cookie, _ := r.Cookie(txCookieName); cookie != nil {
-			txID, _ = strconv.ParseUint(cookie.Value, 10, 64)
-		}
-		if txID == 0 {
-			h(w, r)
-			return
+			var err error
+			txID, err = ltx.ParseTXID(cookie.Value)
+			if err != nil {
+				log.Printf("invalid cookie %q: %v", txCookieName, err)
+				h(w, r)
+				return
+			}
 		}
 
 		ticker := time.NewTicker(time.Millisecond)
@@ -115,7 +117,7 @@ func (lfs *LiteFS) ConsistentReaderFunc(h http.HandlerFunc, timeout time.Duratio
 		ctx, cancel := context.WithTimeout(r.Context(), timeout)
 		defer cancel()
 
-		var pos litefs.Pos
+		var pos ltx.Pos
 	LOOP:
 		for {
 			if pos = lfs.store.DBs()[0].Pos(); pos.TXID >= txID {
@@ -199,7 +201,7 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	if rw.statusCode == 0 || (rw.statusCode >= 200 && rw.statusCode < 300) {
 		http.SetCookie(rw.w, &http.Cookie{
 			Name:     txCookieName,
-			Value:    fmt.Sprint(rw.lfs.store.DBs()[0].Pos().TXID),
+			Value:    fmt.Sprint(rw.lfs.store.DBs()[0].Pos().TXID.String()),
 			Expires:  time.Now().Add(5 * time.Minute),
 			HttpOnly: true,
 		})
