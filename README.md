@@ -4,12 +4,12 @@ Create a **gRPC** (and **HTTP/JSON**) **Server** from the generated code by the 
 
 ### Requirements
 
-- Go 1.16 or superior
+- Go 1.17 or superior
 - [sqlc](https://sqlc.dev/)
 - [buf](https://buf.build/)
 
 ```sh
-go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 go install github.com/bufbuild/buf/cmd/buf@latest
 ```
 
