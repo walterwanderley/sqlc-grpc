@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -29,13 +29,12 @@ type sqlcConfig struct {
 	Packages []PackageConfig `json:"packages" yaml:"packages"`
 }
 
-func readConfig() (sqlcConfig, error) {
-	var cfg sqlcConfig
-	name, err := configFile()
-	if err != nil {
-		return cfg, err
-	}
+type sqlcConfigVersion struct {
+	Version string `json:"version" yaml:"version"`
+}
 
+func readConfigV1(name string) (sqlcConfig, error) {
+	var cfg sqlcConfig
 	f, err := os.Open(name)
 	if err != nil {
 		panic(err)
@@ -45,10 +44,45 @@ func readConfig() (sqlcConfig, error) {
 	switch name {
 	case jsonConfig:
 		err = json.NewDecoder(f).Decode(&cfg)
-	case yamlConfig:
+	default:
 		err = yaml.NewDecoder(f).Decode(&cfg)
+	}
+	return cfg, err
+}
+
+func readConfig() (sqlcConfig, error) {
+	var cfg sqlcConfig
+	name, err := configFile()
+	if err != nil {
+		return cfg, err
+	}
+
+	f, err := os.Open(name)
+	if err != nil {
+		return cfg, err
+	}
+	defer f.Close()
+
+	var v sqlcConfigVersion
+	switch name {
+	case jsonConfig:
+		err = json.NewDecoder(f).Decode(&v)
+		if err != nil {
+			return cfg, err
+		}
+	case yamlConfig:
+		err = yaml.NewDecoder(f).Decode(&v)
+		if err != nil {
+			return cfg, err
+		}
 	default:
 		return cfg, fmt.Errorf("invalid config file %q", name)
+	}
+
+	if v.Version == "1" {
+		cfg, err = readConfigV1(name)
+	} else {
+		cfg, err = readConfigV2(name)
 	}
 	if err != nil {
 		return cfg, err

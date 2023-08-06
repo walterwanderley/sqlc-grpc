@@ -7,7 +7,7 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	golang.org/x/mod v0.12.0
 	golang.org/x/tools v0.11.1
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require golang.org/x/sys v0.10.0 // indirect
