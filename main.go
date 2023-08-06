@@ -78,7 +78,7 @@ func main() {
 	}
 
 	if m := moduleFromGoMod(); m != "" {
-		fmt.Println("Using module path from go.mod:", m)
+		log.Println("Using module path from go.mod:", m)
 		module = m
 	}
 
@@ -154,7 +154,7 @@ func moduleFromGoMod() string {
 }
 
 func postProcess(def *metadata.Definition, workingDirectory string) {
-	fmt.Printf("Configuring project %s...\n", def.GoModule)
+	log.Printf("Configuring project %s...\n", def.GoModule)
 	execCommand("go mod init " + def.GoModule)
 	execCommand("go mod tidy")
 	execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway")
@@ -162,7 +162,7 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 	execCommand("go install google.golang.org/protobuf/cmd/protoc-gen-go")
 	execCommand("go install google.golang.org/grpc/cmd/protoc-gen-go-grpc")
 	execCommand("go install github.com/bufbuild/buf/cmd/buf")
-	fmt.Println("Compiling protocol buffers...")
+	log.Println("Compiling protocol buffers...")
 	if err := os.Chdir("proto"); err != nil {
 		panic(err)
 	}
@@ -172,7 +172,7 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 	}
 	execCommand("buf generate")
 	execCommand("go mod tidy")
-	fmt.Println("Finished!")
+	log.Println("Finished!")
 }
 
 func execCommand(command string) error {
