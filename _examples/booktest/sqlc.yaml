@@ -1,14 +1,17 @@
-version: "1"
-packages:
-  - path: "internal/books"
-    queries: "./sql/queries.sql"
-    schema: "./sql/schema.sql"
-    engine: "postgresql"
-    emit_interface: false
-    emit_exact_table_names: false
-    emit_empty_slices: false
-    emit_exported_queries: false
-    emit_json_tags: false
-    emit_result_struct_pointers: false
-    emit_params_struct_pointers: false
-    emit_methods_with_db_argument: false
+version: "2"
+sql:
+- schema: "./sql/schema.sql"
+  queries: "./sql/queries.sql"
+  engine: "postgresql"
+  gen:
+    go:
+      package: "books"
+      out: "internal/books"
+      emit_interface: false
+      emit_exact_table_names: false
+      emit_empty_slices: false
+      emit_exported_queries: false
+      emit_json_tags: false
+      emit_result_struct_pointers: false
+      emit_params_struct_pointers: false
+      emit_methods_with_db_argument: false

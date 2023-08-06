@@ -22,7 +22,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	// database driver
-	_ "github.com/jackc/pgx/v4/stdlib"
+	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"booktest/internal/server"
 	"booktest/internal/server/trace"
