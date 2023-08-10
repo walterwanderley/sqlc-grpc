@@ -3,8 +3,8 @@ module authors
 go 1.20
 
 require (
-	github.com/benbjohnson/litestream v0.3.9
-	github.com/bufbuild/buf v1.25.1
+	github.com/benbjohnson/litestream v0.3.11
+	github.com/bufbuild/buf v1.26.1
 	github.com/flowchartsman/swaggerui v0.0.0-20221017034628-909ed4f3701b
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
@@ -15,12 +15,12 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/prometheus/client_golang v1.16.0
 	github.com/superfly/litefs v0.5.2
-	github.com/superfly/ltx v0.3.9
+	github.com/superfly/ltx v0.3.11
 	github.com/walterwanderley/litefs-raft v0.0.0-20230802010115-8e0a834b7a99
 	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/zap v1.25.0
 	golang.org/x/net v0.14.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
+	google.golang.org/genproto/googleapis/api v0.0.0-20230807174057-1744710a1577
 	google.golang.org/grpc v1.57.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
 	google.golang.org/protobuf v1.31.0
@@ -28,10 +28,11 @@ require (
 
 require (
 	bazil.org/fuse v0.0.0-20230120002735-62a210ff1fd5 // indirect
+	filippo.io/age v1.1.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
-	github.com/aws/aws-sdk-go v1.34.0 // indirect
+	github.com/aws/aws-sdk-go v1.44.318 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/bufbuild/connect-go v1.9.0 // indirect
@@ -107,8 +108,8 @@ require (
 	golang.org/x/term v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/tools v0.11.0 // indirect
-	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e // indirect
+	google.golang.org/genproto v0.0.0-20230807174057-1744710a1577 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230807174057-1744710a1577 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.36.3 // indirect
