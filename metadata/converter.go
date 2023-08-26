@@ -251,6 +251,10 @@ func ToSnakeCase(str string) string {
 	return strings.ToLower(snake)
 }
 
+func ToPascalCase(str string) string {
+	return UpperFirstCharacter(generator.CamelCase(ToSnakeCase(str)))
+}
+
 func toKebabCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}-${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}-${2}")

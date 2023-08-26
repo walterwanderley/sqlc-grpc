@@ -19,7 +19,7 @@ import (
 )
 	
 type Service struct {
-    pb.Unimplemented{{ .Package | UpperFirst}}ServiceServer
+    pb.Unimplemented{{ .Package | PascalCase}}ServiceServer
 	logger *zap.Logger
 	querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}
 	{{if .EmitDbArgument}}db *sql.DB{{end}}

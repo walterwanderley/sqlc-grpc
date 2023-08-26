@@ -189,7 +189,7 @@ func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath 
 	var b bytes.Buffer
 
 	funcMap := template.FuncMap{
-		"UpperFirst": metadata.UpperFirstCharacter,
+		"PascalCase": metadata.ToPascalCase,
 		"SnakeCase":  metadata.ToSnakeCase,
 	}
 

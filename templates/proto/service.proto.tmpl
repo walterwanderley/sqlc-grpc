@@ -19,7 +19,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };{{end}}
 {{range .CustomServiceProtoComments}}// {{ .}}
 {{end -}}
-service {{.Package | UpperFirst}}Service {
+service {{.Package | PascalCase}}Service {
     {{range .CustomServiceProtoOptions}}{{ .}}
     {{end}}
     {{- range .Services}}
