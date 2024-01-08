@@ -5,16 +5,16 @@ package server
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
+	"github.com/prometheus/client_golang/prometheus"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/proto"
 
+	"authors/internal/server/instrumentation/metric"
 	"authors/internal/server/middleware"
 )
 
@@ -45,7 +46,6 @@ type RegisterHttpHandler func(mux *http.ServeMux)
 // Server represents a gRPC server
 type Server struct {
 	cfg Config
-	log *zap.Logger
 
 	grpcServer   *grpc.Server
 	healthServer *health.Server
@@ -57,10 +57,9 @@ type Server struct {
 }
 
 // New gRPC server
-func New(cfg Config, log *zap.Logger, register RegisterServer, registerHandlers []RegisterHandlerFromEndpoint, registerHttpHandler RegisterHttpHandler) *Server {
+func New(cfg Config, register RegisterServer, registerHandlers []RegisterHandlerFromEndpoint, registerHttpHandler RegisterHttpHandler) *Server {
 	return &Server{
 		cfg:                  cfg,
-		log:                  log,
 		register:             register,
 		registerHandlers:     registerHandlers,
 		registerHttpHandlers: registerHttpHandler,
@@ -69,19 +68,43 @@ func New(cfg Config, log *zap.Logger, register RegisterServer, registerHandlers 
 
 // ListenAndServe start the server
 func (srv *Server) ListenAndServe() error {
-	grpc_zap.ReplaceGrpcLoggerV2(srv.log)
-	srv.grpcServer = grpc.NewServer(srv.cfg.grpcOpts(srv.log)...)
+	grpcInterceptors := srv.cfg.grpcInterceptors()
+
+	srvMetrics := grpc_prometheus.NewServerMetrics(
+		grpc_prometheus.WithServerHandlingTimeHistogram(
+			grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+		),
+	)
+
+	if srv.cfg.PrometheusEnabled() {
+		prometheus.MustRegister(srvMetrics)
+		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
+			if span := oteltrace.SpanContextFromContext(ctx); span.IsSampled() {
+				return prometheus.Labels{"traceID": span.TraceID().String()}
+			}
+			return nil
+		}
+		grpcInterceptors = append(grpcInterceptors, srvMetrics.UnaryServerInterceptor(grpc_prometheus.WithExemplarFromContext(exemplarFromContext)))
+	}
+
+	grpcOpts := make([]grpc.ServerOption, 0)
+
+	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(grpcInterceptors...))
+
+	srv.grpcServer = grpc.NewServer(grpcOpts...)
 	reflection.Register(srv.grpcServer)
 	srv.register(srv.grpcServer)
+	if srv.cfg.PrometheusEnabled() {
+		srvMetrics.InitializeMetrics(srv.grpcServer)
+		err := metric.Init(srv.cfg.PrometheusPort, srv.cfg.ServiceName)
+		if err != nil {
+			return err
+		}
+	}
 
 	srv.healthServer = health.NewServer()
 	healthpb.RegisterHealthServer(srv.grpcServer, srv.healthServer)
-	srv.healthServer.SetServingStatus("ww", healthpb.HealthCheckResponse_SERVING)
-
-	if srv.cfg.PrometheusEnabled() {
-		grpc_prometheus.Register(srv.grpcServer)
-		go prometheusServer(srv.log, srv.cfg.PrometheusPort)
-	}
+	srv.healthServer.SetServingStatus(srv.cfg.ServiceName, healthpb.HealthCheckResponse_SERVING)
 
 	gwmux := runtime.NewServeMux(
 		runtime.WithMetadata(annotator),
@@ -112,7 +135,7 @@ func (srv *Server) ListenAndServe() error {
 	}
 
 	if srv.cfg.EnableCors {
-		srv.log.Info("Enable Cross-Origin Resource Sharing")
+		slog.Info("Enable Cross-Origin Resource Sharing")
 		srv.httpServer.Handler = middleware.CORS(srv.httpServer.Handler)
 	}
 
@@ -123,27 +146,15 @@ func (srv *Server) ListenAndServe() error {
 	return srv.httpServer.ListenAndServe()
 }
 
-func prometheusServer(log *zap.Logger, port int) {
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.Handler())
-	httpServer := &http.Server{
-		Addr:         fmt.Sprintf(":%d", port),
-		ReadTimeout:  httpReadTimeout,
-		WriteTimeout: httpWriteTimeout,
-		IdleTimeout:  httpIdleTimeout,
-		Handler:      mux,
-	}
-	log.Info("Metrics server running", zap.Int("port", port))
-	if err := httpServer.ListenAndServe(); err != nil {
-		log.Fatal("unable to start metrics server", zap.Error(err), zap.Int("port", port))
-	}
-}
-
 func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Handler {
 	return h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 			grpcServer.ServeHTTP(w, r)
 		} else {
+			if r.URL.Path == "/" {
+				http.Redirect(w, r, "/swagger/", http.StatusFound)
+				return
+			}
 			otherHandler.ServeHTTP(w, r)
 		}
 	}), &http2.Server{})
@@ -152,10 +163,10 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 // Shutdown the server
 func (srv *Server) Shutdown(ctx context.Context) {
 	srv.healthServer.Shutdown()
-	srv.log.Info("Graceful stop")
+	slog.Info("Graceful stop")
 	srv.grpcServer.GracefulStop()
 	if err := srv.httpServer.Shutdown(ctx); err != nil {
-		srv.log.Error("Shutdown error", zap.Error(err))
+		slog.Error("Shutdown error", "error", err)
 	}
 }
 

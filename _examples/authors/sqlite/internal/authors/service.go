@@ -5,15 +5,13 @@ package authors
 import (
 	"context"
 	"database/sql"
-
-	"go.uber.org/zap"
+	"log/slog"
 
 	pb "authors/api/authors/v1"
 )
 
 type Service struct {
 	pb.UnimplementedAuthorsServiceServer
-	logger  *zap.Logger
 	querier *Queries
 }
 
@@ -26,7 +24,7 @@ func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest)
 
 	result, err := s.querier.CreateAuthor(ctx, arg)
 	if err != nil {
-		s.logger.Error("CreateAuthor sql call failed", zap.Error(err))
+		slog.Error("CreateAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateAuthorResponse{Value: toExecResult(result)}, nil
@@ -37,7 +35,7 @@ func (s *Service) DeleteAuthor(ctx context.Context, req *pb.DeleteAuthorRequest)
 
 	err := s.querier.DeleteAuthor(ctx, id)
 	if err != nil {
-		s.logger.Error("DeleteAuthor sql call failed", zap.Error(err))
+		slog.Error("DeleteAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.DeleteAuthorResponse{}, nil
@@ -48,7 +46,7 @@ func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.
 
 	result, err := s.querier.GetAuthor(ctx, id)
 	if err != nil {
-		s.logger.Error("GetAuthor sql call failed", zap.Error(err))
+		slog.Error("GetAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.GetAuthorResponse{Author: toAuthor(result)}, nil
@@ -58,7 +56,7 @@ func (s *Service) ListAuthors(ctx context.Context, req *pb.ListAuthorsRequest) (
 
 	result, err := s.querier.ListAuthors(ctx)
 	if err != nil {
-		s.logger.Error("ListAuthors sql call failed", zap.Error(err))
+		slog.Error("ListAuthors sql call failed", "error", err)
 		return nil, err
 	}
 	res := new(pb.ListAuthorsResponse)
@@ -70,7 +68,6 @@ func (s *Service) ListAuthors(ctx context.Context, req *pb.ListAuthorsRequest) (
 
 func (s *Service) WithTx(tx *sql.Tx) *Service {
 	return &Service{
-		logger:  s.logger,
 		querier: s.querier.WithTx(tx),
 	}
 }

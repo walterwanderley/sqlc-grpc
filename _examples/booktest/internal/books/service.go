@@ -6,8 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-
-	"go.uber.org/zap"
+	"log/slog"
 
 	pb "booktest/api/books/v1"
 	"booktest/internal/validation"
@@ -15,7 +14,6 @@ import (
 
 type Service struct {
 	pb.UnimplementedBooksServiceServer
-	logger  *zap.Logger
 	querier *Queries
 }
 
@@ -24,7 +22,7 @@ func (s *Service) BooksByTags(ctx context.Context, req *pb.BooksByTagsRequest) (
 
 	result, err := s.querier.BooksByTags(ctx, dollar_1)
 	if err != nil {
-		s.logger.Error("BooksByTags sql call failed", zap.Error(err))
+		slog.Error("BooksByTags sql call failed", "error", err)
 		return nil, err
 	}
 	res := new(pb.BooksByTagsResponse)
@@ -41,7 +39,7 @@ func (s *Service) BooksByTitleYear(ctx context.Context, req *pb.BooksByTitleYear
 
 	result, err := s.querier.BooksByTitleYear(ctx, arg)
 	if err != nil {
-		s.logger.Error("BooksByTitleYear sql call failed", zap.Error(err))
+		slog.Error("BooksByTitleYear sql call failed", "error", err)
 		return nil, err
 	}
 	res := new(pb.BooksByTitleYearResponse)
@@ -56,7 +54,7 @@ func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest)
 
 	result, err := s.querier.CreateAuthor(ctx, name)
 	if err != nil {
-		s.logger.Error("CreateAuthor sql call failed", zap.Error(err))
+		slog.Error("CreateAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateAuthorResponse{Author: toAuthor(result)}, nil
@@ -83,7 +81,7 @@ func (s *Service) CreateBook(ctx context.Context, req *pb.CreateBookRequest) (*p
 
 	result, err := s.querier.CreateBook(ctx, arg)
 	if err != nil {
-		s.logger.Error("CreateBook sql call failed", zap.Error(err))
+		slog.Error("CreateBook sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateBookResponse{Book: toBook(result)}, nil
@@ -94,7 +92,7 @@ func (s *Service) DeleteBook(ctx context.Context, req *pb.DeleteBookRequest) (*p
 
 	err := s.querier.DeleteBook(ctx, bookID)
 	if err != nil {
-		s.logger.Error("DeleteBook sql call failed", zap.Error(err))
+		slog.Error("DeleteBook sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.DeleteBookResponse{}, nil
@@ -105,7 +103,7 @@ func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.
 
 	result, err := s.querier.GetAuthor(ctx, authorID)
 	if err != nil {
-		s.logger.Error("GetAuthor sql call failed", zap.Error(err))
+		slog.Error("GetAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.GetAuthorResponse{Author: toAuthor(result)}, nil
@@ -116,7 +114,7 @@ func (s *Service) GetBook(ctx context.Context, req *pb.GetBookRequest) (*pb.GetB
 
 	result, err := s.querier.GetBook(ctx, bookID)
 	if err != nil {
-		s.logger.Error("GetBook sql call failed", zap.Error(err))
+		slog.Error("GetBook sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.GetBookResponse{Book: toBook(result)}, nil
@@ -131,7 +129,7 @@ func (s *Service) UpdateBook(ctx context.Context, req *pb.UpdateBookRequest) (*p
 
 	err := s.querier.UpdateBook(ctx, arg)
 	if err != nil {
-		s.logger.Error("UpdateBook sql call failed", zap.Error(err))
+		slog.Error("UpdateBook sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.UpdateBookResponse{}, nil
@@ -146,7 +144,7 @@ func (s *Service) UpdateBookISBN(ctx context.Context, req *pb.UpdateBookISBNRequ
 
 	err := s.querier.UpdateBookISBN(ctx, arg)
 	if err != nil {
-		s.logger.Error("UpdateBookISBN sql call failed", zap.Error(err))
+		slog.Error("UpdateBookISBN sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.UpdateBookISBNResponse{}, nil
@@ -154,7 +152,6 @@ func (s *Service) UpdateBookISBN(ctx context.Context, req *pb.UpdateBookISBNRequ
 
 func (s *Service) WithTx(tx *sql.Tx) *Service {
 	return &Service{
-		logger:  s.logger,
 		querier: s.querier.WithTx(tx),
 	}
 }

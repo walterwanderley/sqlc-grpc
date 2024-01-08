@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -20,7 +19,6 @@ import (
 	"github.com/superfly/litefs/fuse"
 	litehttp "github.com/superfly/litefs/http"
 	litefsraft "github.com/walterwanderley/litefs-raft"
-	"go.uber.org/zap"
 )
 
 type LiteFS struct {
@@ -132,7 +130,7 @@ func (lfs *LiteFS) Close() (err error) {
 	return
 }
 
-func Start(log *zap.Logger, cfg Config) (*LiteFS, error) {
+func Start(cfg Config) (*LiteFS, error) {
 	store := litefs.NewStore(cfg.ConfigDir, cfg.Candidate)
 	store.Client = litehttp.NewClient()
 
@@ -236,7 +234,7 @@ func startRaft(cfg Config, fsm raft.FSM) (*raft.Raft, error) {
 			for _, node := range strings.Split(cfg.Members, ",") {
 				id, addr, ok := strings.Cut(node, "=")
 				if !ok {
-					log.Fatal("invalid -members parameter")
+					return nil, fmt.Errorf("invalid -members parameter")
 				}
 				addr = strings.TrimSpace(addr)
 				var suffrage raft.ServerSuffrage

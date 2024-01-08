@@ -9,6 +9,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,8 +20,6 @@ import (
 
 	"github.com/flowchartsman/swaggerui"
 	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	// database driver
 	_ "github.com/mattn/go-sqlite3"
@@ -54,7 +53,7 @@ func main() {
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
-	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
+	flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 
@@ -64,30 +63,29 @@ func main() {
 
 	dbURL = filepath.Join(litefsConfig.MountDir, dbURL)
 
-	log := logger(dev)
-	defer log.Sync()
-
-	if err := run(cfg, log); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Error("server error", zap.Error(err))
+	initLogger(dev)
+	if err := run(cfg); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		slog.Error("server error", "error", err)
 		os.Exit(1)
 	}
 }
 
-func run(cfg server.Config, log *zap.Logger) error {
-	if _, err := maxprocs.Set(); err != nil {
-		log.Warn("startup", zap.Error(err))
+func run(cfg server.Config) error {
+	_, err := maxprocs.Set()
+	if err != nil {
+		slog.Warn("startup", "error", err)
 	}
-	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
+	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	if litefsConfig.MountDir != "" {
 		err := litefsConfig.Validate()
 		if err != nil {
-			log.Fatal("liteFS parameters validation error", zap.Error(err))
+			return fmt.Errorf("liteFS parameters validation: %w", err)
 		}
 
-		liteFS, err = litefs.Start(log, litefsConfig)
+		liteFS, err = litefs.Start(litefsConfig)
 		if err != nil {
-			log.Fatal("cannot start LiteFS", zap.Error(err))
+			return fmt.Errorf("cannot start LiteFS: %w", err)
 		}
 		defer liteFS.Close()
 
@@ -95,7 +93,7 @@ func run(cfg server.Config, log *zap.Logger) error {
 		cfg.Middlewares = append(cfg.Middlewares, liteFS.ConsistentReader(forwardTimeout, "GET"))
 
 		<-liteFS.ReadyCh()
-		log.Info("LiteFS cluster is ready")
+		slog.Info("LiteFS cluster is ready")
 	}
 
 	db, err := sql.Open("sqlite3", dbURL)
@@ -105,23 +103,23 @@ func run(cfg server.Config, log *zap.Logger) error {
 	defer db.Close()
 
 	if replicationURL != "" {
-		log.Info("litestream replication", zap.String("url", replicationURL))
+		slog.Info("litestream replication", "url", replicationURL)
 		lsdb, err := litestream.Replicate(context.Background(), dbURL, replicationURL)
 		if err != nil {
-			log.Fatal("init replication error", zap.Error(err))
+			return fmt.Errorf("init replication error: %w", err)
 		}
 		defer lsdb.Close()
 	}
 	if err := ensureSchema(db); err != nil {
-		log.Error("migration error", zap.Error(err))
+		slog.Error("migration error", "error", err)
 	}
-	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), httpHandlers)
+	srv := server.New(cfg, registerServer(db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-done
-		log.Warn("signal detected...", zap.Any("signal", sig))
+		slog.Warn("signal detected...", "signal", sig)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		srv.Shutdown(ctx)
@@ -129,27 +127,20 @@ func run(cfg server.Config, log *zap.Logger) error {
 	return srv.ListenAndServe()
 }
 
-func logger(dev bool) *zap.Logger {
-	var config zap.Config
-	if dev {
-		config = zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	} else {
-		config = zap.NewProductionConfig()
+func initLogger(dev bool) {
+	var handler slog.Handler
+	opts := slog.HandlerOptions{
+		AddSource: true,
 	}
-	config.OutputPaths = []string{"stdout"}
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.DisableStacktrace = true
-	config.InitialFields = map[string]interface{}{
-		"service": serviceName,
+	switch {
+	case dev:
+		handler = slog.NewTextHandler(os.Stderr, &opts)
+	default:
+		handler = slog.NewJSONHandler(os.Stderr, &opts)
 	}
 
-	log, err := config.Build()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return log
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 }
 
 func httpHandlers(mux *http.ServeMux) {

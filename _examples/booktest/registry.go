@@ -5,7 +5,6 @@ package main
 import (
 	"database/sql"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	pb_books "booktest/api/books/v1"
@@ -13,9 +12,9 @@ import (
 	"booktest/internal/server"
 )
 
-func registerServer(logger *zap.Logger, db *sql.DB) server.RegisterServer {
+func registerServer(db *sql.DB) server.RegisterServer {
 	return func(grpcServer *grpc.Server) {
-		pb_books.RegisterBooksServiceServer(grpcServer, app_books.NewService(logger, app_books.New(db), db))
+		pb_books.RegisterBooksServiceServer(grpcServer, app_books.NewService(app_books.New(db), db))
 
 	}
 }

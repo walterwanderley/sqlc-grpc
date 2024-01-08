@@ -8,7 +8,7 @@ import (
 	_ "embed"
 	"errors"
 	"flag"
-	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,16 +16,16 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	// database driver
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"booktest/internal/server"
-	"booktest/internal/server/trace"
+	"booktest/internal/server/instrumentation/trace"
 )
 
 //go:generate sqlc-grpc -m booktest -tracing -append
@@ -46,53 +46,66 @@ func main() {
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
-	flag.IntVar(&cfg.PrometheusPort, "prometheusPort", 0, "The metrics server port")
+	flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
-	flag.StringVar(&cfg.JaegerCollector, "jaegerCollector", "", "The Jaeger Tracing Collector endpoint (example: http://localhost:14268/api/traces)")
+	flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
 
 	flag.Parse()
 
-	log := logger(dev)
-	defer log.Sync()
-
-	if err := run(cfg, log); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Error("server error", zap.Error(err))
+	initLogger(dev)
+	if err := run(cfg); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		slog.Error("server error", "error", err)
 		os.Exit(1)
 	}
 }
 
-func run(cfg server.Config, log *zap.Logger) error {
-	if _, err := maxprocs.Set(); err != nil {
-		log.Warn("startup", zap.Error(err))
-	}
-	log.Info("startup", zap.Int("GOMAXPROCS", runtime.GOMAXPROCS(0)))
-
-	db, err := sql.Open("pgx", dbURL)
+func run(cfg server.Config) error {
+	_, err := maxprocs.Set()
 	if err != nil {
-		return err
+		slog.Warn("startup", "error", err)
 	}
-	defer db.Close()
+	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+
+	var db *sql.DB
 	if cfg.TracingEnabled() {
-		flush, err := trace.InitTracer(context.Background(), serviceName, cfg.JaegerCollector)
+		flush, err := trace.Init(context.Background(), serviceName, cfg.OtlpEndpoint)
 		if err != nil {
 			return err
 		}
 		defer flush()
 
-		db, err = trace.OpenDB(db.Driver(), dbURL)
+		db, err = otelsql.Open("pgx", dbURL, otelsql.WithAttributes(
+			semconv.DBSystemPostgreSQL,
+		))
 		if err != nil {
+			slog.Error("erro ao iniciar pool do banco de dados com tracing", "error", err)
+			return err
+		}
+
+		err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
+			semconv.DBSystemPostgreSQL,
+		))
+		if err != nil {
+			slog.Error("erro ao iniciar métricas do banco de dados", "error", err)
+			return err
+		}
+	} else {
+		db, err = sql.Open("pgx", dbURL)
+		if err != nil {
+			slog.Error("erro ao iniciar pool do banco de dados", "error", err)
 			return err
 		}
 	}
+	defer db.Close()
 
-	srv := server.New(cfg, log, registerServer(log, db), registerHandlers(), httpHandlers)
+	srv := server.New(cfg, registerServer(db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-done
-		log.Warn("signal detected...", zap.Any("signal", sig))
+		slog.Warn("signal detected...", "signal", sig)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		srv.Shutdown(ctx)
@@ -100,27 +113,20 @@ func run(cfg server.Config, log *zap.Logger) error {
 	return srv.ListenAndServe()
 }
 
-func logger(dev bool) *zap.Logger {
-	var config zap.Config
-	if dev {
-		config = zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	} else {
-		config = zap.NewProductionConfig()
+func initLogger(dev bool) {
+	var handler slog.Handler
+	opts := slog.HandlerOptions{
+		AddSource: true,
 	}
-	config.OutputPaths = []string{"stdout"}
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.DisableStacktrace = true
-	config.InitialFields = map[string]interface{}{
-		"service": serviceName,
+	switch {
+	case dev:
+		handler = slog.NewTextHandler(os.Stderr, &opts)
+	default:
+		handler = slog.NewJSONHandler(os.Stderr, &opts)
 	}
 
-	log, err := config.Build()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return log
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 }
 
 func httpHandlers(mux *http.ServeMux) {

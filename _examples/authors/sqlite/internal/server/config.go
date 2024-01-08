@@ -3,13 +3,11 @@
 package server
 
 import (
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"context"
+	"log/slog"
 
-	"go.uber.org/zap"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
 )
 
@@ -28,18 +26,18 @@ func (c Config) PrometheusEnabled() bool {
 	return c.PrometheusPort > 0
 }
 
-func (c Config) grpcOpts(log *zap.Logger) []grpc.ServerOption {
+func (c Config) grpcInterceptors() []grpc.UnaryServerInterceptor {
 	interceptors := make([]grpc.UnaryServerInterceptor, 0)
-	interceptors = append(interceptors, grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)))
-	interceptors = append(interceptors, grpc_zap.UnaryServerInterceptor(log))
-	interceptors = append(interceptors, grpc_recovery.UnaryServerInterceptor())
-	if c.PrometheusEnabled() {
-		interceptors = append(interceptors, grpc_prometheus.UnaryServerInterceptor)
-	}
-
+	interceptors = append(interceptors, logging.UnaryServerInterceptor(interceptorLogger(slog.Default()),
+		logging.WithDisableLoggingFields("protocol", "grpc.component", "grpc.method_type")))
 	interceptors = append(interceptors, errorMapper)
+	interceptors = append(interceptors, recovery.UnaryServerInterceptor())
 
-	opts := make([]grpc.ServerOption, 0)
-	opts = append(opts, grpc_middleware.WithUnaryServerChain(interceptors...))
-	return opts
+	return interceptors
+}
+
+func interceptorLogger(l *slog.Logger) logging.Logger {
+	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
+		l.Log(ctx, slog.Level(lvl), msg, fields...)
+	})
 }
