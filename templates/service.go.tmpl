@@ -7,10 +7,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net"
 
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -20,7 +20,6 @@ import (
 	
 type Service struct {
     pb.Unimplemented{{ .Package | PascalCase}}ServiceServer
-	logger *zap.Logger
 	querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}
 	{{if .EmitDbArgument}}db *sql.DB{{end}}
 }
@@ -32,7 +31,7 @@ func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.
 	{{end}}
 	{{if not .EmptyOutput}}result, {{end}}err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
 	if err != nil {
-		s.logger.Error("{{.Name}} sql call failed", zap.Error(err))			
+		slog.Error("{{.Name}} sql call failed", "error", err)			
 		return nil, err
 	}
 	{{ range .OutputGrpc}}{{ .}}
@@ -42,7 +41,6 @@ func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.
 {{if not .EmitInterface}}{{if not .EmitDbArgument}}
 func (s *Service) WithTx(tx *sql.Tx) *Service {
 	return &Service{
-		logger: s.logger,
 		querier: s.querier.WithTx(tx),
 	}
 }

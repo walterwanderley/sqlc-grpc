@@ -5,14 +5,11 @@ package {{.Package}}
 import (
 	"database/sql"
 
-
-	"go.uber.org/zap"
-
 	pb "{{ .GoModule}}/api/{{.Package}}/v1"
 )
 
 // NewService is a constructor of a pb.{{ .Package | PascalCase}}ServiceServer implementation.
 // Use this function to customize the server by adding middlewares to it.
-func NewService(logger *zap.Logger, querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}, db *sql.DB) pb.{{ .Package | PascalCase}}ServiceServer {
-	return &Service{logger: logger, querier: querier{{if .EmitDbArgument}}, db: db{{end}}}
+func NewService(querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}, db *sql.DB) pb.{{ .Package | PascalCase}}ServiceServer {
+	return &Service{querier: querier{{if .EmitDbArgument}}, db: db{{end}}}
 }

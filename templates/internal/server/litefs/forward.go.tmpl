@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -105,7 +105,7 @@ func (lfs *LiteFS) ConsistentReaderFunc(h http.HandlerFunc, timeout time.Duratio
 			var err error
 			txID, err = ltx.ParseTXID(cookie.Value)
 			if err != nil {
-				log.Printf("invalid cookie %q: %v", txCookieName, err)
+				slog.Warn("invalid cookie", "name", txCookieName, "error", err)
 				h(w, r)
 				return
 			}

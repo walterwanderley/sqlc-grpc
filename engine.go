@@ -136,7 +136,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 			return nil
 		}
 
-		if (strings.HasSuffix(newPath, "sql.go") || strings.HasSuffix(newPath, "tracing.go")) && !def.DistributedTracing {
+		if strings.HasSuffix(newPath, "tracing.go") && !def.DistributedTracing {
 			return nil
 		}
 

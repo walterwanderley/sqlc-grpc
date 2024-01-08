@@ -35,7 +35,7 @@ func main() {
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
 	flag.BoolVar(&liteFS, "litefs", false, "Enable support to LiteFS")
-	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing with Jeager")
+	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing with Open Telemetry")
 	flag.Parse()
 
 	if help {
