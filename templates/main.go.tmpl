@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/exaring/otelpgx"
 	"github.com/flowchartsman/swaggerui"
 	"github.com/XSAM/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
@@ -109,7 +110,17 @@ func run(cfg server.Config) error {
 			return err
 		}
 		defer flush()
-		{{if eq .SqlPackage "database/sql"}}
+		{{if eq .SqlPackage "pgx/v5"}}
+		dbCfg, err := pgxpool.ParseConfig(dbURL)
+		if err != nil {
+    		return err
+		}
+		dbCfg.ConnConfig.Tracer = otelpgx.NewTracer()
+		db, err = pgxpool.NewWithConfig(context.Background(), dbCfg)
+		if err != nil {
+    		return err
+		}
+		{{else}}
 		db, err = otelsql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL, otelsql.WithAttributes(
 			{{if eq .Database "mysql"}}semconv.DBSystemMySQL{{else if eq .Database "sqlite"}}semconv.DBSystemSqlite{{else}}semconv.DBSystemPostgreSQL{{end}},
 		))
@@ -124,9 +135,8 @@ func run(cfg server.Config) error {
 			return err
 		}{{end}}
 	} else {
-	    {{if eq .SqlPackage "pgx/v5"}}
-		db, err = pgxpool.New(context.Background(), dbURL)
-		{{else}}
+	    {{if eq .SqlPackage "pgx/v5"}}db, err = pgxpool.New(context.Background(), dbURL)
+		{{else}}	
 		db, err = sql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL)
 		{{end}}if err != nil {
 			return err

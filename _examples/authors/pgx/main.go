@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/exaring/otelpgx"
 	"github.com/flowchartsman/swaggerui"
 	"go.uber.org/automaxprocs/maxprocs"
 
@@ -72,8 +73,17 @@ func run(cfg server.Config) error {
 		}
 		defer flush()
 
-	} else {
+		dbCfg, err := pgxpool.ParseConfig(dbURL)
+		if err != nil {
+			return err
+		}
+		dbCfg.ConnConfig.Tracer = otelpgx.NewTracer()
+		db, err = pgxpool.NewWithConfig(context.Background(), dbCfg)
+		if err != nil {
+			return err
+		}
 
+	} else {
 		db, err = pgxpool.New(context.Background(), dbURL)
 		if err != nil {
 			return err

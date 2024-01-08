@@ -4,6 +4,7 @@ go 1.21.4
 
 require (
 	github.com/bufbuild/buf v1.28.1
+	github.com/exaring/otelpgx v0.5.2
 	github.com/flowchartsman/swaggerui v0.0.0-20221017034628-909ed4f3701b
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
