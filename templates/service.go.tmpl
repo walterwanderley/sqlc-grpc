@@ -11,6 +11,9 @@ import (
 	"net"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -21,7 +24,7 @@ import (
 type Service struct {
     pb.Unimplemented{{ .Package | PascalCase}}ServiceServer
 	querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}
-	{{if .EmitDbArgument}}db *sql.DB{{end}}
+	{{if .EmitDbArgument}}db {{if eq .SqlPackage "database/sql"}}*sql.DB{{else}}*pgxpool.Pool{{end}}{{end}}
 }
 
 {{$emitDbArgument := .EmitDbArgument}}
@@ -39,7 +42,7 @@ func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.
 }
 {{ end }}
 {{if not .EmitInterface}}{{if not .EmitDbArgument}}
-func (s *Service) WithTx(tx *sql.Tx) *Service {
+func (s *Service) WithTx(tx {{if eq .SqlPackage "database/sql"}}*sql.Tx{{else}}pgx.Tx{{end}}) *Service {
 	return &Service{
 		querier: s.querier.WithTx(tx),
 	}

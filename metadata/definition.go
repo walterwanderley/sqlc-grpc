@@ -32,6 +32,15 @@ func (d *Definition) Database() string {
 	return ""
 }
 
+func (d *Definition) SqlPackage() string {
+	for _, p := range d.Packages {
+		if p.SqlPackage != "" {
+			return p.SqlPackage
+		}
+	}
+	return ""
+}
+
 type PackageOpts struct {
 	Path               string
 	EmitInterface      bool
@@ -46,6 +55,7 @@ type Package struct {
 	GoModule                   string
 	SchemaPath                 string
 	SrcPath                    string
+	SqlPackage                 string
 	Services                   []*Service
 	Messages                   map[string]*Message
 	OutputAdapters             []*Message
@@ -194,19 +204,19 @@ func (p *Package) importTimestamp() bool {
 func (p *Package) importWrappers() bool {
 	for _, m := range p.Messages {
 		for _, f := range m.Fields {
-			if strings.HasPrefix(f.Type, "sql.Null") && f.Type != "sql.NullTime" {
+			if (strings.HasPrefix(f.Type, "sql.Null") || strings.HasPrefix(f.Type, "pgtype.")) && f.Type != "sql.NullTime" {
 				return true
 			}
 		}
 	}
 	for _, s := range p.Services {
 		for _, n := range s.InputTypes {
-			if strings.HasPrefix(n, "sql.Null") && n != "sql.NullTime" {
+			if (strings.HasPrefix(n, "sql.Null") || strings.HasPrefix(n, "pgtype.")) && n != "sql.NullTime" {
 				return true
 			}
 		}
 
-		if strings.HasPrefix(s.Output, "sql.Null") && s.Output != "sql.NullTime" {
+		if (strings.HasPrefix(s.Output, "sql.Null") || strings.HasPrefix(s.Output, "pgtype.")) && s.Output != "sql.NullTime" {
 			return true
 		}
 

@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+- name: 'xo-grpc'
+  folder: ''
+  type: file
+  disableDeletion: false
+  editable: true
+  updateIntervalSeconds: 10
+  options:
+    path: /etc/grafana/provisioning/dashboards

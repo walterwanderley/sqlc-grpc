@@ -6,6 +6,7 @@ import (
     "context"
     "database/sql"
 
+    "github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 
     {{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
@@ -14,7 +15,7 @@ import (
 	{{end}}
 )
 
-func registerServer(db *sql.DB) server.RegisterServer {
+func registerServer(db {{if eq .SqlPackage "database/sql"}}*sql.DB{{else}}*pgxpool.Pool{{end}}) server.RegisterServer {
     return func(grpcServer *grpc.Server) {
         {{range .Packages}}pb_{{.Package}}.Register{{ .Package | PascalCase}}ServiceServer(grpcServer, app_{{.Package}}.NewService(app_{{.Package}}.New(db), db))
         {{end}}

@@ -5,11 +5,13 @@ package {{.Package}}
 import (
 	"database/sql"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	pb "{{ .GoModule}}/api/{{.Package}}/v1"
 )
 
 // NewService is a constructor of a pb.{{ .Package | PascalCase}}ServiceServer implementation.
 // Use this function to customize the server by adding middlewares to it.
-func NewService(querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}, db *sql.DB) pb.{{ .Package | PascalCase}}ServiceServer {
+func NewService(querier {{if .EmitInterface}}Querier{{else}}*Queries{{end}}, db {{if eq .SqlPackage "database/sql"}}*sql.DB{{else}}*pgxpool.Pool{{end}}) pb.{{ .Package | PascalCase}}ServiceServer {
 	return &Service{querier: querier{{if .EmitDbArgument}}, db: db{{end}}}
 }

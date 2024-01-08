@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	_ "embed"
 	"errors"
 	"flag"
@@ -16,13 +15,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"booktest/internal/server"
 	"booktest/internal/server/instrumentation/trace"
@@ -67,7 +64,7 @@ func run(cfg server.Config) error {
 	}
 	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
-	var db *sql.DB
+	var db *pgxpool.Pool
 	if cfg.TracingEnabled() {
 		flush, err := trace.Init(context.Background(), serviceName, cfg.OtlpEndpoint)
 		if err != nil {
@@ -75,22 +72,9 @@ func run(cfg server.Config) error {
 		}
 		defer flush()
 
-		db, err = otelsql.Open("pgx", dbURL, otelsql.WithAttributes(
-			semconv.DBSystemPostgreSQL,
-		))
-		if err != nil {
-			return err
-		}
-
-		err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
-			semconv.DBSystemPostgreSQL,
-		))
-		if err != nil {
-			return err
-		}
 	} else {
 
-		db, err = sql.Open("pgx", dbURL)
+		db, err = pgxpool.New(context.Background(), dbURL)
 		if err != nil {
 			return err
 		}

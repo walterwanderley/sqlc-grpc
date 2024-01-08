@@ -23,6 +23,7 @@ type PackageConfig struct {
 	EmitResultStructPointers  bool   `json:"emit_result_struct_pointers" yaml:"emit_result_struct_pointers"`
 	EmitParamsStructPointers  bool   `json:"emit_params_struct_pointers" yaml:"emit_params_struct_pointers"`
 	EmitMethodsWithDBArgument bool   `json:"emit_methods_with_db_argument" yaml:"emit_methods_with_db_argument"`
+	SqlPackage                string `json:"sql_package" yaml:"sql_package"`
 }
 
 type sqlcConfig struct {

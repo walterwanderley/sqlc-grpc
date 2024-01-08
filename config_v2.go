@@ -30,6 +30,7 @@ func (v2 sqlcConfigV2) toV1() (v1 sqlcConfig) {
 			EmitResultStructPointers:  sql.Gen.Go.EmitResultStructPointers,
 			EmitParamsStructPointers:  sql.Gen.Go.EmitParamsStructPointers,
 			EmitMethodsWithDBArgument: sql.Gen.Go.EmitMethodsWithDBArgument,
+			SqlPackage:                sql.Gen.Go.SqlPackage,
 		})
 	}
 	return
@@ -42,6 +43,7 @@ type sqlGoConfig struct {
 	EmitMethodsWithDBArgument bool   `json:"emit_methods_with_db_argument,omitempty" yaml:"emit_methods_with_db_argument"`
 	Package                   string `json:"package" yaml:"package"`
 	Out                       string `json:"out" yaml:"out"`
+	SqlPackage                string `json:"sql_package" yaml:"sql_package"`
 }
 
 func readConfigV2(name string) (sqlcConfig, error) {

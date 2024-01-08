@@ -65,7 +65,7 @@ func toProtoType(typ string) string {
 		return "double"
 	case "sql.NullFloat64":
 		return "google.protobuf.DoubleValue"
-	case "sql.NullString":
+	case "sql.NullString", "pgtype.Text":
 		return "google.protobuf.StringValue"
 	case "sql.NullTime", "time.Time":
 		return "google.protobuf.Timestamp"
@@ -96,7 +96,7 @@ func bindToProto(src, dst, attrName, attrType string) []string {
 	case "sql.NullFloat64":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Double(%s.%s.Float64) }", dst, camelCaseProto(attrName), src, attrName))
-	case "sql.NullString":
+	case "sql.NullString", "pgtype.Text":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.String(%s.%s.String) }", dst, camelCaseProto(attrName), src, attrName))
 	case "sql.NullTime":
@@ -156,6 +156,13 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
 		res = append(res, fmt.Sprintf("%s = sql.NullString{Valid: true, String: v.Value}", dst))
+		res = append(res, "}")
+	case "pgtype.Text":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
+		}
+		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
+		res = append(res, fmt.Sprintf("%s = pgtype.Text{Valid: true, String: v.Value}", dst))
 		res = append(res, "}")
 	case "sql.NullTime":
 		if newVar {
