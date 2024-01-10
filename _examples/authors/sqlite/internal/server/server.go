@@ -143,6 +143,7 @@ func (srv *Server) ListenAndServe() error {
 		srv.httpServer.Handler = mid(srv.httpServer.Handler)
 	}
 
+	slog.Info("Server is running...", "port", srv.cfg.Port)
 	return srv.httpServer.ListenAndServe()
 }
 
