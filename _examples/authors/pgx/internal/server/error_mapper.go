@@ -4,9 +4,9 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -19,7 +19,7 @@ func errorMapper(ctx context.Context, req interface{}, info *grpc.UnaryServerInf
 	if err != nil {
 		if errors.Is(err, validation.ErrUserInput) {
 			err = status.Error(codes.InvalidArgument, err.Error())
-		} else if errors.Is(err, sql.ErrNoRows) {
+		} else if errors.Is(err, pgx.ErrNoRows) {
 			err = status.Error(codes.NotFound, err.Error())
 		}
 	}

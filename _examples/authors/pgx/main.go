@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	_ "embed"
 	"errors"
 	"flag"
@@ -21,12 +22,13 @@ import (
 
 	// database driver
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"booktest/internal/server"
 	"booktest/internal/server/instrumentation/trace"
 )
 
-//go:generate sqlc-grpc -m booktest -tracing -append
+//go:generate sqlc-grpc -m booktest -migration-path sql/migrations -tracing -append
 
 const serviceName = "booktest"
 
@@ -90,6 +92,16 @@ func run(cfg server.Config) error {
 		}
 	}
 	defer db.Close()
+
+	dbMigration, err := sql.Open("pgx", dbURL)
+	if err != nil {
+		return err
+	}
+	err = ensureSchema(dbMigration)
+	if err != nil {
+		slog.Error("migration error", "error", err)
+	}
+	dbMigration.Close()
 
 	srv := server.New(cfg, registerServer(db), registerHandlers(), httpHandlers)
 

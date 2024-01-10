@@ -7,7 +7,7 @@ import (
 	"embed"
 
 	"github.com/golang-migrate/migrate/v4"
-	driver "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	driver "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
@@ -25,7 +25,7 @@ func ensureSchema(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	m, err := migrate.NewWithInstance("iofs", source, "sqlite", target)
+	m, err := migrate.NewWithInstance("iofs", source, "postgresql", target)
 	if err != nil {
 		return err
 	}

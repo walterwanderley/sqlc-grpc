@@ -110,6 +110,7 @@ func run(cfg server.Config) error {
 		}
 		defer lsdb.Close()
 	}
+
 	if err := ensureSchema(db); err != nil {
 		slog.Error("migration error", "error", err)
 	}

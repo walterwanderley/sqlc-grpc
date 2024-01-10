@@ -47,27 +47,31 @@ func toProtoType(typ string) string {
 	switch typ {
 	case "json.RawMessage", "[]byte":
 		return "bytes"
-	case "sql.NullBool":
+	case "sql.NullBool", "pgtype.Bool":
 		return "google.protobuf.BoolValue"
-	case "sql.NullInt32":
+	case "sql.NullInt32", "pgtype.Int4", "pgtype.Int2":
 		return "google.protobuf.Int32Value"
+	case "pgtype.Uint32":
+		return "google.protobuf.UInt32Value"
 	case "int":
 		return "int64"
 	case "int16":
 		return "int32"
 	case "uint16":
 		return "uint32"
-	case "sql.NullInt64":
+	case "sql.NullInt64", "pgtype.Int8":
 		return "google.protobuf.Int64Value"
 	case "float32":
 		return "float"
 	case "float64":
 		return "double"
-	case "sql.NullFloat64":
+	case "pgtype.Float4":
+		return "google.protobuf.FloatValue"
+	case "sql.NullFloat64", "pgtype.Float8":
 		return "google.protobuf.DoubleValue"
-	case "sql.NullString", "pgtype.Text":
+	case "sql.NullString", "pgtype.Text", "pgtype.UUID":
 		return "google.protobuf.StringValue"
-	case "sql.NullTime", "time.Time":
+	case "sql.NullTime", "time.Time", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestampz":
 		return "google.protobuf.Timestamp"
 	case "uuid.UUID", "net.HardwareAddr", "net.IP":
 		return "string"
@@ -84,28 +88,41 @@ func toProtoType(typ string) string {
 func bindToProto(src, dst, attrName, attrType string) []string {
 	res := make([]string, 0)
 	switch attrType {
-	case "sql.NullBool":
+	case "sql.NullBool", "pgtype.Bool":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Bool(%s.%s.Bool) }", dst, camelCaseProto(attrName), src, attrName))
-	case "sql.NullInt32":
+	case "pgtype.Int2":
+		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
+		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Int32(int32(%s.%s.Int16)) }", dst, camelCaseProto(attrName), src, attrName))
+	case "pgtype.Uint32":
+		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
+		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.UInt32(%s.%s.Uint32) }", dst, camelCaseProto(attrName), src, attrName))
+	case "sql.NullInt32", "pgtype.Int4":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Int32(%s.%s.Int32) }", dst, camelCaseProto(attrName), src, attrName))
-	case "sql.NullInt64":
+	case "sql.NullInt64", "pgtype.Int8":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Int64(%s.%s.Int64) }", dst, camelCaseProto(attrName), src, attrName))
-	case "sql.NullFloat64":
+	case "pgtype.Float4":
+		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
+		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Float(%s.%s.Float32) }", dst, camelCaseProto(attrName), src, attrName))
+	case "sql.NullFloat64", "pgtype.Float8":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.Double(%s.%s.Float64) }", dst, camelCaseProto(attrName), src, attrName))
 	case "sql.NullString", "pgtype.Text":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.String(%s.%s.String) }", dst, camelCaseProto(attrName), src, attrName))
-	case "sql.NullTime":
+	case "sql.NullTime", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestampz":
 		res = append(res, fmt.Sprintf("if %s.%s.Valid {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = timestamppb.New(%s.%s.Time) }", dst, camelCaseProto(attrName), src, attrName))
 	case "time.Time":
 		res = append(res, fmt.Sprintf("%s.%s = timestamppb.New(%s.%s)", dst, camelCaseProto(attrName), src, attrName))
 	case "uuid.UUID", "net.HardwareAddr", "net.IP":
 		res = append(res, fmt.Sprintf("%s.%s = %s.%s.String()", dst, camelCaseProto(attrName), src, attrName))
+	case "pgtype.UUID":
+		res = append(res, fmt.Sprintf("if v, err := json.Marshal(%s.%s); err == nil {", src, attrName))
+		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.String(string(v))", dst, camelCaseProto(attrName)))
+		res = append(res, "}")
 	case "int16":
 		res = append(res, fmt.Sprintf("%s.%s = int32(%s.%s)", dst, camelCaseProto(attrName), src, attrName))
 	default:
@@ -122,49 +139,63 @@ func bindToProto(src, dst, attrName, attrType string) []string {
 func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 	res := make([]string, 0)
 	switch attrType {
-	case "sql.NullBool":
+	case "sql.NullBool", "pgtype.Bool":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("%s = sql.NullBool{Valid: true, Bool: v.Value}", dst))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Bool: v.Value}", dst, attrType))
 		res = append(res, "}")
-	case "sql.NullInt32":
+	case "pgtype.Int2":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("%s = sql.NullInt32{Valid: true, Int32: v.Value}", dst))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Int16: int16(v.Value)}", dst, attrType))
 		res = append(res, "}")
-	case "sql.NullInt64":
+	case "pgtype.Uint32":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("%s = sql.NullInt64{Valid: true, Int64: v.Value}", dst))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Uint32: v.Value}", dst, attrType))
 		res = append(res, "}")
-	case "sql.NullFloat64":
+	case "sql.NullInt32", "pgtype.Int4":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("%s = sql.NullFloat64{Valid: true, Float64: v.Value}", dst))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Int32: v.Value}", dst, attrType))
 		res = append(res, "}")
-	case "sql.NullString":
+	case "sql.NullInt64", "pgtype.Int8":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("%s = sql.NullString{Valid: true, String: v.Value}", dst))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Int64: v.Value}", dst, attrType))
 		res = append(res, "}")
-	case "pgtype.Text":
+	case "pgtype.Float4":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
 		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
-		res = append(res, fmt.Sprintf("%s = pgtype.Text{Valid: true, String: v.Value}", dst))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Float32: v.Value}", dst, attrType))
 		res = append(res, "}")
-	case "sql.NullTime":
+	case "sql.NullFloat64", "pgtype.Float8":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
+		}
+		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, Float64: v.Value}", dst, attrType))
+		res = append(res, "}")
+	case "sql.NullString", "pgtype.Text":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
+		}
+		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
+		res = append(res, fmt.Sprintf("%s = %s{Valid: true, String: v.Value}", dst, attrType))
+		res = append(res, "}")
+	case "sql.NullTime", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestampz":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}
@@ -191,7 +222,15 @@ func bindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("if v, err := uuid.Parse(%s.Get%s()); err != nil {", src, camelCaseProto(attrName)))
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, fmt.Sprintf("return nil, err } else { %s = v }", dst))
-
+	case "pgtype.UUID":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
+		}
+		res = append(res, fmt.Sprintf("if v := %s.Get%s(); v != nil {", src, camelCaseProto(attrName)))
+		res = append(res, fmt.Sprintf("if err := json.Unmarshal([]byte(v), &%s); err != nil {", dst))
+		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
+		res = append(res, "return nil, err }")
+		res = append(res, "}")
 	case "net.HardwareAddr":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))

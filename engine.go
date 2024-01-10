@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"errors"
 	"fmt"
 	"go/format"
@@ -17,21 +16,22 @@ import (
 	"golang.org/x/tools/imports"
 
 	"github.com/walterwanderley/sqlc-grpc/metadata"
+	"github.com/walterwanderley/sqlc-grpc/templates"
 )
 
-//go:embed templates/*
-var templates embed.FS
+//go :embed templates/*
+//var templates embed.FS
 
 func process(def *metadata.Definition, outPath string, appendMode bool) error {
-	rootPath := "templates"
-	return fs.WalkDir(templates, rootPath, func(path string, d fs.DirEntry, err error) error {
+	//rootPath := "templates"
+	return fs.WalkDir(templates.Files, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			log.Println("ERROR ", err.Error())
 			return err
 		}
 
-		newPath := strings.Replace(path, rootPath, outPath, 1)
-		newPath = strings.TrimSuffix(newPath, ".tmpl")
+		//newPath := strings.Replace(path, rootPath, outPath, 1)
+		newPath := strings.TrimSuffix(path, ".tmpl")
 
 		if d.IsDir() {
 			if strings.HasSuffix(newPath, "trace") && !def.DistributedTracing {
@@ -53,9 +53,13 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 			return nil
 		}
 
+		if strings.HasSuffix(newPath, "templates.go") {
+			return nil
+		}
+
 		log.Println(path, "...")
 
-		in, err := templates.Open(path)
+		in, err := templates.Files.Open(path)
 		if err != nil {
 			return err
 		}
