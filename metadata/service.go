@@ -140,5 +140,5 @@ func (s *Service) ProtoOutputs() string {
 	} else if s.HasCustomOutput() {
 		name = ToSnakeCase(canonicalName(s.Output))
 	}
-	return fmt.Sprintf("    %s %s = 1;\n", toProtoType(s.Output), name)
+	return fmt.Sprintf("    %s %s = 1;\n", ToProtoType(s.Output), name)
 }

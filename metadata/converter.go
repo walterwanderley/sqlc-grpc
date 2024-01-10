@@ -37,12 +37,12 @@ func exprToStr(e ast.Expr) (string, error) {
 	}
 }
 
-func toProtoType(typ string) string {
+func ToProtoType(typ string) string {
 	if strings.HasPrefix(typ, "*") {
-		return toProtoType(typ[1:])
+		return ToProtoType(typ[1:])
 	}
 	if strings.HasPrefix(typ, "[]") && typ != "[]byte" {
-		return "repeated " + toProtoType(typ[2:])
+		return "repeated " + ToProtoType(typ[2:])
 	}
 	switch typ {
 	case "json.RawMessage", "[]byte":

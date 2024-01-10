@@ -77,7 +77,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 			} else if service.HasCustomOutput() {
 				name = ToSnakeCase(canonicalName(service.Output))
 			}
-			fields = append(fields, &Field{Name: name, Type: toProtoType(service.Output)})
+			fields = append(fields, &Field{Name: name, Type: ToProtoType(service.Output)})
 		}
 		def.Messages[resMessageName] = &Message{
 			Name:   resMessageName,

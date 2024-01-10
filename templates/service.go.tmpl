@@ -42,7 +42,7 @@ func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.
 }
 {{ end }}
 {{if not .EmitInterface}}{{if not .EmitDbArgument}}
-func (s *Service) WithTx(tx {{if eq .SqlPackage "database/sql"}}*sql.Tx{{else}}pgx.Tx{{end}}) *Service {
+func (s *Service) WithTx(tx {{if eq .SqlPackage "pgx/v5"}}pgx.Tx{{else}}*sql.Tx{{end}}) *Service {
 	return &Service{
 		querier: s.querier.WithTx(tx),
 	}

@@ -17,7 +17,7 @@ func (f *Field) Proto(tag int) string {
 	for _, line := range f.CustomProtoComments {
 		sb.WriteString(fmt.Sprintf("    // %s\n", line))
 	}
-	sb.WriteString(fmt.Sprintf("    %s %s = %d%s;\n", toProtoType(f.Type), ToSnakeCase(f.Name), tag, f.formatProtoOptions()))
+	sb.WriteString(fmt.Sprintf("    %s %s = %d%s;\n", ToProtoType(f.Type), ToSnakeCase(f.Name), tag, f.formatProtoOptions()))
 	return sb.String()
 }
 

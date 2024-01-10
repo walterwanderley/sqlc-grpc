@@ -32,8 +32,7 @@ import (
 	"{{ .GoModule}}/internal/server/litestream"
 	"{{ .GoModule}}/internal/server/instrumentation/trace"
 )
-
-//go:generate {{ .Args}}
+{{if .Args}}//go:generate {{ .Args}}{{end}}
 {{if .LiteFS}}
 const (
 	serviceName    = "{{ .GoModule}}"
