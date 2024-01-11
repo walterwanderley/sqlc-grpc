@@ -25,9 +25,9 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/proto"
 
-	"booktest/internal/server/instrumentation/metric"
-	"booktest/internal/server/instrumentation/trace"
-	"booktest/internal/server/middleware"
+	"authors/internal/server/instrumentation/metric"
+	"authors/internal/server/instrumentation/trace"
+	"authors/internal/server/middleware"
 )
 
 const (

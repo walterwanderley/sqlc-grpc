@@ -24,13 +24,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
-	"booktest/internal/server"
-	"booktest/internal/server/instrumentation/trace"
+	"authors/internal/server"
+	"authors/internal/server/instrumentation/trace"
 )
 
-//go:generate sqlc-grpc -m booktest -migration-path sql/migrations -tracing -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -append
 
-const serviceName = "booktest"
+const serviceName = "authors"
 
 var (
 	dbURL string

@@ -6,9 +6,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 
-	pb_authors "booktest/api/authors/v1"
-	app_authors "booktest/internal/authors"
-	"booktest/internal/server"
+	pb_authors "authors/api/authors/v1"
+	app_authors "authors/internal/authors"
+	"authors/internal/server"
 )
 
 func registerServer(db *pgxpool.Pool) server.RegisterServer {

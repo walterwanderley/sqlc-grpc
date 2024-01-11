@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	pb "booktest/api/authors/v1"
+	pb "authors/api/authors/v1"
 )
 
 type Service struct {

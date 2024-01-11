@@ -1,4 +1,4 @@
-module booktest
+module authors
 
 go 1.21.4
 

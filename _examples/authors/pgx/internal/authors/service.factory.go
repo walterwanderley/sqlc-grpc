@@ -5,7 +5,7 @@ package authors
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	pb "booktest/api/authors/v1"
+	pb "authors/api/authors/v1"
 )
 
 // NewService is a constructor of a pb.AuthorsServiceServer implementation.

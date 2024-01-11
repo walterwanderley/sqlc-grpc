@@ -5,7 +5,7 @@ package authors
 import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	pb "booktest/api/authors/v1"
+	pb "authors/api/authors/v1"
 )
 
 func toAuthor(in Author) *pb.Author {
