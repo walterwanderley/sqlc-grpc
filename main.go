@@ -22,6 +22,7 @@ var (
 	ignoreQueries      string
 	migrationPath      string
 	liteFS             bool
+	litestream         bool
 	distributedTracing bool
 	appendMode         bool
 	showVersion        bool
@@ -36,6 +37,7 @@ func main() {
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
 	flag.BoolVar(&liteFS, "litefs", false, "Enable support to LiteFS")
+	flag.BoolVar(&litestream, "litestream", false, "Enable support to Litestream")
 	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing with Open Telemetry")
 	flag.Parse()
 
@@ -65,10 +67,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if len(cfg.Packages) == 0 {
-		log.Fatal("no packages")
-	}
-
 	queriesToIgnore := make([]*regexp.Regexp, 0)
 	for _, queryName := range strings.Split(ignoreQueries, ",") {
 		s := strings.TrimSpace(queryName)
@@ -94,6 +92,7 @@ func main() {
 		MigrationPath:      migrationPath,
 		Packages:           make([]*metadata.Package, 0),
 		LiteFS:             liteFS,
+		Litestream:         litestream,
 		DistributedTracing: distributedTracing,
 	}
 
@@ -108,6 +107,7 @@ func main() {
 		if err != nil {
 			log.Fatal("parser error:", err.Error())
 		}
+
 		pkg.GoModule = module
 		pkg.Engine = p.Engine
 		if p.SqlPackage == "" {
@@ -127,8 +127,8 @@ func main() {
 		return strings.Compare(def.Packages[i].Package, def.Packages[j].Package) < 0
 	})
 
-	if len(def.Packages) == 0 {
-		log.Fatal("No services found, verify the -i parameter")
+	if err := def.Validate(); err != nil {
+		log.Fatal(err.Error())
 	}
 
 	wd, err := os.Getwd()

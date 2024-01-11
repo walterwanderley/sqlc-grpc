@@ -21,9 +21,8 @@ import (
 	"github.com/XSAM/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.uber.org/automaxprocs/maxprocs"
-
 	// database driver
-	{{if eq .Database "mysql"}}_ "github.com/go-sql-driver/mysql"{{else if eq .Database "sqlite"}}_ "github.com/mattn/go-sqlite3"{{else}}{{if eq .SqlPackage "pgx/v5"}}"github.com/jackc/pgx/v5/pgxpool"{{else}}_ "github.com/jackc/pgx/v5/stdlib"{{end}}{{end}}
+	_ "{{ .DatabaseImport}}"
 	{{if .MigrationPath}}{{if eq .SqlPackage "pgx/v5"}}_ "github.com/jackc/pgx/v5/stdlib"{{end}}{{end}}
 
 	{{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
@@ -42,7 +41,7 @@ const serviceName = "{{ .GoModule}}"
 {{end}}
 var (
 	dbURL string
-	{{if eq .Database "sqlite"}}replicationURL string{{end}}
+	{{if .Litestream}}replicationURL string{{end}}
 	{{if .LiteFS}}litefsConfig   litefs.Config
 	liteFS         *litefs.LiteFS{{end}}
 
@@ -61,7 +60,7 @@ func main() {
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	{{if .DistributedTracing}}flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)"){{end}}
-	{{if eq .Database "sqlite"}}flag.StringVar(&replicationURL, "replication", "", "S3 replication URL"){{end}}
+	{{if .Litestream}}flag.StringVar(&replicationURL, "replication", "", "S3 replication URL"){{end}}
 	{{if .LiteFS}}litefs.SetFlags(&litefsConfig){{end}}
 	flag.Parse()
 
@@ -121,7 +120,7 @@ func run(cfg server.Config) error {
     		return err
 		}
 		{{else}}
-		db, err = otelsql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL, otelsql.WithAttributes(
+		db, err = otelsql.Open("{{ .DatabaseDriver}}", dbURL, otelsql.WithAttributes(
 			{{if eq .Database "mysql"}}semconv.DBSystemMySQL{{else if eq .Database "sqlite"}}semconv.DBSystemSqlite{{else}}semconv.DBSystemPostgreSQL{{end}},
 		))
 		if err != nil {			
@@ -147,13 +146,13 @@ func run(cfg server.Config) error {
 	{{if eq .SqlPackage "pgx/v5"}}
 		db, err := pgxpool.New(context.Background(), dbURL)
 	{{else}}
-	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL)
+	db, err := sql.Open("{{ .DatabaseDriver}}", dbURL)
 	{{end}}if err != nil {
 		return err
 	}
 	defer db.Close()
 	{{end}}
-	{{if eq .Database "sqlite"}}if replicationURL != "" {
+	{{if .Litestream}}if replicationURL != "" {
 		slog.Info("litestream replication", "url", replicationURL)
 		lsdb, err := litestream.Replicate(context.Background(), dbURL, replicationURL)
 		if err != nil { return fmt.Errorf("init replication error: %w", err) }

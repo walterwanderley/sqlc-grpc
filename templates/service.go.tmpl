@@ -30,14 +30,14 @@ type Service struct {
 {{$emitDbArgument := .EmitDbArgument}}
 {{ range .Services }}
 func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.{{.Name}}Response, error) {
-	{{ range .InputGrpc}}{{ .}}
+	{{ range . | Input}}{{ .}}
 	{{end}}
 	{{if not .EmptyOutput}}result, {{end}}err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
 	if err != nil {
 		slog.Error("{{.Name}} sql call failed", "error", err)			
 		return nil, err
 	}
-	{{ range .OutputGrpc}}{{ .}}
+	{{ range . | Output}}{{ .}}
 	{{end -}}
 }
 {{ end }}

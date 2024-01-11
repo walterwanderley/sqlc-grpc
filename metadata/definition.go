@@ -21,7 +21,35 @@ type Definition struct {
 	Packages           []*Package
 	MigrationPath      string
 	LiteFS             bool
+	Litestream         bool
 	DistributedTracing bool
+}
+
+func (d *Definition) Validate() error {
+	var engine, sqlPackage string
+	countServices := 0
+	for _, pkg := range d.Packages {
+		if engine == "" {
+			engine = pkg.Engine
+		} else if engine != pkg.Engine {
+			return fmt.Errorf("can't use different database engines, found %q and %q", engine, pkg.Engine)
+		}
+
+		if sqlPackage == "" {
+			sqlPackage = pkg.SqlPackage
+		} else if sqlPackage != pkg.SqlPackage {
+			return fmt.Errorf("can't use different sql packages, found %q and %q", sqlPackage, pkg.SqlPackage)
+		}
+
+		countServices += len(pkg.Services)
+	}
+
+	if countServices == 0 {
+		return fmt.Errorf("no services found")
+	}
+
+	return nil
+
 }
 
 func (d *Definition) Database() string {
@@ -31,6 +59,41 @@ func (d *Definition) Database() string {
 		}
 	}
 	return ""
+}
+
+func (d *Definition) DatabaseDriver() string {
+	switch d.Database() {
+	case "sqlite":
+		if !d.LiteFS && !d.Litestream {
+			return "sqlite"
+		}
+		return "sqlite3"
+	case "postgresql":
+		return "pgx"
+	case "mysql":
+		return "mysql"
+	}
+
+	return "unknown_driver"
+}
+
+func (d *Definition) DatabaseImport() string {
+	switch d.Database() {
+	case "sqlite":
+		if !d.LiteFS && !d.Litestream {
+			return "modernc.org/sqlite"
+		}
+		return "github.com/mattn/go-sqlite3"
+	case "postgresql":
+		if d.SqlPackage() == "pgx/v5" {
+			return "github.com/jackc/pgx/v5/pgxpool"
+		}
+		return "github.com/jackc/pgx/v5/stdlib"
+	case "mysql":
+		return "github.com/go-sql-driver/mysql"
+	}
+
+	return "unknown_database"
 }
 
 func (d *Definition) SqlPackage() string {
@@ -73,14 +136,12 @@ type Package struct {
 
 func (p *Package) ProtoImports() []string {
 	r := make([]string, 0)
-	r = append(r, `import "google/api/annotations.proto";`)
 	if p.importTimestamp() {
 		r = append(r, `import "google/protobuf/timestamp.proto";`)
 	}
 	if p.importWrappers() {
 		r = append(r, `import "google/protobuf/wrappers.proto";`)
 	}
-	r = append(r, `import "protoc-gen-openapiv2/options/annotations.proto";`)
 	imports := strings.Join(r, " ")
 	for _, i := range p.CustomProtoImports {
 		if !strings.Contains(imports, i) {
@@ -307,7 +368,7 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 
 		for _, s := range p.Services {
 			if s.HasCustomOutput() || s.HasArrayOutput() {
-				outAdapters[canonicalName(s.Output)] = struct{}{}
+				outAdapters[converter.CanonicalName(s.Output)] = struct{}{}
 			}
 		}
 

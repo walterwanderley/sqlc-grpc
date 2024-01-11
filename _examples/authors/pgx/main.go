@@ -22,6 +22,7 @@ import (
 
 	// database driver
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"authors/internal/server"

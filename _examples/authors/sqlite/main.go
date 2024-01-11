@@ -29,7 +29,7 @@ import (
 	"authors/internal/server/litestream"
 )
 
-//go:generate sqlc-grpc -m authors -migration-path sql/migrations -litefs -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -litefs -litestream -append
 
 const (
 	serviceName    = "authors"

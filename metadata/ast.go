@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"go/ast"
-	"strings"
 
 	"github.com/walterwanderley/sqlc-grpc/converter"
 )
@@ -77,7 +76,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 			if service.HasArrayOutput() {
 				name = "list"
 			} else if service.HasCustomOutput() {
-				name = converter.ToSnakeCase(canonicalName(service.Output))
+				name = converter.ToSnakeCase(converter.CanonicalName(service.Output))
 			}
 			fields = append(fields, &Field{Name: name, Type: converter.ToProtoType(service.Output)})
 		}
@@ -143,10 +142,4 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 	}
 
 	return true
-}
-
-func canonicalName(typ string) string {
-	name := strings.TrimPrefix(typ, "[]")
-	name = strings.TrimPrefix(name, "*")
-	return name
 }

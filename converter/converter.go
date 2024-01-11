@@ -311,6 +311,12 @@ func CamelCaseProto(str string) string {
 	return generator.CamelCase(ToSnakeCase(str))
 }
 
+func CanonicalName(typ string) string {
+	name := strings.TrimPrefix(typ, "[]")
+	name = strings.TrimPrefix(name, "*")
+	return name
+}
+
 func originalAndElementType(typ string) (original, element string) {
 	typ = strings.TrimPrefix(typ, "[]")
 	t := strings.Split(typ, ".")
