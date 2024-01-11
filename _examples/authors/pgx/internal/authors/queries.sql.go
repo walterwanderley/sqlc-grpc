@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createAuthor = `-- name: CreateAuthor :one
+const CreateAuthor = `-- name: CreateAuthor :one
 INSERT INTO authors (
   name, bio
 ) VALUES (
@@ -21,57 +21,57 @@ RETURNING id, name, bio
 `
 
 type CreateAuthorParams struct {
-	Name string
-	Bio  pgtype.Text
+	Name string      `json:"name"`
+	Bio  pgtype.Text `json:"bio"`
 }
 
-func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (Author, error) {
-	row := q.db.QueryRow(ctx, createAuthor, arg.Name, arg.Bio)
-	var i Author
+func (q *Queries) CreateAuthor(ctx context.Context, db DBTX, arg *CreateAuthorParams) (*Authors, error) {
+	row := db.QueryRow(ctx, CreateAuthor, arg.Name, arg.Bio)
+	var i Authors
 	err := row.Scan(&i.ID, &i.Name, &i.Bio)
-	return i, err
+	return &i, err
 }
 
-const deleteAuthor = `-- name: DeleteAuthor :exec
+const DeleteAuthor = `-- name: DeleteAuthor :exec
 DELETE FROM authors
 WHERE id = $1
 `
 
-func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteAuthor, id)
+func (q *Queries) DeleteAuthor(ctx context.Context, db DBTX, id int64) error {
+	_, err := db.Exec(ctx, DeleteAuthor, id)
 	return err
 }
 
-const getAuthor = `-- name: GetAuthor :one
+const GetAuthor = `-- name: GetAuthor :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
-	row := q.db.QueryRow(ctx, getAuthor, id)
-	var i Author
+func (q *Queries) GetAuthor(ctx context.Context, db DBTX, id int64) (*Authors, error) {
+	row := db.QueryRow(ctx, GetAuthor, id)
+	var i Authors
 	err := row.Scan(&i.ID, &i.Name, &i.Bio)
-	return i, err
+	return &i, err
 }
 
-const listAuthors = `-- name: ListAuthors :many
+const ListAuthors = `-- name: ListAuthors :many
 SELECT id, name, bio FROM authors
 ORDER BY name
 `
 
-func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
-	rows, err := q.db.Query(ctx, listAuthors)
+func (q *Queries) ListAuthors(ctx context.Context, db DBTX) ([]*Authors, error) {
+	rows, err := db.Query(ctx, ListAuthors)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Author
+	items := []*Authors{}
 	for rows.Next() {
-		var i Author
+		var i Authors
 		if err := rows.Scan(&i.ID, &i.Name, &i.Bio); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, &i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

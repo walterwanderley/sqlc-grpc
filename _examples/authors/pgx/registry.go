@@ -13,7 +13,7 @@ import (
 
 func registerServer(db *pgxpool.Pool) server.RegisterServer {
 	return func(grpcServer *grpc.Server) {
-		pb_authors.RegisterAuthorsServiceServer(grpcServer, app_authors.NewService(app_authors.New(db), db))
+		pb_authors.RegisterAuthorsServiceServer(grpcServer, app_authors.NewService(app_authors.New(), db))
 
 	}
 }

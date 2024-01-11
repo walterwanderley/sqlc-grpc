@@ -423,7 +423,7 @@ type response_AuthorsService_CreateAuthor_0 struct {
 
 func (m response_AuthorsService_CreateAuthor_0) XXX_ResponseBody() interface{} {
 	response := m.Message.(*CreateAuthorResponse)
-	return response.Author
+	return response.Authors
 }
 
 type response_AuthorsService_GetAuthor_0 struct {
@@ -432,7 +432,7 @@ type response_AuthorsService_GetAuthor_0 struct {
 
 func (m response_AuthorsService_GetAuthor_0) XXX_ResponseBody() interface{} {
 	response := m.Message.(*GetAuthorResponse)
-	return response.Author
+	return response.Authors
 }
 
 type response_AuthorsService_ListAuthors_0 struct {

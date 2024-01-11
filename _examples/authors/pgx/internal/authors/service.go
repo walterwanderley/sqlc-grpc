@@ -6,36 +6,37 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	pb "authors/api/authors/v1"
 )
 
 type Service struct {
 	pb.UnimplementedAuthorsServiceServer
-	querier *Queries
+	querier Querier
+	db      *pgxpool.Pool
 }
 
 func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest) (*pb.CreateAuthorResponse, error) {
-	var arg CreateAuthorParams
+	arg := new(CreateAuthorParams)
 	arg.Name = req.GetName()
 	if v := req.GetBio(); v != nil {
 		arg.Bio = pgtype.Text{Valid: true, String: v.Value}
 	}
 
-	result, err := s.querier.CreateAuthor(ctx, arg)
+	result, err := s.querier.CreateAuthor(ctx, s.db, arg)
 	if err != nil {
 		slog.Error("CreateAuthor sql call failed", "error", err)
 		return nil, err
 	}
-	return &pb.CreateAuthorResponse{Author: toAuthor(result)}, nil
+	return &pb.CreateAuthorResponse{Authors: toAuthors(result)}, nil
 }
 
 func (s *Service) DeleteAuthor(ctx context.Context, req *pb.DeleteAuthorRequest) (*pb.DeleteAuthorResponse, error) {
 	id := req.GetId()
 
-	err := s.querier.DeleteAuthor(ctx, id)
+	err := s.querier.DeleteAuthor(ctx, s.db, id)
 	if err != nil {
 		slog.Error("DeleteAuthor sql call failed", "error", err)
 		return nil, err
@@ -46,30 +47,24 @@ func (s *Service) DeleteAuthor(ctx context.Context, req *pb.DeleteAuthorRequest)
 func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.GetAuthorResponse, error) {
 	id := req.GetId()
 
-	result, err := s.querier.GetAuthor(ctx, id)
+	result, err := s.querier.GetAuthor(ctx, s.db, id)
 	if err != nil {
 		slog.Error("GetAuthor sql call failed", "error", err)
 		return nil, err
 	}
-	return &pb.GetAuthorResponse{Author: toAuthor(result)}, nil
+	return &pb.GetAuthorResponse{Authors: toAuthors(result)}, nil
 }
 
 func (s *Service) ListAuthors(ctx context.Context, req *pb.ListAuthorsRequest) (*pb.ListAuthorsResponse, error) {
 
-	result, err := s.querier.ListAuthors(ctx)
+	result, err := s.querier.ListAuthors(ctx, s.db)
 	if err != nil {
 		slog.Error("ListAuthors sql call failed", "error", err)
 		return nil, err
 	}
 	res := new(pb.ListAuthorsResponse)
 	for _, r := range result {
-		res.List = append(res.List, toAuthor(r))
+		res.List = append(res.List, toAuthors(r))
 	}
 	return res, nil
-}
-
-func (s *Service) WithTx(tx pgx.Tx) *Service {
-	return &Service{
-		querier: s.querier.WithTx(tx),
-	}
 }

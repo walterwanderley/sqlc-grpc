@@ -23,7 +23,7 @@ service AuthorsService {
     option (google.api.http) = {
       post: "/author"
       body: "*"
-      response_body: "author"
+      response_body: "authors"
     };
   }
   rpc DeleteAuthor(DeleteAuthorRequest) returns (DeleteAuthorResponse) {
@@ -32,7 +32,7 @@ service AuthorsService {
   rpc GetAuthor(GetAuthorRequest) returns (GetAuthorResponse) {
     option (google.api.http) = {
       get: "/author/{id}"
-      response_body: "author"
+      response_body: "authors"
     };
   }
   rpc ListAuthors(ListAuthorsRequest) returns (ListAuthorsResponse) {
@@ -43,7 +43,7 @@ service AuthorsService {
   }
 }
 
-message Author {
+message Authors {
   int64 id = 1;
   string name = 2;
   google.protobuf.StringValue bio = 3;
@@ -55,7 +55,7 @@ message CreateAuthorRequest {
 }
 
 message CreateAuthorResponse {
-  Author author = 1;
+  Authors authors = 1;
 }
 
 message DeleteAuthorRequest {
@@ -69,11 +69,11 @@ message GetAuthorRequest {
 }
 
 message GetAuthorResponse {
-  Author author = 1;
+  Authors authors = 1;
 }
 
 message ListAuthorsRequest {}
 
 message ListAuthorsResponse {
-  repeated Author list = 1;
+  repeated Authors list = 1;
 }

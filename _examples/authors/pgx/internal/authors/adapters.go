@@ -8,9 +8,11 @@ import (
 	pb "authors/api/authors/v1"
 )
 
-func toAuthor(in Author) *pb.Author {
-
-	out := new(pb.Author)
+func toAuthors(in *Authors) *pb.Authors {
+	if in == nil {
+		return nil
+	}
+	out := new(pb.Authors)
 	out.Id = in.ID
 	out.Name = in.Name
 	if in.Bio.Valid {

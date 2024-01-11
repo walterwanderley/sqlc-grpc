@@ -10,6 +10,6 @@ import (
 
 // NewService is a constructor of a pb.AuthorsServiceServer implementation.
 // Use this function to customize the server by adding middlewares to it.
-func NewService(querier *Queries, db *pgxpool.Pool) pb.AuthorsServiceServer {
-	return &Service{querier: querier}
+func NewService(querier Querier, db *pgxpool.Pool) pb.AuthorsServiceServer {
+	return &Service{querier: querier, db: db}
 }

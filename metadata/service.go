@@ -32,7 +32,11 @@ func (s *Service) InputGrpc() []string {
 	if s.HasCustomParams() {
 		typ := s.InputTypes[0]
 		in := s.InputNames[0]
-		res = append(res, fmt.Sprintf("var %s %s", in, typ))
+		if strings.HasPrefix(typ, "*") {
+			res = append(res, fmt.Sprintf("%s := new(%s)", in, typ[1:]))
+		} else {
+			res = append(res, fmt.Sprintf("var %s %s", in, typ))
+		}
 		m := s.Messages[canonicalName(typ)]
 		for _, f := range m.Fields {
 			attrName := UpperFirstCharacter(f.Name)

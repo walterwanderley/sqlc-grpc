@@ -17,7 +17,7 @@ import (
 
 func registerServer(db {{if eq .SqlPackage "database/sql"}}*sql.DB{{else}}*pgxpool.Pool{{end}}) server.RegisterServer {
     return func(grpcServer *grpc.Server) {
-        {{range .Packages}}pb_{{.Package}}.Register{{ .Package | PascalCase}}ServiceServer(grpcServer, app_{{.Package}}.NewService(app_{{.Package}}.New(db), db))
+        {{range .Packages}}pb_{{.Package}}.Register{{ .Package | PascalCase}}ServiceServer(grpcServer, app_{{.Package}}.NewService(app_{{.Package}}.New({{if not .EmitDbArgument}}db{{end}}), db))
         {{end}}
     }
 }

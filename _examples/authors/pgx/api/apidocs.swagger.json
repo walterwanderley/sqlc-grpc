@@ -28,7 +28,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/v1Author"
+              "$ref": "#/definitions/v1Authors"
             }
           },
           "default": {
@@ -60,7 +60,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/v1Author"
+              "$ref": "#/definitions/v1Authors"
             }
           },
           "default": {
@@ -123,7 +123,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "$ref": "#/definitions/v1Author"
+                "$ref": "#/definitions/v1Authors"
               }
             }
           },
@@ -169,7 +169,7 @@
         }
       }
     },
-    "v1Author": {
+    "v1Authors": {
       "type": "object",
       "properties": {
         "id": {
@@ -198,8 +198,8 @@
     "v1CreateAuthorResponse": {
       "type": "object",
       "properties": {
-        "author": {
-          "$ref": "#/definitions/v1Author"
+        "authors": {
+          "$ref": "#/definitions/v1Authors"
         }
       }
     },
@@ -209,8 +209,8 @@
     "v1GetAuthorResponse": {
       "type": "object",
       "properties": {
-        "author": {
-          "$ref": "#/definitions/v1Author"
+        "authors": {
+          "$ref": "#/definitions/v1Authors"
         }
       }
     },
@@ -221,7 +221,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1Author"
+            "$ref": "#/definitions/v1Authors"
           }
         }
       }
