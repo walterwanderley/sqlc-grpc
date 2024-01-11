@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -26,7 +26,7 @@ type PackageConfig struct {
 	SqlPackage                string `json:"sql_package" yaml:"sql_package"`
 }
 
-type sqlcConfig struct {
+type SqlcConfig struct {
 	Packages []PackageConfig `json:"packages" yaml:"packages"`
 }
 
@@ -34,8 +34,8 @@ type sqlcConfigVersion struct {
 	Version string `json:"version" yaml:"version"`
 }
 
-func readConfigV1(name string) (sqlcConfig, error) {
-	var cfg sqlcConfig
+func readConfigV1(name string) (SqlcConfig, error) {
+	var cfg SqlcConfig
 	f, err := os.Open(name)
 	if err != nil {
 		panic(err)
@@ -51,8 +51,8 @@ func readConfigV1(name string) (sqlcConfig, error) {
 	return cfg, err
 }
 
-func readConfig() (sqlcConfig, error) {
-	var cfg sqlcConfig
+func Load() (SqlcConfig, error) {
+	var cfg SqlcConfig
 	name, err := configFile()
 	if err != nil {
 		return cfg, err

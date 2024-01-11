@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/proto"
+	"github.com/walterwanderley/sqlc-grpc/converter"
 )
 
 type Definition struct {
@@ -120,7 +121,7 @@ func (p *Package) LoadOptions(protoFile string) {
 	}))
 
 	proto.Walk(def, proto.WithService(func(s *proto.Service) {
-		if s.Name != UpperFirstCharacter(p.Package)+"Service" {
+		if s.Name != converter.UpperFirstCharacter(p.Package)+"Service" {
 			return
 		}
 		if s.Comment != nil {
@@ -332,7 +333,7 @@ func addConstant(constants map[string]string, name string, obj *ast.Object) {
 	}
 	if vs, ok := obj.Decl.(*ast.ValueSpec); ok {
 		if v, ok := vs.Values[0].(*ast.BasicLit); ok {
-			constants[UpperFirstCharacter(name)] = v.Value
+			constants[converter.UpperFirstCharacter(name)] = v.Value
 		}
 	}
 

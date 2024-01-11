@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/emicklei/proto"
+	"github.com/walterwanderley/sqlc-grpc/converter"
 )
 
 type Message struct {
@@ -47,7 +48,7 @@ func (m *Message) loadOptions(protoMessage *proto.Message) {
 
 		if f, ok := e.(*proto.NormalField); ok {
 			for _, field := range m.Fields {
-				if ToSnakeCase(field.Name) == f.Name {
+				if converter.ToSnakeCase(field.Name) == f.Name {
 					if f.Comment != nil {
 						field.CustomProtoComments = clearLines(f.Comment.Lines)
 					}
@@ -87,7 +88,7 @@ func createStructMessage(name string, s *ast.StructType) (*Message, error) {
 		if len(f.Names) == 0 || !firstIsUpper(f.Names[0].Name) {
 			continue
 		}
-		typ, err := exprToStr(f.Type)
+		typ, err := converter.ExprToStr(f.Type)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +101,7 @@ func createStructMessage(name string, s *ast.StructType) (*Message, error) {
 }
 
 func createArrayMessage(name string, s *ast.ArrayType) (*Message, error) {
-	elt, err := exprToStr(s.Elt)
+	elt, err := converter.ExprToStr(s.Elt)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func createArrayMessage(name string, s *ast.ArrayType) (*Message, error) {
 }
 
 func createAliasMessage(name string, s *ast.Ident) (*Message, error) {
-	str, err := exprToStr(s)
+	str, err := converter.ExprToStr(s)
 	if err != nil {
 		return nil, err
 	}
@@ -146,12 +147,6 @@ func adjustType(typ string, messages map[string]*Message) string {
 	return typ
 }
 
-func originalAndElementType(typ string) (original, element string) {
-	typ = strings.TrimPrefix(typ, "[]")
-	t := strings.Split(typ, ".")
-	return t[0], strings.Join(t[1:], ".")
-}
-
 func (m *Message) HasComplexAttribute() bool {
 	for _, f := range m.Fields {
 		if customType(f.Type) || strings.HasPrefix(f.Type, "[]") {
@@ -165,8 +160,8 @@ func (m *Message) HasComplexAttribute() bool {
 func (m *Message) AdapterToGo(src, dst string) []string {
 	res := make([]string, 0)
 	for _, f := range m.Fields {
-		attrName := UpperFirstCharacter(f.Name)
-		res = append(res, bindToGo(src, fmt.Sprintf("%s.%s", dst, attrName), attrName, f.Type, false)...)
+		attrName := converter.UpperFirstCharacter(f.Name)
+		res = append(res, converter.BindToGo(src, fmt.Sprintf("%s.%s", dst, attrName), attrName, f.Type, false)...)
 	}
 	return res
 }
@@ -174,7 +169,7 @@ func (m *Message) AdapterToGo(src, dst string) []string {
 func (m *Message) AdapterToProto(src, dst string) []string {
 	res := make([]string, 0)
 	for _, f := range m.Fields {
-		res = append(res, bindToProto(src, dst, UpperFirstCharacter(f.Name), f.Type)...)
+		res = append(res, converter.BindToProto(src, dst, converter.UpperFirstCharacter(f.Name), f.Type)...)
 	}
 	return res
 }

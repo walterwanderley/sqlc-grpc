@@ -15,6 +15,7 @@ import (
 
 	"golang.org/x/tools/imports"
 
+	"github.com/walterwanderley/sqlc-grpc/converter"
 	"github.com/walterwanderley/sqlc-grpc/metadata"
 	"github.com/walterwanderley/sqlc-grpc/templates"
 )
@@ -67,14 +68,14 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 				return err
 			}
 			for _, pkg := range def.Packages {
-				dest := filepath.Join(dir, metadata.ToSnakeCase(pkg.Package), "v1")
+				dest := filepath.Join(dir, converter.ToSnakeCase(pkg.Package), "v1")
 				if _, err := os.Stat(dest); os.IsNotExist(err) {
 					err := os.MkdirAll(dest, 0750)
 					if err != nil {
 						return err
 					}
 				}
-				destFile := filepath.Join(dest, (metadata.ToSnakeCase(pkg.Package) + ".proto"))
+				destFile := filepath.Join(dest, (converter.ToSnakeCase(pkg.Package) + ".proto"))
 				if appendMode && fileExists(destFile) {
 					pkg.LoadOptions(destFile)
 				}
@@ -188,8 +189,8 @@ func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath 
 	var b bytes.Buffer
 
 	funcMap := template.FuncMap{
-		"PascalCase": metadata.ToPascalCase,
-		"SnakeCase":  metadata.ToSnakeCase,
+		"PascalCase": converter.ToPascalCase,
+		"SnakeCase":  converter.ToSnakeCase,
 	}
 
 	t, err := template.New(name).Funcs(funcMap).Parse(tmp)

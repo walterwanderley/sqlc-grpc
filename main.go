@@ -13,6 +13,7 @@ import (
 
 	"golang.org/x/mod/modfile"
 
+	"github.com/walterwanderley/sqlc-grpc/config"
 	"github.com/walterwanderley/sqlc-grpc/metadata"
 )
 
@@ -59,7 +60,7 @@ func main() {
 		}
 	}
 
-	cfg, err := readConfig()
+	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
 	}

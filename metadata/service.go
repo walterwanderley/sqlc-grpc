@@ -3,6 +3,8 @@ package metadata
 import (
 	"fmt"
 	"strings"
+
+	"github.com/walterwanderley/sqlc-grpc/converter"
 )
 
 type Service struct {
@@ -39,12 +41,12 @@ func (s *Service) InputGrpc() []string {
 		}
 		m := s.Messages[canonicalName(typ)]
 		for _, f := range m.Fields {
-			attrName := UpperFirstCharacter(f.Name)
-			res = append(res, bindToGo("req", fmt.Sprintf("%s.%s", in, attrName), attrName, f.Type, false)...)
+			attrName := converter.UpperFirstCharacter(f.Name)
+			res = append(res, converter.BindToGo("req", fmt.Sprintf("%s.%s", in, attrName), attrName, f.Type, false)...)
 		}
 	} else {
 		for i, n := range s.InputNames {
-			res = append(res, bindToGo("req", n, UpperFirstCharacter(n), s.InputTypes[i], true)...)
+			res = append(res, converter.BindToGo("req", n, converter.UpperFirstCharacter(n), s.InputTypes[i], true)...)
 		}
 	}
 
@@ -63,7 +65,7 @@ func (s *Service) OutputGrpc() []string {
 	}
 
 	if s.HasCustomOutput() {
-		res = append(res, fmt.Sprintf("return &pb.%sResponse{%s: to%s(result)}, nil", s.Name, camelCaseProto(canonicalName(s.Output)), canonicalName(s.Output)))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{%s: to%s(result)}, nil", s.Name, converter.CamelCaseProto(canonicalName(s.Output)), canonicalName(s.Output)))
 		return res
 	}
 	if s.EmptyOutput() {
@@ -142,7 +144,7 @@ func (s *Service) ProtoOutputs() string {
 	if s.HasArrayOutput() {
 		name = "list"
 	} else if s.HasCustomOutput() {
-		name = ToSnakeCase(canonicalName(s.Output))
+		name = converter.ToSnakeCase(canonicalName(s.Output))
 	}
-	return fmt.Sprintf("    %s %s = 1;\n", ToProtoType(s.Output), name)
+	return fmt.Sprintf("    %s %s = 1;\n", converter.ToProtoType(s.Output), name)
 }

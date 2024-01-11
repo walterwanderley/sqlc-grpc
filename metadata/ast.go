@@ -3,6 +3,8 @@ package metadata
 import (
 	"go/ast"
 	"strings"
+
+	"github.com/walterwanderley/sqlc-grpc/converter"
 )
 
 func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
@@ -17,7 +19,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	for i := 1; i < len(fun.Type.Params.List); i++ {
 		p := fun.Type.Params.List[i]
 		for _, n := range p.Names {
-			typ, err := exprToStr(p.Type)
+			typ, err := converter.ExprToStr(p.Type)
 			if err != nil {
 				return
 			}
@@ -34,7 +36,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	if len(fun.Type.Results.List) > 1 {
 		p := fun.Type.Results.List[0]
 		var err error
-		output, err = exprToStr(p.Type)
+		output, err = converter.ExprToStr(p.Type)
 		if err != nil {
 			return
 		}
@@ -75,9 +77,9 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 			if service.HasArrayOutput() {
 				name = "list"
 			} else if service.HasCustomOutput() {
-				name = ToSnakeCase(canonicalName(service.Output))
+				name = converter.ToSnakeCase(canonicalName(service.Output))
 			}
-			fields = append(fields, &Field{Name: name, Type: ToProtoType(service.Output)})
+			fields = append(fields, &Field{Name: name, Type: converter.ToProtoType(service.Output)})
 		}
 		def.Messages[resMessageName] = &Message{
 			Name:   resMessageName,
@@ -118,7 +120,7 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 		return false
 	}
 
-	firstParam, err := exprToStr(fun.Type.Params.List[0].Type)
+	firstParam, err := converter.ExprToStr(fun.Type.Params.List[0].Type)
 	if err != nil {
 		return false
 	}
@@ -131,7 +133,7 @@ func isMethodValid(fun *ast.FuncDecl) bool {
 		return false
 	}
 
-	lastResult, err := exprToStr(fun.Type.Results.List[len(fun.Type.Results.List)-1].Type)
+	lastResult, err := converter.ExprToStr(fun.Type.Results.List[len(fun.Type.Results.List)-1].Type)
 	if err != nil {
 		return false
 	}

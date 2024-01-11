@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+
+	"github.com/walterwanderley/sqlc-grpc/converter"
 )
 
 func (s *Service) HttpMethod() string {
@@ -35,12 +37,12 @@ func trimHeaderComments(s string) string {
 }
 
 func (s *Service) HttpPath() string {
-	path := "/" + toKebabCase(removePrefix(s.Name))
+	path := "/" + converter.ToKebabCase(removePrefix(s.Name))
 	method := s.HttpMethod()
 
 	if (method == "get" || method == "delete") &&
 		len(s.InputNames) == 1 && !s.HasCustomParams() && !s.HasArrayParams() {
-		path = fmt.Sprintf("%s/{%s}", path, ToSnakeCase(canonicalName(s.InputNames[0])))
+		path = fmt.Sprintf("%s/{%s}", path, converter.ToSnakeCase(canonicalName(s.InputNames[0])))
 	}
 	return path
 }
@@ -61,7 +63,7 @@ func (s *Service) HttpResponseBody() string {
 	if s.HasArrayOutput() {
 		return "list"
 	} else if s.HasCustomOutput() {
-		return ToSnakeCase(canonicalName(s.Output))
+		return converter.ToSnakeCase(canonicalName(s.Output))
 	}
 	return ""
 }

@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -16,7 +16,7 @@ type sqlcConfigV2 struct {
 	} `json:"sql" yaml:"sql"`
 }
 
-func (v2 sqlcConfigV2) toV1() (v1 sqlcConfig) {
+func (v2 sqlcConfigV2) toV1() (v1 SqlcConfig) {
 	v1.Packages = make([]PackageConfig, 0)
 	for _, sql := range v2.SQL {
 		if sql.Gen.Go == nil {
@@ -46,11 +46,11 @@ type sqlGoConfig struct {
 	SqlPackage                string `json:"sql_package" yaml:"sql_package"`
 }
 
-func readConfigV2(name string) (sqlcConfig, error) {
+func readConfigV2(name string) (SqlcConfig, error) {
 	var cfgV2 sqlcConfigV2
 	f, err := os.Open(name)
 	if err != nil {
-		return sqlcConfig{}, err
+		return SqlcConfig{}, err
 	}
 	defer f.Close()
 
@@ -61,7 +61,7 @@ func readConfigV2(name string) (sqlcConfig, error) {
 		err = yaml.NewDecoder(f).Decode(&cfgV2)
 	}
 	if err != nil {
-		return sqlcConfig{}, err
+		return SqlcConfig{}, err
 	}
 	return cfgV2.toV1(), nil
 }
