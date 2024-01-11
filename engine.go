@@ -19,18 +19,13 @@ import (
 	"github.com/walterwanderley/sqlc-grpc/templates"
 )
 
-//go :embed templates/*
-//var templates embed.FS
-
 func process(def *metadata.Definition, outPath string, appendMode bool) error {
-	//rootPath := "templates"
 	return fs.WalkDir(templates.Files, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			log.Println("ERROR ", err.Error())
 			return err
 		}
 
-		//newPath := strings.Replace(path, rootPath, outPath, 1)
 		newPath := strings.TrimSuffix(path, ".tmpl")
 
 		if d.IsDir() {
