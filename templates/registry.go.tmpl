@@ -15,7 +15,7 @@ import (
 	{{end}}
 )
 
-func registerServer(db {{if eq .SqlPackage "database/sql"}}*sql.DB{{else}}*pgxpool.Pool{{end}}) server.RegisterServer {
+func registerServer(db {{if eq .SqlPackage "pgx/v5"}}*pgxpool.Pool{{else}}*sql.DB{{end}}) server.RegisterServer {
     return func(grpcServer *grpc.Server) {
         {{range .Packages}}pb_{{.Package}}.Register{{ .Package | PascalCase}}ServiceServer(grpcServer, app_{{.Package}}.NewService(app_{{.Package}}.New({{if not .EmitDbArgument}}db{{end}}), db))
         {{end}}

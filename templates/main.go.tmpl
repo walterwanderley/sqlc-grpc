@@ -103,7 +103,7 @@ func run(cfg server.Config) error {
 	{{end}}
 
 	{{if .DistributedTracing}}
-	{{if eq .SqlPackage "database/sql"}}var db *sql.DB{{else}}var db *pgxpool.Pool{{end}}
+	var db {{if eq .SqlPackage "pgx/v5"}}*pgxpool.Pool{{else}}*sql.DB{{end}}
 	if cfg.TracingEnabled() {
 		flush, err := trace.Init(context.Background(), serviceName, cfg.OtlpEndpoint)
 		if err != nil {
@@ -145,7 +145,7 @@ func run(cfg server.Config) error {
 	defer db.Close()
 	{{else}}
 	{{if eq .SqlPackage "pgx/v5"}}
-		db, err = pgxpool.New(context.Background(), dbURL)
+		db, err := pgxpool.New(context.Background(), dbURL)
 	{{else}}
 	db, err := sql.Open("{{if eq .Database "mysql"}}mysql{{else if eq .Database "sqlite"}}sqlite3{{else}}pgx{{end}}", dbURL)
 	{{end}}if err != nil {
