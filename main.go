@@ -141,7 +141,7 @@ func main() {
 		log.Fatal("unable to process templates:", err.Error())
 	}
 
-	postProcess(&def, wd)
+	postProcess(&def)
 }
 
 func moduleFromGoMod() string {
@@ -159,7 +159,7 @@ func moduleFromGoMod() string {
 	return modfile.ModulePath(b)
 }
 
-func postProcess(def *metadata.Definition, workingDirectory string) {
+func postProcess(def *metadata.Definition) {
 	log.Printf("Configuring project %s...\n", def.GoModule)
 	execCommand("go mod init " + def.GoModule)
 	execCommand("go mod tidy")
@@ -169,13 +169,7 @@ func postProcess(def *metadata.Definition, workingDirectory string) {
 	execCommand("go install google.golang.org/grpc/cmd/protoc-gen-go-grpc")
 	execCommand("go install github.com/bufbuild/buf/cmd/buf")
 	log.Println("Compiling protocol buffers...")
-	if err := os.Chdir("proto"); err != nil {
-		panic(err)
-	}
-	execCommand("buf mod update")
-	if err := os.Chdir(workingDirectory); err != nil {
-		panic(err)
-	}
+	execCommand("buf mod update proto")
 	execCommand("buf generate")
 	execCommand("buf format -w")
 	execCommand("go mod tidy")
