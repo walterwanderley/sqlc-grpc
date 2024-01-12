@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go/format"
 	"io"
 	"io/fs"
 	"log"
@@ -199,12 +198,7 @@ func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath 
 
 	var src []byte
 	if goSource {
-		src, err = format.Source(b.Bytes())
-		if err != nil {
-			fmt.Println(b.String())
-			return fmt.Errorf("format source error: %w", err)
-		}
-		src, err = imports.Process("", src, nil)
+		src, err = imports.Process("", b.Bytes(), nil)
 		if err != nil {
 			return fmt.Errorf("organize imports error: %w", err)
 		}
