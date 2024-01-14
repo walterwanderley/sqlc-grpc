@@ -27,16 +27,17 @@ service {{.Package | PascalCase}}Service {
     {{- range .Services}}
     {{range .CustomProtoComments}}// {{ .}}
     {{end -}}
-    rpc {{.Name}}({{.Name}}Request) returns ({{.Name}}Response) {
+    {{with $ucName := .Name | UpperFirstCharacter}}
+    rpc {{$ucName}}({{$ucName}}Request) returns ({{$ucName}}Response) {
         {{range .HttpOptions}}{{ .}}
         {{end}}
-    }{{end}}
+    }{{end}}{{end}}
 }
 
 {{range $key, $value := .Messages}}
 {{range $value.CustomProtoComments}}// {{ .}}
 {{end -}}
-message {{$value.ProtoName}} {
+message {{$value.ProtoName | UpperFirstCharacter}} {
 {{range $value.CustomProtoOptions}}{{ .}}
 {{end -}}
 {{$value.ProtoAttributes -}}
