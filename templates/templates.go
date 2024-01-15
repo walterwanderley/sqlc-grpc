@@ -12,8 +12,9 @@ import (
 var Files embed.FS
 
 var Funcs = template.FuncMap{
-	"PascalCase": converter.ToPascalCase,
-	"SnakeCase":  converter.ToSnakeCase,
-	"Input":      metadata.InputGrpc,
-	"Output":     metadata.OutputGrpc,
+	"PascalCase":          converter.ToPascalCase,
+	"SnakeCase":           converter.ToSnakeCase,
+	"UpperFirstCharacter": converter.UpperFirstCharacter,
+	"Input":               metadata.InputGrpc,
+	"Output":              metadata.OutputGrpc,
 }

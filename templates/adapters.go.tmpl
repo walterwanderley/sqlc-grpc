@@ -19,9 +19,9 @@ import (
 {{$emitParamsPointers := .EmitParamsPointers}}
 {{$emitResultPointers := .EmitResultPointers}}
 {{range .OutputAdapters}}
-func to{{.Name}}(in {{if $emitResultPointers}}*{{end}}{{.Name}}) *pb.{{.Name}} {
+func to{{.Name}}(in {{if $emitResultPointers}}*{{end}}{{.Name}}) *pb.{{.Name | UpperFirstCharacter}} {
     {{if $emitResultPointers}}if in == nil { return nil }{{end}}
-    out := new(pb.{{.Name}})
+    out := new(pb.{{.Name | UpperFirstCharacter}})
     {{range .AdapterToProto "in" "out"}}{{.}}
     {{end }}return out
 }

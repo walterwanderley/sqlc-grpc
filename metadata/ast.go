@@ -40,12 +40,16 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 			return
 		}
 	}
+	sql, ok := constants[fun.Name.String()]
+	if !ok {
+		sql = constants[converter.LowerFirstCharacter(fun.Name.String())]
+	}
 	service := Service{
 		Name:       fun.Name.String(),
 		InputNames: inputNames,
 		InputTypes: inputTypes,
 		Output:     output,
-		Sql:        constants[fun.Name.String()],
+		Sql:        sql,
 		Messages:   def.Messages,
 	}
 	def.Services = append(def.Services, &service)
@@ -78,7 +82,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 			} else if service.HasCustomOutput() {
 				name = converter.ToSnakeCase(converter.CanonicalName(service.Output))
 			}
-			fields = append(fields, &Field{Name: name, Type: converter.ToProtoType(service.Output)})
+			fields = append(fields, &Field{Name: name, Type: service.Output})
 		}
 		def.Messages[resMessageName] = &Message{
 			Name:   resMessageName,
@@ -89,10 +93,6 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 
 func isMethodValid(fun *ast.FuncDecl) bool {
 	if fun.Name == nil {
-		return false
-	}
-
-	if !fun.Name.IsExported() {
 		return false
 	}
 

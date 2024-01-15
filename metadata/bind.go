@@ -36,9 +36,10 @@ func InputGrpc(s *Service) []string {
 }
 
 func OutputGrpc(s *Service) []string {
+	name := converter.UpperFirstCharacter(s.Name)
 	res := make([]string, 0)
 	if s.HasArrayOutput() {
-		res = append(res, fmt.Sprintf("res := new(pb.%sResponse)", s.Name))
+		res = append(res, fmt.Sprintf("res := new(pb.%sResponse)", name))
 		res = append(res, "for _, r := range result {")
 		res = append(res, fmt.Sprintf("res.List = append(res.List, to%s(r))", converter.CanonicalName(s.Output)))
 		res = append(res, "}")
@@ -47,17 +48,17 @@ func OutputGrpc(s *Service) []string {
 	}
 
 	if s.HasCustomOutput() {
-		res = append(res, fmt.Sprintf("return &pb.%sResponse{%s: to%s(result)}, nil", s.Name, converter.CamelCaseProto(converter.CanonicalName(s.Output)), converter.CanonicalName(s.Output)))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{%s: to%s(result)}, nil", name, converter.CamelCaseProto(converter.CanonicalName(s.Output)), converter.CanonicalName(s.Output)))
 		return res
 	}
 	if s.EmptyOutput() {
-		res = append(res, fmt.Sprintf("return &pb.%sResponse{}, nil", s.Name))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{}, nil", name))
 	} else {
 		if s.Output == "sql.Result" {
-			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: toExecResult(result)}, nil", s.Name))
+			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: toExecResult(result)}, nil", name))
 			return res
 		}
-		res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result}, nil", s.Name))
+		res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result}, nil", name))
 	}
 
 	return res

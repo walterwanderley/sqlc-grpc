@@ -47,17 +47,21 @@ func ToProtoType(typ string) string {
 	switch typ {
 	case "json.RawMessage", "[]byte":
 		return "bytes"
+	case "bool":
+		return "bool"
 	case "sql.NullBool", "pgtype.Bool":
 		return "google.protobuf.BoolValue"
 	case "sql.NullInt32", "pgtype.Int4", "pgtype.Int2":
 		return "google.protobuf.Int32Value"
 	case "pgtype.Uint32":
 		return "google.protobuf.UInt32Value"
-	case "int":
+	case "int", "int64":
 		return "int64"
-	case "int16":
+	case "uint64":
+		return "uint64"
+	case "int16", "int32":
 		return "int32"
-	case "uint16":
+	case "uint16", "uint32":
 		return "uint32"
 	case "sql.NullInt64", "pgtype.Int8":
 		return "google.protobuf.Int64Value"
@@ -73,7 +77,7 @@ func ToProtoType(typ string) string {
 		return "google.protobuf.StringValue"
 	case "sql.NullTime", "time.Time", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestampz":
 		return "google.protobuf.Timestamp"
-	case "uuid.UUID", "net.HardwareAddr", "net.IP":
+	case "string", "uuid.UUID", "net.HardwareAddr", "net.IP":
 		return "string"
 	case "sql.Result":
 		return "ExecResult"
@@ -81,7 +85,7 @@ func ToProtoType(typ string) string {
 		if _, elementType := originalAndElementType(typ); elementType != "" {
 			return elementType
 		}
-		return typ
+		return UpperFirstCharacter(typ)
 	}
 }
 
@@ -284,6 +288,13 @@ func BindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 func UpperFirstCharacter(str string) string {
 	for i, v := range str {
 		return string(unicode.ToUpper(v)) + str[i+1:]
+	}
+	return str
+}
+
+func LowerFirstCharacter(str string) string {
+	for i, v := range str {
+		return string(unicode.ToLower(v)) + str[i+1:]
 	}
 	return str
 }

@@ -27,7 +27,7 @@ service {{.Package | PascalCase}}Service {
     {{- range .Services}}
     {{range .CustomProtoComments}}// {{ .}}
     {{end -}}
-    rpc {{.Name}}({{.Name}}Request) returns ({{.Name}}Response) {
+    rpc {{.Name | UpperFirstCharacter}}({{.Name | UpperFirstCharacter}}Request) returns ({{.Name | UpperFirstCharacter}}Response) {
         {{range .HttpOptions}}{{ .}}
         {{end}}
     }{{end}}
@@ -36,7 +36,7 @@ service {{.Package | PascalCase}}Service {
 {{range $key, $value := .Messages}}
 {{range $value.CustomProtoComments}}// {{ .}}
 {{end -}}
-message {{$value.ProtoName}} {
+message {{$value.ProtoName | UpperFirstCharacter}} {
 {{range $value.CustomProtoOptions}}{{ .}}
 {{end -}}
 {{$value.ProtoAttributes -}}

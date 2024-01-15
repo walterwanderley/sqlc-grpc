@@ -5,8 +5,6 @@ import (
 	"go/ast"
 	"regexp"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/emicklei/proto"
 	"github.com/walterwanderley/sqlc-grpc/converter"
@@ -85,7 +83,7 @@ func (m *Message) loadOptions(protoMessage *proto.Message) {
 func createStructMessage(name string, s *ast.StructType) (*Message, error) {
 	fields := make([]*Field, 0)
 	for _, f := range s.Fields.List {
-		if len(f.Names) == 0 || !firstIsUpper(f.Names[0].Name) {
+		if len(f.Names) == 0 || !f.Names[0].IsExported() {
 			continue
 		}
 		typ, err := converter.ExprToStr(f.Type)
@@ -123,14 +121,10 @@ func createAliasMessage(name string, s *ast.Ident) (*Message, error) {
 	}, nil
 }
 
-func customType(typ string) bool {
+func customType(typ string, messages map[string]*Message) bool {
 	typ = strings.TrimPrefix(typ, "*")
-	return firstIsUpper(typ)
-}
-
-func firstIsUpper(s string) bool {
-	ru, _ := utf8.DecodeRuneInString(s[0:1])
-	return unicode.IsUpper(ru)
+	_, ok := messages[typ]
+	return ok
 }
 
 func adjustType(typ string, messages map[string]*Message) string {
@@ -147,9 +141,9 @@ func adjustType(typ string, messages map[string]*Message) string {
 	return typ
 }
 
-func (m *Message) HasComplexAttribute() bool {
+func (m *Message) HasComplexAttribute(messages map[string]*Message) bool {
 	for _, f := range m.Fields {
-		if customType(f.Type) || strings.HasPrefix(f.Type, "[]") {
+		if customType(f.Type, messages) || strings.HasPrefix(f.Type, "[]") {
 			return true
 		}
 	}

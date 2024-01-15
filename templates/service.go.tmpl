@@ -29,7 +29,7 @@ type Service struct {
 
 {{$emitDbArgument := .EmitDbArgument}}
 {{ range .Services }}
-func (s *Service) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Request) (*pb.{{.Name}}Response, error) {
+func (s *Service) {{.Name | UpperFirstCharacter}}(ctx context.Context, req *pb.{{.Name  | UpperFirstCharacter}}Request) (*pb.{{.Name | UpperFirstCharacter}}Response, error) {
 	{{ range . | Input}}{{ .}}
 	{{end}}
 	{{if not .EmptyOutput}}result, {{end}}err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})

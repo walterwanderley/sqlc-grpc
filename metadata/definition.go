@@ -340,6 +340,14 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 
 				}
 			}
+
+		}
+
+		for _, m := range p.Messages {
+			m.adjustType(p.Messages)
+		}
+
+		for _, file := range pkg.Files {
 			for _, n := range file.Decls {
 				if fun, ok := n.(*ast.FuncDecl); ok {
 					var ignore bool
@@ -354,10 +362,6 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 					}
 				}
 			}
-		}
-
-		for _, m := range p.Messages {
-			m.adjustType(p.Messages)
 		}
 
 		sort.SliceStable(p.Services, func(i, j int) bool {
@@ -394,7 +398,7 @@ func addConstant(constants map[string]string, name string, obj *ast.Object) {
 	}
 	if vs, ok := obj.Decl.(*ast.ValueSpec); ok {
 		if v, ok := vs.Values[0].(*ast.BasicLit); ok {
-			constants[converter.UpperFirstCharacter(name)] = v.Value
+			constants[name] = v.Value
 		}
 	}
 

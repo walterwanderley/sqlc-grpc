@@ -1,7 +1,6 @@
 package metadata
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/walterwanderley/sqlc-grpc/converter"
@@ -30,7 +29,7 @@ func (s *Service) HasCustomParams() bool {
 		return false
 	}
 
-	return customType(s.InputTypes[0])
+	return customType(s.InputTypes[0], s.Messages)
 }
 
 func (s *Service) HasSimpleParams() bool {
@@ -43,7 +42,7 @@ func (s *Service) HasSimpleParams() bool {
 	}
 
 	if msg, ok := s.Messages[converter.CanonicalName(s.InputTypes[0])]; ok {
-		return !msg.HasComplexAttribute()
+		return !msg.HasComplexAttribute(s.Messages)
 	}
 
 	return false
@@ -62,7 +61,7 @@ func (s *Service) HasCustomOutput() bool {
 		return false
 	}
 
-	return customType(s.Output)
+	return customType(s.Output, s.Messages)
 }
 
 func (s *Service) HasArrayOutput() bool {
@@ -78,17 +77,4 @@ func (s *Service) EmptyInput() bool {
 
 func (s *Service) EmptyOutput() bool {
 	return s.Output == ""
-}
-
-func (s *Service) ProtoOutputs() string {
-	if s.EmptyOutput() {
-		return ""
-	}
-	name := "value"
-	if s.HasArrayOutput() {
-		name = "list"
-	} else if s.HasCustomOutput() {
-		name = converter.ToSnakeCase(converter.CanonicalName(s.Output))
-	}
-	return fmt.Sprintf("    %s %s = 1;\n", converter.ToProtoType(s.Output), name)
 }
