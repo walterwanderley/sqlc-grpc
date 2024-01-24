@@ -24,6 +24,7 @@ var (
 	liteFS             bool
 	litestream         bool
 	distributedTracing bool
+	metric             bool
 	appendMode         bool
 	showVersion        bool
 	help               bool
@@ -38,7 +39,8 @@ func main() {
 	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
 	flag.BoolVar(&liteFS, "litefs", false, "Enable support to LiteFS")
 	flag.BoolVar(&litestream, "litestream", false, "Enable support to Litestream")
-	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing with Open Telemetry")
+	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing")
+	flag.BoolVar(&metric, "metric", false, "Enable support to metrics")
 	flag.Parse()
 
 	if help {
@@ -94,6 +96,7 @@ func main() {
 		LiteFS:             liteFS,
 		Litestream:         litestream,
 		DistributedTracing: distributedTracing,
+		Metric:             metric,
 	}
 
 	for _, p := range cfg.Packages {

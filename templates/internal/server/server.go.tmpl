@@ -28,7 +28,7 @@ import (
 
 	"{{.GoModule}}/internal/server/middleware"
 	"{{.GoModule}}/internal/server/instrumentation/metric"
-	{{if .DistributedTracing}}"{{.GoModule}}/internal/server/instrumentation/trace"{{end}}
+	"{{.GoModule}}/internal/server/instrumentation/trace"
 )
 
 const (
@@ -71,13 +71,12 @@ func New(cfg Config, register RegisterServer, registerHandlers []RegisterHandler
 // ListenAndServe start the server
 func (srv *Server) ListenAndServe() error {
 	grpcInterceptors := srv.cfg.grpcInterceptors()
-
+	{{if .Metric}}
 	srvMetrics := grpc_prometheus.NewServerMetrics(
 		grpc_prometheus.WithServerHandlingTimeHistogram(
 			grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
 		),
 	)
-
 	if srv.cfg.PrometheusEnabled() {
 		prometheus.MustRegister(srvMetrics)
 		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
@@ -87,7 +86,7 @@ func (srv *Server) ListenAndServe() error {
 			return nil
 		}
 		grpcInterceptors = append(grpcInterceptors, srvMetrics.UnaryServerInterceptor(grpc_prometheus.WithExemplarFromContext(exemplarFromContext)))
-	}
+	}{{end}}
 
 	grpcOpts := make([]grpc.ServerOption, 0)
 	{{if .DistributedTracing}}if srv.cfg.TracingEnabled() {
@@ -98,13 +97,14 @@ func (srv *Server) ListenAndServe() error {
 	srv.grpcServer = grpc.NewServer(grpcOpts...)
 	reflection.Register(srv.grpcServer)
 	srv.register(srv.grpcServer)
+	{{if .Metric}}
 	if srv.cfg.PrometheusEnabled() {
 		srvMetrics.InitializeMetrics(srv.grpcServer)
 		err := metric.Init(srv.cfg.PrometheusPort, srv.cfg.ServiceName)
 		if err != nil {
 			return err
 		}
-	}
+	}{{end}}
 
 	srv.healthServer = health.NewServer()
 	healthpb.RegisterHealthServer(srv.grpcServer, srv.healthServer)

@@ -23,6 +23,7 @@ type Definition struct {
 	LiteFS             bool
 	Litestream         bool
 	DistributedTracing bool
+	Metric             bool
 }
 
 func (d *Definition) Validate() error {

@@ -76,7 +76,6 @@ func (srv *Server) ListenAndServe() error {
 			grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
 		),
 	)
-
 	if srv.cfg.PrometheusEnabled() {
 		prometheus.MustRegister(srvMetrics)
 		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
@@ -97,6 +96,7 @@ func (srv *Server) ListenAndServe() error {
 	srv.grpcServer = grpc.NewServer(grpcOpts...)
 	reflection.Register(srv.grpcServer)
 	srv.register(srv.grpcServer)
+
 	if srv.cfg.PrometheusEnabled() {
 		srvMetrics.InitializeMetrics(srv.grpcServer)
 		err := metric.Init(srv.cfg.PrometheusPort, srv.cfg.ServiceName)

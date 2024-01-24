@@ -29,7 +29,7 @@ import (
 	"authors/internal/server/instrumentation/trace"
 )
 
-//go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -metric -append
 
 const serviceName = "authors"
 

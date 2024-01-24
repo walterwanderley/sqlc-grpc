@@ -15,8 +15,8 @@ import (
 type Config struct {
 	ServiceName    string
 	Port           int
-	PrometheusPort int
 	EnableCors     bool
+	PrometheusPort int
 	OtlpEndpoint   string
 
 	Middlewares []HttpMiddlewareType

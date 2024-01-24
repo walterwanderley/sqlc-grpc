@@ -14,18 +14,18 @@ import (
 // Config represents the server configuration
 type Config struct {
 	ServiceName     string
-	Port            int
-	PrometheusPort  int
+	Port            int	
 	EnableCors      bool
+	{{if .Metric}}PrometheusPort  int{{end}}
 	{{if .DistributedTracing}}OtlpEndpoint string{{end}}
 
 	Middlewares     []HttpMiddlewareType
 }
-
+{{if .Metric}}
 // PrometheusEnabled check configuration
 func (c Config) PrometheusEnabled() bool {
 	return c.PrometheusPort > 0
-}
+}{{end}}
 {{if .DistributedTracing}}
 // TracingEnabled check configuration
 func (c Config) TracingEnabled() bool {

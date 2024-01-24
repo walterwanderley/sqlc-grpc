@@ -53,7 +53,7 @@ func main() {
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
-	flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port")
+
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 

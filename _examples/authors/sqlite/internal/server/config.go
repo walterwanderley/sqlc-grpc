@@ -13,17 +13,11 @@ import (
 
 // Config represents the server configuration
 type Config struct {
-	ServiceName    string
-	Port           int
-	PrometheusPort int
-	EnableCors     bool
+	ServiceName string
+	Port        int
+	EnableCors  bool
 
 	Middlewares []HttpMiddlewareType
-}
-
-// PrometheusEnabled check configuration
-func (c Config) PrometheusEnabled() bool {
-	return c.PrometheusPort > 0
 }
 
 func (c Config) grpcInterceptors() []grpc.UnaryServerInterceptor {
