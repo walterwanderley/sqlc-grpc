@@ -137,10 +137,8 @@ func (s *Service) UpdateBook(ctx context.Context, req *pb.UpdateBookRequest) (*p
 
 func (s *Service) UpdateBookISBN(ctx context.Context, req *pb.UpdateBookISBNRequest) (*pb.UpdateBookISBNResponse, error) {
 	var arg UpdateBookISBNParams
-	arg.Title = req.GetTitle()
-	arg.Tags = req.GetTags()
-	arg.BookID = req.GetBookId()
 	arg.Isbn = req.GetIsbn()
+	arg.BookID = req.GetBookId()
 
 	err := s.querier.UpdateBookISBN(ctx, arg)
 	if err != nil {

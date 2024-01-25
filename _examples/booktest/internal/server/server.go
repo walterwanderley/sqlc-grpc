@@ -11,7 +11,10 @@ import (
 	"strings"
 	"time"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/prometheus/client_golang/prometheus"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
@@ -22,6 +25,8 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/proto"
 
+	"booktest/internal/server/instrumentation/metric"
+	"booktest/internal/server/instrumentation/trace"
 	"booktest/internal/server/middleware"
 )
 
@@ -66,13 +71,39 @@ func New(cfg Config, register RegisterServer, registerHandlers []RegisterHandler
 func (srv *Server) ListenAndServe() error {
 	grpcInterceptors := srv.cfg.grpcInterceptors()
 
-	grpcOpts := make([]grpc.ServerOption, 0)
+	srvMetrics := grpc_prometheus.NewServerMetrics(
+		grpc_prometheus.WithServerHandlingTimeHistogram(
+			grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+		),
+	)
+	if srv.cfg.PrometheusEnabled() {
+		prometheus.MustRegister(srvMetrics)
+		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
+			if span := oteltrace.SpanContextFromContext(ctx); span.IsSampled() {
+				return prometheus.Labels{"traceID": span.TraceID().String()}
+			}
+			return nil
+		}
+		grpcInterceptors = append(grpcInterceptors, srvMetrics.UnaryServerInterceptor(grpc_prometheus.WithExemplarFromContext(exemplarFromContext)))
+	}
 
+	grpcOpts := make([]grpc.ServerOption, 0)
+	if srv.cfg.TracingEnabled() {
+		grpcOpts = append(grpcOpts, trace.ServerOption())
+	}
 	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(grpcInterceptors...))
 
 	srv.grpcServer = grpc.NewServer(grpcOpts...)
 	reflection.Register(srv.grpcServer)
 	srv.register(srv.grpcServer)
+
+	if srv.cfg.PrometheusEnabled() {
+		srvMetrics.InitializeMetrics(srv.grpcServer)
+		err := metric.Init(srv.cfg.PrometheusPort, srv.cfg.ServiceName)
+		if err != nil {
+			return err
+		}
+	}
 
 	srv.healthServer = health.NewServer()
 	healthpb.RegisterHealthServer(srv.grpcServer, srv.healthServer)

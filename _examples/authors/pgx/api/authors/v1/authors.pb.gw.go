@@ -179,6 +179,66 @@ func local_request_AuthorsService_ListAuthors_0(ctx context.Context, marshaler r
 
 }
 
+func request_AuthorsService_UpdateAuthorBio_0(ctx context.Context, marshaler runtime.Marshaler, client AuthorsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq UpdateAuthorBioRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+	}
+
+	protoReq.Id, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+	}
+
+	msg, err := client.UpdateAuthorBio(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_AuthorsService_UpdateAuthorBio_0(ctx context.Context, marshaler runtime.Marshaler, server AuthorsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq UpdateAuthorBioRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+	}
+
+	protoReq.Id, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+	}
+
+	msg, err := server.UpdateAuthorBio(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 // RegisterAuthorsServiceHandlerServer registers the http handlers for service AuthorsService to "mux".
 // UnaryRPC     :call AuthorsServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -193,7 +253,7 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/CreateAuthor", runtime.WithHTTPPathPattern("/author"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/CreateAuthor", runtime.WithHTTPPathPattern("/authors"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -218,7 +278,7 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/DeleteAuthor", runtime.WithHTTPPathPattern("/author/{id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/DeleteAuthor", runtime.WithHTTPPathPattern("/authors/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -243,7 +303,7 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/GetAuthor", runtime.WithHTTPPathPattern("/author/{id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/GetAuthor", runtime.WithHTTPPathPattern("/authors/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -282,6 +342,31 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		}
 
 		forward_AuthorsService_ListAuthors_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_ListAuthors_0{resp}, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("PATCH", pattern_AuthorsService_UpdateAuthorBio_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/authors.v1.AuthorsService/UpdateAuthorBio", runtime.WithHTTPPathPattern("/authors/{id}/bio"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_AuthorsService_UpdateAuthorBio_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_AuthorsService_UpdateAuthorBio_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -332,7 +417,7 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/CreateAuthor", runtime.WithHTTPPathPattern("/author"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/CreateAuthor", runtime.WithHTTPPathPattern("/authors"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -354,7 +439,7 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/DeleteAuthor", runtime.WithHTTPPathPattern("/author/{id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/DeleteAuthor", runtime.WithHTTPPathPattern("/authors/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -376,7 +461,7 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/GetAuthor", runtime.WithHTTPPathPattern("/author/{id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/GetAuthor", runtime.WithHTTPPathPattern("/authors/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -414,6 +499,28 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 
 	})
 
+	mux.Handle("PATCH", pattern_AuthorsService_UpdateAuthorBio_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/authors.v1.AuthorsService/UpdateAuthorBio", runtime.WithHTTPPathPattern("/authors/{id}/bio"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_AuthorsService_UpdateAuthorBio_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_AuthorsService_UpdateAuthorBio_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -445,13 +552,15 @@ func (m response_AuthorsService_ListAuthors_0) XXX_ResponseBody() interface{} {
 }
 
 var (
-	pattern_AuthorsService_CreateAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"author"}, ""))
+	pattern_AuthorsService_CreateAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"authors"}, ""))
 
-	pattern_AuthorsService_DeleteAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"author", "id"}, ""))
+	pattern_AuthorsService_DeleteAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"authors", "id"}, ""))
 
-	pattern_AuthorsService_GetAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"author", "id"}, ""))
+	pattern_AuthorsService_GetAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"authors", "id"}, ""))
 
 	pattern_AuthorsService_ListAuthors_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"authors"}, ""))
+
+	pattern_AuthorsService_UpdateAuthorBio_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"authors", "id", "bio"}, ""))
 )
 
 var (
@@ -462,4 +571,6 @@ var (
 	forward_AuthorsService_GetAuthor_0 = runtime.ForwardResponseMessage
 
 	forward_AuthorsService_ListAuthors_0 = runtime.ForwardResponseMessage
+
+	forward_AuthorsService_UpdateAuthorBio_0 = runtime.ForwardResponseMessage
 )

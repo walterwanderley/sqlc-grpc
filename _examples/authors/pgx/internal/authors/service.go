@@ -4,12 +4,14 @@ package authors
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	pb "authors/api/authors/v1"
+	"authors/internal/validation"
 )
 
 type Service struct {
@@ -23,6 +25,16 @@ func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest)
 	arg.Name = req.GetName()
 	if v := req.GetBio(); v != nil {
 		arg.Bio = pgtype.Text{Valid: true, String: v.Value}
+	}
+	if v := req.GetCreatedAt(); v != nil {
+		if err := v.CheckValid(); err != nil {
+			err = fmt.Errorf("invalid CreatedAt: %s%w", err.Error(), validation.ErrUserInput)
+			return nil, err
+		}
+		if t := v.AsTime(); !t.IsZero() {
+			arg.CreatedAt.Valid = true
+			arg.CreatedAt.Time = t
+		}
 	}
 
 	result, err := s.querier.CreateAuthor(ctx, s.db, arg)
@@ -67,4 +79,19 @@ func (s *Service) ListAuthors(ctx context.Context, req *pb.ListAuthorsRequest) (
 		res.List = append(res.List, toAuthors(r))
 	}
 	return res, nil
+}
+
+func (s *Service) UpdateAuthorBio(ctx context.Context, req *pb.UpdateAuthorBioRequest) (*pb.UpdateAuthorBioResponse, error) {
+	arg := new(UpdateAuthorBioParams)
+	if v := req.GetBio(); v != nil {
+		arg.Bio = pgtype.Text{Valid: true, String: v.Value}
+	}
+	arg.ID = req.GetId()
+
+	err := s.querier.UpdateAuthorBio(ctx, s.db, arg)
+	if err != nil {
+		slog.Error("UpdateAuthorBio sql call failed", "error", err)
+		return nil, err
+	}
+	return &pb.UpdateAuthorBioResponse{}, nil
 }

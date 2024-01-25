@@ -8,6 +8,11 @@ import (
 	"github.com/walterwanderley/sqlc-grpc/converter"
 )
 
+type HttpSpec struct {
+	Method string
+	Path   string
+}
+
 func (s *Service) HttpMethod() string {
 	query := trimHeaderComments(strings.ReplaceAll(s.Sql, "`", ""))
 	query = strings.ToUpper(query)
@@ -72,9 +77,22 @@ func (s *Service) HttpOptions() []string {
 	if len(s.CustomProtoOptions) > 0 {
 		return s.CustomProtoOptions
 	}
+
+	res := make([]string, 0)
+	if len(s.HttpSpecs) > 0 {
+		for _, spec := range s.HttpSpecs {
+			res = append(res, s.httpCreateOption(spec.Method, spec.Path)...)
+		}
+	} else {
+		res = append(res, s.httpCreateOption(s.HttpMethod(), s.HttpPath())...)
+	}
+	return res
+}
+
+func (s *Service) httpCreateOption(method, path string) []string {
 	res := make([]string, 0)
 	res = append(res, "option (google.api.http) = {")
-	res = append(res, fmt.Sprintf("    %s: \"%s\"", s.HttpMethod(), s.HttpPath()))
+	res = append(res, fmt.Sprintf("    %s: \"%s\"", strings.ToLower(method), path))
 	body := s.HttpBody()
 	if body != "" {
 		res = append(res, fmt.Sprintf("    body: \"%s\"", body))

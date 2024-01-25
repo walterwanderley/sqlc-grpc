@@ -17,19 +17,19 @@ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 mkdir -p sql/migrations
 ```
 
-2. Create migrations scripts using [go-migrate](https://github.com/golang-migrate/migrate/blob/master/MIGRATIONS.md) rules.
+2. Create migrations scripts using [goose](https://github.com/pressly/goose?tab=readme-ov-file#migrations) rules.
 
 ```sh
-echo "CREATE TABLE IF NOT EXISTS authors (
+echo "-- +goose Up
+CREATE TABLE IF NOT EXISTS authors (
     id   integer    PRIMARY KEY AUTOINCREMENT,
     name text   NOT NULL,
     bio  text
 );
-" > sql/migrations/001_authors.up.sql
-```
 
-```sh
-echo "DROP TABLE IF EXISTS authors;" > sql/migrations/001_authors.down.sql
+-- +goose Down
+DROP TABLE IF EXISTS authors;
+" > sql/migrations/001_authors.sql
 ```
 
 3. Create SQL queries

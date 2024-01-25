@@ -20,6 +20,7 @@ type Definition struct {
 	GoModule           string
 	Packages           []*Package
 	MigrationPath      string
+	MigrationLib       string
 	LiteFS             bool
 	Litestream         bool
 	DistributedTracing bool
@@ -27,6 +28,11 @@ type Definition struct {
 }
 
 func (d *Definition) Validate() error {
+	switch d.MigrationLib {
+	case "goose", "migrate":
+	default:
+		return fmt.Errorf("invalid migration library %q , use goose or go-migrate", d.MigrationLib)
+	}
 	var engine, sqlPackage string
 	countServices := 0
 	for _, pkg := range d.Packages {
@@ -244,19 +250,19 @@ func (p *Package) LoadOptions(protoFile string) {
 func (p *Package) importTimestamp() bool {
 	for _, m := range p.Messages {
 		for _, f := range m.Fields {
-			if f.Type == "time.Time" || f.Type == "sql.NullTime" {
+			if f.Type == "time.Time" || f.Type == "sql.NullTime" || strings.HasPrefix(f.Type, "pgtype.Time") || strings.HasPrefix(f.Type, "pgtype.Date") {
 				return true
 			}
 		}
 	}
 	for _, s := range p.Services {
 		for _, n := range s.InputTypes {
-			if n == "time.Time" || n == "sql.NullTime" {
+			if n == "time.Time" || n == "sql.NullTime" || strings.HasPrefix(n, "pgtype.Time") || strings.HasPrefix(n, "pgtype.Date") {
 				return true
 			}
 		}
 
-		if s.Output == "time.Time" || s.Output == "sql.NullTime" {
+		if s.Output == "time.Time" || s.Output == "sql.NullTime" || strings.HasPrefix(s.Output, "pgtype.Time") || strings.HasPrefix(s.Output, "pgtype.Date") {
 			return true
 		}
 

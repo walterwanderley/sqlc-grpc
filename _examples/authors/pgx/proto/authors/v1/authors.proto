@@ -3,6 +3,7 @@ syntax = "proto3";
 package authors.v1;
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
@@ -21,17 +22,17 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service AuthorsService {
   rpc CreateAuthor(CreateAuthorRequest) returns (CreateAuthorResponse) {
     option (google.api.http) = {
-      post: "/author"
+      post: "/authors"
       body: "*"
       response_body: "authors"
     };
   }
   rpc DeleteAuthor(DeleteAuthorRequest) returns (DeleteAuthorResponse) {
-    option (google.api.http) = {delete: "/author/{id}"};
+    option (google.api.http) = {delete: "/authors/{id}"};
   }
   rpc GetAuthor(GetAuthorRequest) returns (GetAuthorResponse) {
     option (google.api.http) = {
-      get: "/author/{id}"
+      get: "/authors/{id}"
       response_body: "authors"
     };
   }
@@ -41,17 +42,25 @@ service AuthorsService {
       response_body: "list"
     };
   }
+  rpc UpdateAuthorBio(UpdateAuthorBioRequest) returns (UpdateAuthorBioResponse) {
+    option (google.api.http) = {
+      patch: "/authors/{id}/bio"
+      body: "*"
+    };
+  }
 }
 
 message Authors {
   int64 id = 1;
   string name = 2;
   google.protobuf.StringValue bio = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
 
 message CreateAuthorRequest {
   string name = 1;
   google.protobuf.StringValue bio = 2;
+  google.protobuf.Timestamp created_at = 3;
 }
 
 message CreateAuthorResponse {
@@ -77,3 +86,10 @@ message ListAuthorsRequest {}
 message ListAuthorsResponse {
   repeated Authors list = 1;
 }
+
+message UpdateAuthorBioRequest {
+  google.protobuf.StringValue bio = 1;
+  int64 id = 2;
+}
+
+message UpdateAuthorBioResponse {}

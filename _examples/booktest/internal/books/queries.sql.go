@@ -72,6 +72,7 @@ type BooksByTitleYearParams struct {
 	Year  int32
 }
 
+// http: GET /books
 func (q *Queries) BooksByTitleYear(ctx context.Context, arg BooksByTitleYearParams) ([]Book, error) {
 	rows, err := q.db.QueryContext(ctx, booksByTitleYear, arg.Title, arg.Year)
 	if err != nil {
@@ -109,6 +110,7 @@ INSERT INTO authors (name) VALUES ($1)
 RETURNING author_id, name
 `
 
+// http: POST /authors
 func (q *Queries) CreateAuthor(ctx context.Context, name string) (Author, error) {
 	row := q.db.QueryRowContext(ctx, createAuthor, name)
 	var i Author
@@ -147,6 +149,7 @@ type CreateBookParams struct {
 	Tags      []string
 }
 
+// http: POST /books
 func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, error) {
 	row := q.db.QueryRowContext(ctx, createBook,
 		arg.AuthorID,
@@ -176,6 +179,7 @@ DELETE FROM books
 WHERE book_id = $1
 `
 
+// http: DELETE /books/{book_id}
 func (q *Queries) DeleteBook(ctx context.Context, bookID int32) error {
 	_, err := q.db.ExecContext(ctx, deleteBook, bookID)
 	return err
@@ -186,6 +190,7 @@ SELECT author_id, name FROM authors
 WHERE author_id = $1
 `
 
+// http: GET /authors/{author_id}
 func (q *Queries) GetAuthor(ctx context.Context, authorID int32) (Author, error) {
 	row := q.db.QueryRowContext(ctx, getAuthor, authorID)
 	var i Author
@@ -198,6 +203,7 @@ SELECT book_id, author_id, isbn, book_type, title, year, available, tags FROM bo
 WHERE book_id = $1
 `
 
+// http: GET /books/{book_id}
 func (q *Queries) GetBook(ctx context.Context, bookID int32) (Book, error) {
 	row := q.db.QueryRowContext(ctx, getBook, bookID)
 	var i Book
@@ -227,6 +233,7 @@ type UpdateBookParams struct {
 	BookID   int32
 }
 
+// http: PUT /books/{book_id}
 func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 	_, err := q.db.ExecContext(ctx, updateBook,
 		arg.Title,
@@ -239,23 +246,17 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 
 const updateBookISBN = `-- name: UpdateBookISBN :exec
 UPDATE books
-SET title = $1, tags = $2, isbn = $4
-WHERE book_id = $3
+SET isbn = $1
+WHERE book_id = $2
 `
 
 type UpdateBookISBNParams struct {
-	Title  string
-	Tags   []string
-	BookID int32
 	Isbn   string
+	BookID int32
 }
 
+// http: PATCH /books/{book_id}/isbn
 func (q *Queries) UpdateBookISBN(ctx context.Context, arg UpdateBookISBNParams) error {
-	_, err := q.db.ExecContext(ctx, updateBookISBN,
-		arg.Title,
-		pq.Array(arg.Tags),
-		arg.BookID,
-		arg.Isbn,
-	)
+	_, err := q.db.ExecContext(ctx, updateBookISBN, arg.Isbn, arg.BookID)
 	return err
 }

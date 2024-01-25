@@ -16,16 +16,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"booktest/internal/server"
+	"booktest/internal/server/instrumentation/trace"
 )
 
-//go:generate sqlc-grpc -m booktest -append
+//go:generate sqlc-grpc -m booktest -tracing -metric -append
 
 const serviceName = "booktest"
 
@@ -43,9 +46,10 @@ func main() {
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
-
+	flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
+	flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
 
 	flag.Parse()
 
@@ -63,9 +67,33 @@ func run(cfg server.Config) error {
 	}
 	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
-	db, err := sql.Open("pgx", dbURL)
-	if err != nil {
-		return err
+	var db *sql.DB
+	if cfg.TracingEnabled() {
+		flush, err := trace.Init(context.Background(), serviceName, cfg.OtlpEndpoint)
+		if err != nil {
+			return err
+		}
+		defer flush()
+
+		db, err = otelsql.Open("pgx", dbURL, otelsql.WithAttributes(
+			semconv.DBSystemPostgreSQL,
+		))
+		if err != nil {
+			return err
+		}
+
+		err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
+			semconv.DBSystemPostgreSQL,
+		))
+		if err != nil {
+			return err
+		}
+	} else {
+
+		db, err = sql.Open("pgx", dbURL)
+		if err != nil {
+			return err
+		}
 	}
 	defer db.Close()
 

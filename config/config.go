@@ -12,6 +12,7 @@ import (
 
 const (
 	yamlConfig = "sqlc.yaml"
+	ymlConfig  = "sqlc.yml"
 	jsonConfig = "sqlc.json"
 )
 
@@ -71,7 +72,7 @@ func Load() (SqlcConfig, error) {
 		if err != nil {
 			return cfg, err
 		}
-	case yamlConfig:
+	case yamlConfig, ymlConfig:
 		err = yaml.NewDecoder(f).Decode(&v)
 		if err != nil {
 			return cfg, err
@@ -97,6 +98,10 @@ func Load() (SqlcConfig, error) {
 }
 
 func configFile() (string, error) {
+	if f, err := os.Stat(ymlConfig); err == nil && !f.IsDir() {
+		return ymlConfig, nil
+	}
+
 	if f, err := os.Stat(yamlConfig); err == nil && !f.IsDir() {
 		return yamlConfig, nil
 	}
@@ -104,6 +109,5 @@ func configFile() (string, error) {
 	if f, err := os.Stat(jsonConfig); err == nil && !f.IsDir() {
 		return jsonConfig, nil
 	}
-	return "", errors.New("no sqlc config files (sqlc.json or sqlc.yaml)")
-
+	return "", errors.New("no sqlc config files (sqlc.json, sqlc.yaml or sqlc.yml)")
 }

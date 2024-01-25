@@ -14,8 +14,6 @@ import (
 //go:embed sql/migrations
 var migrations embed.FS
 
-const schemaVersion = 1
-
 func ensureSchema(db *sql.DB) error {
 	source, err := iofs.New(migrations, "sql/migrations")
 	if err != nil {
@@ -29,7 +27,7 @@ func ensureSchema(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	err = m.Migrate(schemaVersion)
+	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		return err
 	}

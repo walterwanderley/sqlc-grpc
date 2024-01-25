@@ -309,6 +309,23 @@ func request_BooksService_UpdateBook_0(ctx context.Context, marshaler runtime.Ma
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["book_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
+	}
+
+	protoReq.BookId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
+	}
+
 	msg, err := client.UpdateBook(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -320,6 +337,23 @@ func local_request_BooksService_UpdateBook_0(ctx context.Context, marshaler runt
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["book_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
+	}
+
+	protoReq.BookId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
 	msg, err := server.UpdateBook(ctx, &protoReq)
@@ -335,6 +369,23 @@ func request_BooksService_UpdateBookISBN_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["book_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
+	}
+
+	protoReq.BookId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
+	}
+
 	msg, err := client.UpdateBookISBN(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -346,6 +397,23 @@ func local_request_BooksService_UpdateBookISBN_0(ctx context.Context, marshaler 
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["book_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
+	}
+
+	protoReq.BookId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
 	msg, err := server.UpdateBookISBN(ctx, &protoReq)
@@ -392,7 +460,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/BooksByTitleYear", runtime.WithHTTPPathPattern("/books-by-title-year"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/BooksByTitleYear", runtime.WithHTTPPathPattern("/books"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -417,7 +485,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/CreateAuthor", runtime.WithHTTPPathPattern("/author"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/CreateAuthor", runtime.WithHTTPPathPattern("/authors"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -442,7 +510,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/CreateBook", runtime.WithHTTPPathPattern("/book"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/CreateBook", runtime.WithHTTPPathPattern("/books"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -467,7 +535,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/DeleteBook", runtime.WithHTTPPathPattern("/book/{book_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/DeleteBook", runtime.WithHTTPPathPattern("/books/{book_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -492,7 +560,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/GetAuthor", runtime.WithHTTPPathPattern("/author/{author_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/GetAuthor", runtime.WithHTTPPathPattern("/authors/{author_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -517,7 +585,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/GetBook", runtime.WithHTTPPathPattern("/book/{book_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/GetBook", runtime.WithHTTPPathPattern("/books/{book_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -542,7 +610,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/UpdateBook", runtime.WithHTTPPathPattern("/book"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/UpdateBook", runtime.WithHTTPPathPattern("/books/{book_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -559,7 +627,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 
 	})
 
-	mux.Handle("PUT", pattern_BooksService_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PATCH", pattern_BooksService_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -567,7 +635,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/UpdateBookISBN", runtime.WithHTTPPathPattern("/book-isbn"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/UpdateBookISBN", runtime.WithHTTPPathPattern("/books/{book_id}/isbn"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -653,7 +721,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/BooksByTitleYear", runtime.WithHTTPPathPattern("/books-by-title-year"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/BooksByTitleYear", runtime.WithHTTPPathPattern("/books"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -675,7 +743,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/CreateAuthor", runtime.WithHTTPPathPattern("/author"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/CreateAuthor", runtime.WithHTTPPathPattern("/authors"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -697,7 +765,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/CreateBook", runtime.WithHTTPPathPattern("/book"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/CreateBook", runtime.WithHTTPPathPattern("/books"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -719,7 +787,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/DeleteBook", runtime.WithHTTPPathPattern("/book/{book_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/DeleteBook", runtime.WithHTTPPathPattern("/books/{book_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -741,7 +809,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/GetAuthor", runtime.WithHTTPPathPattern("/author/{author_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/GetAuthor", runtime.WithHTTPPathPattern("/authors/{author_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -763,7 +831,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/GetBook", runtime.WithHTTPPathPattern("/book/{book_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/GetBook", runtime.WithHTTPPathPattern("/books/{book_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -785,7 +853,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/UpdateBook", runtime.WithHTTPPathPattern("/book"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/UpdateBook", runtime.WithHTTPPathPattern("/books/{book_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -801,13 +869,13 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 
 	})
 
-	mux.Handle("PUT", pattern_BooksService_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PATCH", pattern_BooksService_UpdateBookISBN_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/UpdateBookISBN", runtime.WithHTTPPathPattern("/book-isbn"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/UpdateBookISBN", runtime.WithHTTPPathPattern("/books/{book_id}/isbn"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -883,21 +951,21 @@ func (m response_BooksService_GetBook_0) XXX_ResponseBody() interface{} {
 var (
 	pattern_BooksService_BooksByTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-tags"}, ""))
 
-	pattern_BooksService_BooksByTitleYear_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-title-year"}, ""))
+	pattern_BooksService_BooksByTitleYear_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books"}, ""))
 
-	pattern_BooksService_CreateAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"author"}, ""))
+	pattern_BooksService_CreateAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"authors"}, ""))
 
-	pattern_BooksService_CreateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book"}, ""))
+	pattern_BooksService_CreateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books"}, ""))
 
-	pattern_BooksService_DeleteBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"book", "book_id"}, ""))
+	pattern_BooksService_DeleteBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "book_id"}, ""))
 
-	pattern_BooksService_GetAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"author", "author_id"}, ""))
+	pattern_BooksService_GetAuthor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"authors", "author_id"}, ""))
 
-	pattern_BooksService_GetBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"book", "book_id"}, ""))
+	pattern_BooksService_GetBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "book_id"}, ""))
 
-	pattern_BooksService_UpdateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book"}, ""))
+	pattern_BooksService_UpdateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "book_id"}, ""))
 
-	pattern_BooksService_UpdateBookISBN_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"book-isbn"}, ""))
+	pattern_BooksService_UpdateBookISBN_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"books", "book_id", "isbn"}, ""))
 )
 
 var (

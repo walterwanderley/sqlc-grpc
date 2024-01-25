@@ -10,15 +10,14 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	driver "github.com/golang-migrate/migrate/v4/database/{{if eq .Database "postgresql"}}pgx/v5{{else if eq .Database "sqlite"}}sqlite3{{else}}{{.Database}}{{end}}"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/pressly/goose/v3"
 )
 
 //go:embed {{.MigrationPath}}
 var migrations embed.FS
 
-const schemaVersion = 1
-
 func ensureSchema(db *sql.DB) error {
-	source, err := iofs.New(migrations, "{{.MigrationPath}}")
+	{{if eq .MigrationLib "migrate"}}source, err := iofs.New(migrations, "{{.MigrationPath}}")
 	if err != nil {
 		return err
 	}
@@ -30,9 +29,16 @@ func ensureSchema(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	err = m.Migrate(schemaVersion)
+	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		return err
 	}
-	return source.Close()
+	return source.Close(){{else}}goose.SetBaseFS(migrations)
+
+    if err := goose.SetDialect("{{if eq .Database "postgresql"}}postgres{{else}}{{.Database}}{{end}}"); err != nil {
+        return err
+    }
+
+    return goose.Up(db, "{{.MigrationPath}}")
+	{{end}}
 }

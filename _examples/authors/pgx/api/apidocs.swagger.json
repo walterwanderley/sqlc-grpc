@@ -21,7 +21,31 @@
     "application/json"
   ],
   "paths": {
-    "/author": {
+    "/authors": {
+      "get": {
+        "operationId": "AuthorsService_ListAuthors",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/v1Authors"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AuthorsService"
+        ]
+      },
       "post": {
         "operationId": "AuthorsService_CreateAuthor",
         "responses": {
@@ -53,7 +77,7 @@
         ]
       }
     },
-    "/author/{id}": {
+    "/authors/{id}": {
       "get": {
         "operationId": "AuthorsService_GetAuthor",
         "responses": {
@@ -113,18 +137,14 @@
         ]
       }
     },
-    "/authors": {
-      "get": {
-        "operationId": "AuthorsService_ListAuthors",
+    "/authors/{id}/bio": {
+      "patch": {
+        "operationId": "AuthorsService_UpdateAuthorBio",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "$ref": "#/definitions/v1Authors"
-              }
+              "$ref": "#/definitions/v1UpdateAuthorBioResponse"
             }
           },
           "default": {
@@ -134,6 +154,23 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AuthorsServiceUpdateAuthorBioBody"
+            }
+          }
+        ],
         "tags": [
           "AuthorsService"
         ]
@@ -141,6 +178,14 @@
     }
   },
   "definitions": {
+    "AuthorsServiceUpdateAuthorBioBody": {
+      "type": "object",
+      "properties": {
+        "bio": {
+          "type": "string"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -181,6 +226,10 @@
         },
         "bio": {
           "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -192,6 +241,10 @@
         },
         "bio": {
           "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -225,6 +278,9 @@
           }
         }
       }
+    },
+    "v1UpdateAuthorBioResponse": {
+      "type": "object"
     }
   }
 }

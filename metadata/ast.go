@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"go/ast"
+	"strings"
 
 	"github.com/walterwanderley/sqlc-grpc/converter"
 )
@@ -44,6 +45,30 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	if !ok {
 		sql = constants[converter.LowerFirstCharacter(fun.Name.String())]
 	}
+
+	httpSpecs := make([]HttpSpec, 0)
+	docs := strings.Split(fun.Doc.Text(), "\n")
+	for _, doc := range docs {
+		doc = strings.TrimSpace(doc)
+		if strings.HasPrefix(doc, "http: ") {
+			opts := strings.Split(strings.TrimPrefix(doc, "http: "), " ")
+			if len(opts) != 2 {
+				continue
+			}
+			httpMethod, httpPath := strings.ToUpper(opts[0]), opts[1]
+			switch httpMethod {
+			case "POST", "GET", "PUT", "DELETE", "PATCH":
+			default:
+				continue
+			}
+			httpSpecs = append(httpSpecs, HttpSpec{
+				Method: httpMethod,
+				Path:   httpPath,
+			})
+
+		}
+	}
+
 	service := Service{
 		Name:       fun.Name.String(),
 		InputNames: inputNames,
@@ -51,6 +76,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 		Output:     output,
 		Sql:        sql,
 		Messages:   def.Messages,
+		HttpSpecs:  httpSpecs,
 	}
 	def.Services = append(def.Services, &service)
 

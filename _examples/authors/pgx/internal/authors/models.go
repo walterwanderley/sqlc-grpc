@@ -9,7 +9,8 @@ import (
 )
 
 type Authors struct {
-	ID   int64       `json:"id"`
-	Name string      `json:"name"`
-	Bio  pgtype.Text `json:"bio"`
+	ID        int64            `json:"id"`
+	Name      string           `json:"name"`
+	Bio       pgtype.Text      `json:"bio"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
