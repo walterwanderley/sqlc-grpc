@@ -28,7 +28,7 @@ func to{{.Name}}(in {{if $emitResultPointers}}*{{end}}{{.Name}}) *pb.{{.Name | U
 }
 {{end}}
 {{if .HasExecResult}}
-func toExecResult(in {{if eq .SqlPackage "pgx/v5"}}{{else}}sql.Result{{end}}) *pb.ExecResult {
+func toExecResult(in {{if eq .SqlPackage "pgx/v5"}}pgconn.CommandTag{{else}}sql.Result{{end}}) *pb.ExecResult {
 	{{if eq .SqlPackage "pgx/v5"}}return &pb.ExecResult{
 		RowsAffected: in.RowsAffected(),
 	}{{else}}lastInsertId, _ := in.LastInsertId()
