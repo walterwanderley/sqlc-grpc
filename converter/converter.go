@@ -79,7 +79,7 @@ func ToProtoType(typ string) string {
 		return "google.protobuf.Timestamp"
 	case "string", "uuid.UUID", "net.HardwareAddr", "net.IP":
 		return "string"
-	case "sql.Result":
+	case "sql.Result", "pgconn.CommandTag":
 		return "ExecResult"
 	default:
 		if _, elementType := originalAndElementType(typ); elementType != "" {
