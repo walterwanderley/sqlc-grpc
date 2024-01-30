@@ -24,6 +24,8 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service {{.Package | PascalCase}}Service {
     {{range .CustomServiceProtoOptions}}{{ .}}
     {{end}}
+    {{- range .CustomProtoRPCs}}{{ .}}
+    {{end}}
     {{- range .Services}}
     {{range .CustomProtoComments}}// {{ .}}
     {{end -}}
@@ -32,6 +34,9 @@ service {{.Package | PascalCase}}Service {
         {{end}}
     }{{end}}
 }
+
+{{- range .CustomProtoMessages}}{{ .}}
+{{end}}
 
 {{range $key, $value := .Messages}}
 {{range $value.CustomProtoComments}}// {{ .}}

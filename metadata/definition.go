@@ -138,6 +138,8 @@ type Package struct {
 	CustomProtoImports         []string
 	CustomServiceProtoComments []string
 	CustomServiceProtoOptions  []string
+	CustomProtoRPCs            []string
+	CustomProtoMessages        []string
 	HasExecResult              bool
 }
 
@@ -173,6 +175,10 @@ func (p *Package) LoadOptions(protoFile string) {
 	}
 
 	proto.Walk(def, proto.WithImport(func(i *proto.Import) {
+		if strings.Contains(i.Filename, "google/api/annotations.proto") ||
+			strings.Contains(i.Filename, "protoc-gen-openapiv2/options/annotations.proto") {
+			return
+		}
 		p.CustomProtoImports = append(p.CustomProtoImports, i.Filename)
 	}))
 
@@ -208,26 +214,59 @@ func (p *Package) LoadOptions(protoFile string) {
 	}))
 
 	proto.Walk(def, proto.WithRPC(func(rpc *proto.RPC) {
-		res := make([]string, 0)
+		options := make([]string, 0)
 
 		for _, e := range rpc.Elements {
 			opt, ok := e.(*proto.Option)
 			if !ok {
 				continue
 			}
-			res = append(res, fmt.Sprintf("option %s = {", opt.Name))
-			res = append(res, printProtoLiteral(opt.Constant.OrderedMap, 1)...)
-			res = append(res, "};")
+			options = append(options, fmt.Sprintf("option %s = {", opt.Name))
+			options = append(options, printProtoLiteral(opt.Constant.OrderedMap, 1)...)
+			options = append(options, "};")
 		}
-
+		var comments []string
+		if rpc.Comment != nil {
+			comments = clearLines(rpc.Comment.Lines)
+		}
+		var exists bool
 		for _, s := range p.Services {
 			if s.Name == rpc.Name {
-				s.CustomProtoOptions = res
-				if rpc.Comment != nil {
-					s.CustomProtoComments = clearLines(rpc.Comment.Lines)
-				}
+				s.CustomProtoOptions = options
+				s.CustomProtoComments = comments
+				exists = true
 				break
 			}
+		}
+		if exists {
+			return
+		}
+
+		for _, c := range comments {
+			p.CustomProtoRPCs = append(p.CustomProtoRPCs, fmt.Sprintf("// %s", c))
+		}
+		var rpcInterface strings.Builder
+		rpcInterface.WriteString("rpc ")
+		rpcInterface.WriteString(rpc.Name)
+		rpcInterface.WriteString("(")
+		if rpc.StreamsRequest {
+			rpcInterface.WriteString("streams ")
+		}
+		rpcInterface.WriteString(rpc.RequestType)
+		rpcInterface.WriteString(") returns (")
+		if rpc.StreamsReturns {
+			rpcInterface.WriteString("streams ")
+		}
+		rpcInterface.WriteString(rpc.ReturnsType)
+		rpcInterface.WriteString(")")
+		if len(options) == 0 {
+			rpcInterface.WriteString(";")
+			p.CustomProtoRPCs = append(p.CustomProtoRPCs, rpcInterface.String())
+		} else {
+			rpcInterface.WriteString("{")
+			p.CustomProtoRPCs = append(p.CustomProtoRPCs, rpcInterface.String())
+			p.CustomProtoRPCs = append(p.CustomProtoRPCs, options...)
+			p.CustomProtoRPCs = append(p.CustomProtoRPCs, "};")
 		}
 	}))
 
@@ -237,14 +276,90 @@ func (p *Package) LoadOptions(protoFile string) {
 			if strings.HasSuffix(protoMessage.Name, "Request") {
 				msg, ok = p.Messages[protoMessage.Name[0:len(protoMessage.Name)-7]+"Params"]
 				if !ok {
+					p.addUserDefinedMessage(protoMessage)
 					return
 				}
 			} else {
+				p.addUserDefinedMessage(protoMessage)
 				return
 			}
 		}
 		msg.loadOptions(protoMessage)
 	}))
+}
+
+func (p *Package) addUserDefinedMessage(protoMessage *proto.Message) {
+	if protoMessage.Comment != nil {
+		for _, c := range clearLines(protoMessage.Comment.Lines) {
+			p.CustomProtoMessages = append(p.CustomProtoMessages, fmt.Sprintf("// %s", c))
+		}
+	}
+	var options, fields []string
+	for _, e := range protoMessage.Elements {
+		if opt, ok := e.(*proto.Option); ok {
+			options = append(options, fmt.Sprintf("    option %s = {", opt.Name))
+			options = append(options, printProtoLiteral(opt.Constant.OrderedMap, 2)...)
+			options = append(options, "    };")
+			continue
+		}
+
+		if f, ok := e.(*proto.NormalField); ok {
+			if f.Comment != nil {
+				for _, c := range clearLines(f.Comment.Lines) {
+					fields = append(fields, fmt.Sprintf("// %s", c))
+				}
+			}
+			var fieldSpec strings.Builder
+			if f.Repeated {
+				fieldSpec.WriteString("repeated ")
+			}
+			fieldSpec.WriteString(f.Type)
+			fieldSpec.WriteString(" ")
+			fieldSpec.WriteString(f.Name)
+			fieldSpec.WriteString(" = ")
+			fieldSpec.WriteString(fmt.Sprintf("%d", f.Sequence))
+
+			var fieldOptions []string
+			var hasComplexOption bool
+			for i, opt := range f.Options {
+				var prefix string
+				if i > 0 {
+					prefix = "        "
+				}
+				var suffix string
+				if i+1 < len(f.Options) {
+					suffix = ", "
+				}
+				if opt.Constant.Source != "" {
+					if hasComplexOption {
+						fieldOptions = append(fieldOptions, fmt.Sprintf("%s%s = %s%s", prefix, opt.Name, opt.Constant.Source, suffix))
+					} else {
+						fieldOptions = append(fieldOptions, fmt.Sprintf("%s = %s%s", opt.Name, opt.Constant.Source, suffix))
+					}
+					continue
+				}
+				hasComplexOption = true
+				fieldOptions = append(fieldOptions, fmt.Sprintf("%s%s = {\n", prefix, opt.Name))
+				fieldOptions = append(fieldOptions, printProtoLiteral(opt.Constant.OrderedMap, 3)...)
+				fieldOptions = append(fieldOptions, fmt.Sprintf("        }%s", suffix))
+			}
+			if len(fieldOptions) == 0 {
+				fieldSpec.WriteString(";")
+				fields = append(fields, fieldSpec.String())
+				continue
+			}
+			fieldSpec.WriteString(" [")
+			fields = append(fields, fieldSpec.String())
+			fields = append(fields, fieldOptions...)
+			fields = append(fields, "];")
+
+		}
+	}
+	p.CustomProtoMessages = append(p.CustomProtoMessages, fmt.Sprintf("message %s {", protoMessage.Name))
+	p.CustomProtoMessages = append(p.CustomProtoMessages, options...)
+	p.CustomProtoMessages = append(p.CustomProtoMessages, fields...)
+	p.CustomProtoMessages = append(p.CustomProtoMessages, "}")
+
 }
 
 func (p *Package) importTimestamp() bool {
