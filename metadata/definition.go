@@ -444,18 +444,21 @@ func ParsePackage(opts PackageOpts, queriesToIgnore []*regexp.Regexp) (*Package,
 							if err != nil {
 								return nil, err
 							}
+							msg.PackageName = pkgName
 							p.Messages[name] = msg
 						case *ast.StructType:
 							msg, err := createStructMessage(name, t)
 							if err != nil {
 								return nil, err
 							}
+							msg.PackageName = pkgName
 							p.Messages[name] = msg
 						case *ast.ArrayType:
 							msg, err := createArrayMessage(name, t)
 							if err != nil {
 								return nil, err
 							}
+							msg.PackageName = pkgName
 							p.Messages[name] = msg
 						}
 					}

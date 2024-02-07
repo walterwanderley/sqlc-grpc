@@ -12,6 +12,7 @@ import (
 
 type Message struct {
 	Name                string
+	PackageName         string
 	Fields              []*Field
 	IsArray             bool
 	ElementType         string
