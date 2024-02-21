@@ -47,6 +47,7 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 	}
 
 	httpSpecs := make([]HttpSpec, 0)
+	customSpecs := make(map[string][]string)
 	docs := strings.Split(fun.Doc.Text(), "\n")
 	for _, doc := range docs {
 		doc = strings.TrimSpace(doc)
@@ -65,18 +66,24 @@ func visitFunc(fun *ast.FuncDecl, def *Package, constants map[string]string) {
 				Method: httpMethod,
 				Path:   httpPath,
 			})
-
+		} else {
+			k, v, ok := strings.Cut(doc, ":")
+			if !ok {
+				continue
+			}
+			customSpecs[k] = append(customSpecs[k], v)
 		}
 	}
 
 	service := Service{
-		Name:       fun.Name.String(),
-		InputNames: inputNames,
-		InputTypes: inputTypes,
-		Output:     output,
-		Sql:        sql,
-		Messages:   def.Messages,
-		HttpSpecs:  httpSpecs,
+		Name:        fun.Name.String(),
+		InputNames:  inputNames,
+		InputTypes:  inputTypes,
+		Output:      output,
+		Sql:         sql,
+		Messages:    def.Messages,
+		HttpSpecs:   httpSpecs,
+		CustomSpecs: customSpecs,
 	}
 	def.Services = append(def.Services, &service)
 

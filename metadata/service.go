@@ -16,6 +16,7 @@ type Service struct {
 	CustomProtoComments []string
 	CustomProtoOptions  []string
 	HttpSpecs           []HttpSpec
+	CustomSpecs         map[string][]string
 }
 
 func (s *Service) ParamsCallDatabase() string {
