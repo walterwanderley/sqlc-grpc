@@ -1,23 +1,21 @@
-version: v1
+version: v2
 plugins:
-  - name: go
+  - local: protoc-gen-go
     out: api
-    opt:
-      - paths=source_relative
-  - name: go-grpc
+    opt: paths=source_relative
+  - local: protoc-gen-go-grpc
     out: api
-    opt:
-      - paths=source_relative
-  - name: grpc-gateway
+    opt: paths=source_relative
+  - local: protoc-gen-grpc-gateway
     out: api
     opt:
       - paths=source_relative
       - generate_unbound_methods=true
       - logtostderr=true
-  - name: openapiv2
+  - local: protoc-gen-openapiv2
     out: api
     opt:
       - generate_unbound_methods=true
       - logtostderr=true
       - allow_merge=true
-    strategy: all    
+    strategy: all

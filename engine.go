@@ -116,7 +116,7 @@ func process(def *metadata.Definition, outPath string, appendMode bool) error {
 			for _, pkg := range def.Packages {
 				newPath := filepath.Join(pkg.SrcPath, "service.factory.go")
 				if appendMode && fileExists(newPath) {
-					return nil
+					continue
 				}
 				err = genFromTemplate(path, string(tpl), pkg, true, newPath)
 				if err != nil {
