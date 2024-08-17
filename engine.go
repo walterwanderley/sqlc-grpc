@@ -19,7 +19,7 @@ import (
 	"github.com/walterwanderley/sqlc-grpc/templates"
 )
 
-func process(def *metadata.Definition, outPath string, appendMode bool) error {
+func process(def *metadata.Definition, appendMode bool) error {
 	return fs.WalkDir(templates.Files, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			log.Println("ERROR ", err.Error())

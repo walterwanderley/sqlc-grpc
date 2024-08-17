@@ -449,7 +449,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_BooksByTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp.(*BooksByTagsResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -474,7 +474,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_BooksByTitleYear_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTitleYear_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTitleYear_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTitleYear_0{resp.(*BooksByTitleYearResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -499,7 +499,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateAuthor_0{resp.(*CreateAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -524,7 +524,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateBook_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateBook_0{resp.(*CreateBookResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -574,7 +574,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetAuthor_0{resp.(*GetAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -599,7 +599,7 @@ func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetBook_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetBook_0{resp.(*GetBookResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -712,7 +712,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_BooksByTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp.(*BooksByTagsResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -734,7 +734,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_BooksByTitleYear_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTitleYear_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_BooksByTitleYear_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTitleYear_0{resp.(*BooksByTitleYearResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -756,7 +756,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateAuthor_0{resp.(*CreateAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -778,7 +778,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_CreateBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateBook_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_CreateBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_CreateBook_0{resp.(*CreateBookResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -822,7 +822,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetAuthor_0{resp.(*GetAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -844,7 +844,7 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 			return
 		}
 
-		forward_BooksService_GetBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetBook_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_BooksService_GetBook_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_GetBook_0{resp.(*GetBookResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -896,57 +896,51 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 }
 
 type response_BooksService_BooksByTags_0 struct {
-	proto.Message
+	*BooksByTagsResponse
 }
 
 func (m response_BooksService_BooksByTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*BooksByTagsResponse)
-	return response.List
+	return m.List
 }
 
 type response_BooksService_BooksByTitleYear_0 struct {
-	proto.Message
+	*BooksByTitleYearResponse
 }
 
 func (m response_BooksService_BooksByTitleYear_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*BooksByTitleYearResponse)
-	return response.List
+	return m.List
 }
 
 type response_BooksService_CreateAuthor_0 struct {
-	proto.Message
+	*CreateAuthorResponse
 }
 
 func (m response_BooksService_CreateAuthor_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*CreateAuthorResponse)
-	return response.Author
+	return m.Author
 }
 
 type response_BooksService_CreateBook_0 struct {
-	proto.Message
+	*CreateBookResponse
 }
 
 func (m response_BooksService_CreateBook_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*CreateBookResponse)
-	return response.Book
+	return m.Book
 }
 
 type response_BooksService_GetAuthor_0 struct {
-	proto.Message
+	*GetAuthorResponse
 }
 
 func (m response_BooksService_GetAuthor_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetAuthorResponse)
-	return response.Author
+	return m.Author
 }
 
 type response_BooksService_GetBook_0 struct {
-	proto.Message
+	*GetBookResponse
 }
 
 func (m response_BooksService_GetBook_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetBookResponse)
-	return response.Book
+	return m.Book
 }
 
 var (

@@ -140,12 +140,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal("unable to get working directory:", err.Error())
-	}
-
-	err = process(&def, wd, appendMode)
+	err = process(&def, appendMode)
 	if err != nil {
 		log.Fatal("unable to process templates:", err.Error())
 	}

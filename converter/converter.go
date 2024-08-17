@@ -6,8 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
-
-	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 )
 
 func ExprToStr(e ast.Expr) (string, error) {
@@ -309,7 +307,7 @@ func ToSnakeCase(str string) string {
 }
 
 func ToPascalCase(str string) string {
-	return UpperFirstCharacter(generator.CamelCase(ToSnakeCase(str)))
+	return UpperFirstCharacter(camelCase(ToSnakeCase(str)))
 }
 
 func ToKebabCase(str string) string {
@@ -319,7 +317,7 @@ func ToKebabCase(str string) string {
 }
 
 func CamelCaseProto(str string) string {
-	return generator.CamelCase(ToSnakeCase(str))
+	return camelCase(ToSnakeCase(str))
 }
 
 func CanonicalName(typ string) string {
@@ -332,4 +330,41 @@ func originalAndElementType(typ string) (original, element string) {
 	typ = strings.TrimPrefix(typ, "[]")
 	t := strings.Split(typ, ".")
 	return t[0], strings.Join(t[1:], ".")
+}
+
+func isASCIILower(c byte) bool {
+	return 'a' <= c && c <= 'z'
+}
+
+func camelCase(s string) string {
+	if s == "" {
+		return ""
+	}
+	t := make([]byte, 0, 32)
+	i := 0
+	if s[0] == '_' {
+		t = append(t, 'X')
+		i++
+	}
+
+	for ; i < len(s); i++ {
+		c := s[i]
+		if c == '_' && i+1 < len(s) && isASCIILower(s[i+1]) {
+			continue
+		}
+		if '0' <= c && c <= '9' {
+			t = append(t, c)
+			continue
+		}
+
+		if isASCIILower(c) {
+			c ^= ' '
+		}
+		t = append(t, c)
+		for i+1 < len(s) && isASCIILower(s[i+1]) {
+			i++
+			t = append(t, s[i])
+		}
+	}
+	return string(t)
 }

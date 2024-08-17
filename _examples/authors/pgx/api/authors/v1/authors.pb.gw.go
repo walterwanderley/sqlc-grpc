@@ -267,7 +267,7 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_AuthorsService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_CreateAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_AuthorsService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_CreateAuthor_0{resp.(*CreateAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -317,7 +317,7 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_AuthorsService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_GetAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_AuthorsService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_GetAuthor_0{resp.(*GetAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -342,7 +342,7 @@ func RegisterAuthorsServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_AuthorsService_ListAuthors_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_ListAuthors_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_AuthorsService_ListAuthors_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_ListAuthors_0{resp.(*ListAuthorsResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -430,7 +430,7 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_AuthorsService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_CreateAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_AuthorsService_CreateAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_CreateAuthor_0{resp.(*CreateAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -474,7 +474,7 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_AuthorsService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_GetAuthor_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_AuthorsService_GetAuthor_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_GetAuthor_0{resp.(*GetAuthorResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -496,7 +496,7 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_AuthorsService_ListAuthors_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_ListAuthors_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_AuthorsService_ListAuthors_0(annotatedContext, mux, outboundMarshaler, w, req, response_AuthorsService_ListAuthors_0{resp.(*ListAuthorsResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -526,30 +526,27 @@ func RegisterAuthorsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 type response_AuthorsService_CreateAuthor_0 struct {
-	proto.Message
+	*CreateAuthorResponse
 }
 
 func (m response_AuthorsService_CreateAuthor_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*CreateAuthorResponse)
-	return response.Authors
+	return m.Authors
 }
 
 type response_AuthorsService_GetAuthor_0 struct {
-	proto.Message
+	*GetAuthorResponse
 }
 
 func (m response_AuthorsService_GetAuthor_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetAuthorResponse)
-	return response.Authors
+	return m.Authors
 }
 
 type response_AuthorsService_ListAuthors_0 struct {
-	proto.Message
+	*ListAuthorsResponse
 }
 
 func (m response_AuthorsService_ListAuthors_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListAuthorsResponse)
-	return response.List
+	return m.List
 }
 
 var (
