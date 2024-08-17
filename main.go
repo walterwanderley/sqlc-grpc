@@ -199,6 +199,7 @@ func postProcess(def *metadata.Definition) {
 	execCommand("buf dep update")
 	execCommand("buf generate")
 	execCommand("buf format -w")
+	execCommand("go mod tidy")
 	log.Println("Finished!")
 }
 
