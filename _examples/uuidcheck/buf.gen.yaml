@@ -1,0 +1,21 @@
+version: v2
+plugins:
+  - local: protoc-gen-go
+    out: api
+    opt: paths=source_relative
+  - local: protoc-gen-go-grpc
+    out: api
+    opt: paths=source_relative
+  - local: protoc-gen-grpc-gateway
+    out: api
+    opt:
+      - paths=source_relative
+      - generate_unbound_methods=true
+      - logtostderr=true
+  - local: protoc-gen-openapiv2
+    out: api
+    opt:
+      - generate_unbound_methods=true
+      - logtostderr=true
+      - allow_merge=true
+    strategy: all

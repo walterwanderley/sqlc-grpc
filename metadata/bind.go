@@ -58,7 +58,20 @@ func OutputGrpc(s *Service) []string {
 			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: toExecResult(result)}, nil", name))
 			return res
 		}
-		res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result}, nil", name))
+		if s.Output == "uuid.UUID" {
+			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result.String()}, nil", name))
+		} else if s.Output == "pgtype.UUID" {
+			res = append(res, fmt.Sprintf(""))
+			res = append(res, fmt.Sprintf("uuidStr, err := result.MarshalJSON()"))
+			res = append(res, fmt.Sprintf("if err != nil {"))
+			res = append(res, fmt.Sprintf("return nil, fmt.Errorf(`failed to convert UUID to string: %%w`, err)"))
+			res = append(res, fmt.Sprintf("}"))
+			res = append(res, fmt.Sprintf("responseValue := wrapperspb.String(string(uuidStr))"))
+			res = append(res, fmt.Sprintf(""))
+			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: responseValue}, nil", name))
+		} else {
+			res = append(res, fmt.Sprintf("return &pb.%sResponse{Value: result}, nil", name))
+		}
 	}
 
 	return res
