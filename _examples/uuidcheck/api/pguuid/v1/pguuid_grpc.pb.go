@@ -25,6 +25,7 @@ const (
 	PguuidService_CreateUser_FullMethodName                 = "/pguuid.v1.PguuidService/CreateUser"
 	PguuidService_CreateUserReturnAll_FullMethodName        = "/pguuid.v1.PguuidService/CreateUserReturnAll"
 	PguuidService_CreateUserReturnPartial_FullMethodName    = "/pguuid.v1.PguuidService/CreateUserReturnPartial"
+	PguuidService_GetProductsByIds_FullMethodName           = "/pguuid.v1.PguuidService/GetProductsByIds"
 )
 
 // PguuidServiceClient is the client API for PguuidService service.
@@ -37,6 +38,7 @@ type PguuidServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	CreateUserReturnAll(ctx context.Context, in *CreateUserReturnAllRequest, opts ...grpc.CallOption) (*CreateUserReturnAllResponse, error)
 	CreateUserReturnPartial(ctx context.Context, in *CreateUserReturnPartialRequest, opts ...grpc.CallOption) (*CreateUserReturnPartialResponse, error)
+	GetProductsByIds(ctx context.Context, in *GetProductsByIdsRequest, opts ...grpc.CallOption) (*GetProductsByIdsResponse, error)
 }
 
 type pguuidServiceClient struct {
@@ -107,6 +109,16 @@ func (c *pguuidServiceClient) CreateUserReturnPartial(ctx context.Context, in *C
 	return out, nil
 }
 
+func (c *pguuidServiceClient) GetProductsByIds(ctx context.Context, in *GetProductsByIdsRequest, opts ...grpc.CallOption) (*GetProductsByIdsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProductsByIdsResponse)
+	err := c.cc.Invoke(ctx, PguuidService_GetProductsByIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PguuidServiceServer is the server API for PguuidService service.
 // All implementations must embed UnimplementedPguuidServiceServer
 // for forward compatibility.
@@ -117,6 +129,7 @@ type PguuidServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	CreateUserReturnAll(context.Context, *CreateUserReturnAllRequest) (*CreateUserReturnAllResponse, error)
 	CreateUserReturnPartial(context.Context, *CreateUserReturnPartialRequest) (*CreateUserReturnPartialResponse, error)
+	GetProductsByIds(context.Context, *GetProductsByIdsRequest) (*GetProductsByIdsResponse, error)
 	mustEmbedUnimplementedPguuidServiceServer()
 }
 
@@ -144,6 +157,9 @@ func (UnimplementedPguuidServiceServer) CreateUserReturnAll(context.Context, *Cr
 }
 func (UnimplementedPguuidServiceServer) CreateUserReturnPartial(context.Context, *CreateUserReturnPartialRequest) (*CreateUserReturnPartialResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserReturnPartial not implemented")
+}
+func (UnimplementedPguuidServiceServer) GetProductsByIds(context.Context, *GetProductsByIdsRequest) (*GetProductsByIdsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductsByIds not implemented")
 }
 func (UnimplementedPguuidServiceServer) mustEmbedUnimplementedPguuidServiceServer() {}
 func (UnimplementedPguuidServiceServer) testEmbeddedByValue()                       {}
@@ -274,6 +290,24 @@ func _PguuidService_CreateUserReturnPartial_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PguuidService_GetProductsByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductsByIdsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PguuidServiceServer).GetProductsByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PguuidService_GetProductsByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PguuidServiceServer).GetProductsByIds(ctx, req.(*GetProductsByIdsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PguuidService_ServiceDesc is the grpc.ServiceDesc for PguuidService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +338,10 @@ var PguuidService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUserReturnPartial",
 			Handler:    _PguuidService_CreateUserReturnPartial_Handler,
+		},
+		{
+			MethodName: "GetProductsByIds",
+			Handler:    _PguuidService_GetProductsByIds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

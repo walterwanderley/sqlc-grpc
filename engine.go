@@ -47,7 +47,7 @@ func process(def *metadata.Definition, appendMode bool) error {
 				return nil
 			}
 			if _, err := os.Stat(newPath); os.IsNotExist(err) {
-				err := os.MkdirAll(newPath, 0750)
+				err := os.MkdirAll(newPath, 0o750)
 				if err != nil {
 					return err
 				}
@@ -76,7 +76,7 @@ func process(def *metadata.Definition, appendMode bool) error {
 			for _, pkg := range def.Packages {
 				dest := filepath.Join(dir, converter.ToSnakeCase(pkg.Package), "v1")
 				if _, err := os.Stat(dest); os.IsNotExist(err) {
-					err := os.MkdirAll(dest, 0750)
+					err := os.MkdirAll(dest, 0o750)
 					if err != nil {
 						return err
 					}
@@ -219,7 +219,6 @@ func genFromTemplate(name, tmp string, data interface{}, goSource bool, outPath 
 
 	fmt.Fprintf(w, "%s", string(src))
 	return nil
-
 }
 
 func fileExists(path string) bool {

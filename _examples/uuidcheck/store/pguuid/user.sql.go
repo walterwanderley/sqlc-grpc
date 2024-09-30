@@ -121,3 +121,27 @@ func (q *Queries) CreateUserReturnPartial(ctx context.Context, arg CreateUserRet
 	err := row.Scan(&i.ID, &i.Name)
 	return i, err
 }
+
+const getProductsByIds = `-- name: GetProductsByIds :many
+SELECT id, category, name FROM products WHERE id = ANY($1::uuid[])
+`
+
+func (q *Queries) GetProductsByIds(ctx context.Context, dollar_1 []pgtype.UUID) ([]Product, error) {
+	rows, err := q.db.Query(ctx, getProductsByIds, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Product{}
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(&i.ID, &i.Category, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -24,7 +24,7 @@ import (
 	"uuidcheck/internal/server"
 )
 
-//go:generate ../../sqlc-grpc -append
+//go:generate /var/folders/ks/_614mn9d3c53zg_y00d9md840000gn/T/go-build1377911914/b001/exe/sqlc-grpc -append
 
 const serviceName = "uuidcheck"
 

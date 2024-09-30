@@ -59,6 +59,13 @@ service GoogleuuidService {
       response_body: "create_user_return_partial_row"
     };
   }
+  rpc GetProductsByIds(GetProductsByIdsRequest) returns (GetProductsByIdsResponse) {
+    option (google.api.http) = {
+      post: "/products-by-ids"
+      body: "dollar_1"
+      response_body: "list"
+    };
+  }
 }
 
 message Category {
@@ -127,6 +134,14 @@ message CreateUserReturnPartialResponse {
 message CreateUserReturnPartialRow {
   string id = 1;
   google.protobuf.StringValue name = 2;
+}
+
+message GetProductsByIdsRequest {
+  repeated string dollar_1 = 1;
+}
+
+message GetProductsByIdsResponse {
+  repeated Product list = 1;
 }
 
 message Location {

@@ -20,3 +20,6 @@ VALUES ($1, $2) RETURNING id,
 
 -- name: CreateProductReturnAll :one
 INSERT INTO products (id, category) VALUES ($1, $2) RETURNING *;
+
+-- name: GetProductsByIds :many
+SELECT * FROM products WHERE id = ANY($1::uuid[]);

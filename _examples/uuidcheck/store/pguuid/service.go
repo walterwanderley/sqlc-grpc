@@ -142,6 +142,27 @@ func (s *Service) CreateUserReturnPartial(ctx context.Context, req *pb.CreateUse
 	return &pb.CreateUserReturnPartialResponse{CreateUserReturnPartialRow: toCreateUserReturnPartialRow(result)}, nil
 }
 
+func (s *Service) GetProductsByIds(ctx context.Context, req *pb.GetProductsByIdsRequest) (*pb.GetProductsByIdsResponse, error) {
+	var dollar_1 []pgtype.UUID
+	dollar_1 = make([]pgtype.UUID, len(req.GetDollar_1()))
+	for i, s := range req.GetDollar_1() {
+		if err := dollar_1[i].Scan(s.Value); err != nil {
+			return nil, fmt.Errorf("invalid UUID in Dollar_1 at index %d: %w", i, err)
+		}
+	}
+
+	result, err := s.querier.GetProductsByIds(ctx, dollar_1)
+	if err != nil {
+		slog.Error("GetProductsByIds sql call failed", "error", err)
+		return nil, err
+	}
+	res := new(pb.GetProductsByIdsResponse)
+	for _, r := range result {
+		res.List = append(res.List, toProduct(r))
+	}
+	return res, nil
+}
+
 func (s *Service) WithTx(tx pgx.Tx) *Service {
 	return &Service{
 		querier: s.querier.WithTx(tx),

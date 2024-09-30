@@ -120,6 +120,45 @@
         ]
       }
     },
+    "/products-by-ids": {
+      "post": {
+        "operationId": "PguuidService_GetProductsByIds",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/pguuidv1Product"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "dollar1",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "tags": [
+          "PguuidService"
+        ]
+      }
+    },
     "/user": {
       "post": {
         "operationId": "PguuidService_CreateUser",
@@ -362,6 +401,18 @@
         }
       }
     },
+    "googleuuidv1GetProductsByIdsResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/googleuuidv1Product"
+          }
+        }
+      }
+    },
     "googleuuidv1Product": {
       "type": "object",
       "properties": {
@@ -533,6 +584,18 @@
         },
         "name": {
           "type": "string"
+        }
+      }
+    },
+    "pguuidv1GetProductsByIdsResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pguuidv1Product"
+          }
         }
       }
     },

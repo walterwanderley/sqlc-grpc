@@ -187,6 +187,32 @@ func local_request_PguuidService_CreateUserReturnPartial_0(ctx context.Context, 
 
 }
 
+func request_PguuidService_GetProductsByIds_0(ctx context.Context, marshaler runtime.Marshaler, client PguuidServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetProductsByIdsRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Dollar_1); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.GetProductsByIds(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_PguuidService_GetProductsByIds_0(ctx context.Context, marshaler runtime.Marshaler, server PguuidServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetProductsByIdsRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Dollar_1); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.GetProductsByIds(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 // RegisterPguuidServiceHandlerServer registers the http handlers for service PguuidService to "mux".
 // UnaryRPC     :call PguuidServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -341,6 +367,31 @@ func RegisterPguuidServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		}
 
 		forward_PguuidService_CreateUserReturnPartial_0(annotatedContext, mux, outboundMarshaler, w, req, response_PguuidService_CreateUserReturnPartial_0{resp.(*CreateUserReturnPartialResponse)}, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_PguuidService_GetProductsByIds_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/pguuid.v1.PguuidService/GetProductsByIds", runtime.WithHTTPPathPattern("/products-by-ids"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_PguuidService_GetProductsByIds_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PguuidService_GetProductsByIds_0(annotatedContext, mux, outboundMarshaler, w, req, response_PguuidService_GetProductsByIds_0{resp.(*GetProductsByIdsResponse)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -517,6 +568,28 @@ func RegisterPguuidServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 
 	})
 
+	mux.Handle("POST", pattern_PguuidService_GetProductsByIds_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/pguuid.v1.PguuidService/GetProductsByIds", runtime.WithHTTPPathPattern("/products-by-ids"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_PguuidService_GetProductsByIds_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PguuidService_GetProductsByIds_0(annotatedContext, mux, outboundMarshaler, w, req, response_PguuidService_GetProductsByIds_0{resp.(*GetProductsByIdsResponse)}, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -552,6 +625,14 @@ func (m response_PguuidService_CreateUserReturnPartial_0) XXX_ResponseBody() int
 	return m.CreateUserReturnPartialRow
 }
 
+type response_PguuidService_GetProductsByIds_0 struct {
+	*GetProductsByIdsResponse
+}
+
+func (m response_PguuidService_GetProductsByIds_0) XXX_ResponseBody() interface{} {
+	return m.List
+}
+
 var (
 	pattern_PguuidService_CreateProduct_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"product"}, ""))
 
@@ -564,6 +645,8 @@ var (
 	pattern_PguuidService_CreateUserReturnAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"user-return-all"}, ""))
 
 	pattern_PguuidService_CreateUserReturnPartial_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"user-return-partial"}, ""))
+
+	pattern_PguuidService_GetProductsByIds_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"products-by-ids"}, ""))
 )
 
 var (
@@ -578,4 +661,6 @@ var (
 	forward_PguuidService_CreateUserReturnAll_0 = runtime.ForwardResponseMessage
 
 	forward_PguuidService_CreateUserReturnPartial_0 = runtime.ForwardResponseMessage
+
+	forward_PguuidService_GetProductsByIds_0 = runtime.ForwardResponseMessage
 )

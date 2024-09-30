@@ -25,6 +25,7 @@ const (
 	GoogleuuidService_CreateUser_FullMethodName                 = "/googleuuid.v1.GoogleuuidService/CreateUser"
 	GoogleuuidService_CreateUserReturnAll_FullMethodName        = "/googleuuid.v1.GoogleuuidService/CreateUserReturnAll"
 	GoogleuuidService_CreateUserReturnPartial_FullMethodName    = "/googleuuid.v1.GoogleuuidService/CreateUserReturnPartial"
+	GoogleuuidService_GetProductsByIds_FullMethodName           = "/googleuuid.v1.GoogleuuidService/GetProductsByIds"
 )
 
 // GoogleuuidServiceClient is the client API for GoogleuuidService service.
@@ -37,6 +38,7 @@ type GoogleuuidServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	CreateUserReturnAll(ctx context.Context, in *CreateUserReturnAllRequest, opts ...grpc.CallOption) (*CreateUserReturnAllResponse, error)
 	CreateUserReturnPartial(ctx context.Context, in *CreateUserReturnPartialRequest, opts ...grpc.CallOption) (*CreateUserReturnPartialResponse, error)
+	GetProductsByIds(ctx context.Context, in *GetProductsByIdsRequest, opts ...grpc.CallOption) (*GetProductsByIdsResponse, error)
 }
 
 type googleuuidServiceClient struct {
@@ -107,6 +109,16 @@ func (c *googleuuidServiceClient) CreateUserReturnPartial(ctx context.Context, i
 	return out, nil
 }
 
+func (c *googleuuidServiceClient) GetProductsByIds(ctx context.Context, in *GetProductsByIdsRequest, opts ...grpc.CallOption) (*GetProductsByIdsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProductsByIdsResponse)
+	err := c.cc.Invoke(ctx, GoogleuuidService_GetProductsByIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GoogleuuidServiceServer is the server API for GoogleuuidService service.
 // All implementations must embed UnimplementedGoogleuuidServiceServer
 // for forward compatibility.
@@ -117,6 +129,7 @@ type GoogleuuidServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	CreateUserReturnAll(context.Context, *CreateUserReturnAllRequest) (*CreateUserReturnAllResponse, error)
 	CreateUserReturnPartial(context.Context, *CreateUserReturnPartialRequest) (*CreateUserReturnPartialResponse, error)
+	GetProductsByIds(context.Context, *GetProductsByIdsRequest) (*GetProductsByIdsResponse, error)
 	mustEmbedUnimplementedGoogleuuidServiceServer()
 }
 
@@ -144,6 +157,9 @@ func (UnimplementedGoogleuuidServiceServer) CreateUserReturnAll(context.Context,
 }
 func (UnimplementedGoogleuuidServiceServer) CreateUserReturnPartial(context.Context, *CreateUserReturnPartialRequest) (*CreateUserReturnPartialResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserReturnPartial not implemented")
+}
+func (UnimplementedGoogleuuidServiceServer) GetProductsByIds(context.Context, *GetProductsByIdsRequest) (*GetProductsByIdsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductsByIds not implemented")
 }
 func (UnimplementedGoogleuuidServiceServer) mustEmbedUnimplementedGoogleuuidServiceServer() {}
 func (UnimplementedGoogleuuidServiceServer) testEmbeddedByValue()                           {}
@@ -274,6 +290,24 @@ func _GoogleuuidService_CreateUserReturnPartial_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GoogleuuidService_GetProductsByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductsByIdsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoogleuuidServiceServer).GetProductsByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GoogleuuidService_GetProductsByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoogleuuidServiceServer).GetProductsByIds(ctx, req.(*GetProductsByIdsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GoogleuuidService_ServiceDesc is the grpc.ServiceDesc for GoogleuuidService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +338,10 @@ var GoogleuuidService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUserReturnPartial",
 			Handler:    _GoogleuuidService_CreateUserReturnPartial_Handler,
+		},
+		{
+			MethodName: "GetProductsByIds",
+			Handler:    _GoogleuuidService_GetProductsByIds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

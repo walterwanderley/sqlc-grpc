@@ -224,6 +224,16 @@ func BindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("if v, err := uuid.Parse(%s.Get%s()); err != nil {", src, CamelCaseProto(attrName)))
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, fmt.Sprintf("return nil, err } else { %s = v }", dst))
+	case "[]uuid.UUID":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s %s", dst, attrType)) // Declare the variable as []uuid.UUID
+		}
+		res = append(res, fmt.Sprintf("%s = make([]uuid.UUID, len(%s.Get%s()))", dst, src, CamelCaseProto(attrName)))              // Create slice of UUIDs
+		res = append(res, fmt.Sprintf("for i, s := range %s.Get%s() {", src, CamelCaseProto(attrName)))                            // Loop over strings
+		res = append(res, fmt.Sprintf("if v, err := uuid.Parse(s); err != nil {"))                                                 // Parse each string as UUID
+		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName)) // Handle error
+		res = append(res, "return nil, err } else {")                                                                              // Close error check
+		res = append(res, fmt.Sprintf("%s[i] = v } }", dst))                                                                       // Assign parsed UUID and close loop
 	case "pgtype.UUID":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
@@ -233,6 +243,15 @@ func BindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName))
 		res = append(res, "return nil, err }")
 		res = append(res, "}")
+	case "[]pgtype.UUID":
+		if newVar {
+			res = append(res, fmt.Sprintf("var %s []pgtype.UUID", dst))
+		}
+		res = append(res, fmt.Sprintf("%s = make([]pgtype.UUID, len(%s.Get%s()))", dst, src, CamelCaseProto(attrName)))
+		res = append(res, fmt.Sprintf("for i, s := range %s.Get%s() {", src, CamelCaseProto(attrName)))
+		res = append(res, fmt.Sprintf("if err := %s[i].Scan(s.Value); err != nil {", dst))
+		res = append(res, fmt.Sprintf("return nil, fmt.Errorf(\"invalid UUID in %s at index %%d: %%w\", i, err)", attrName))
+		res = append(res, "}}")
 	case "net.HardwareAddr":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
@@ -297,8 +316,10 @@ func LowerFirstCharacter(str string) string {
 	return str
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+var (
+	matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	matchAllCap   = regexp.MustCompile("([a-z0-9])([A-Z])")
+)
 
 func ToSnakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
