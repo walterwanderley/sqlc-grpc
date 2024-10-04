@@ -24,7 +24,7 @@ import (
 	"uuidcheck/internal/server"
 )
 
-//go:generate /var/folders/ks/_614mn9d3c53zg_y00d9md840000gn/T/go-build3827348841/b001/exe/sqlc-grpc -append
+//go:generate sqlc-grpc -append
 
 const serviceName = "uuidcheck"
 
@@ -103,5 +103,4 @@ func httpHandlers(mux *http.ServeMux) {
 		w.WriteHeader(200)
 	})
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
-
 }

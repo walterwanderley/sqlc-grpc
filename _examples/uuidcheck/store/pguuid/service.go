@@ -109,14 +109,11 @@ func (s *Service) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*p
 		slog.Error("CreateUser sql call failed", "error", err)
 		return nil, err
 	}
-
-	uuidStr, err := result.MarshalJSON()
-	if err != nil {
-		return nil, fmt.Errorf(`failed to convert UUID to string: %w`, err)
+	if uuidStr, err := result.MarshalJSON(); err != nil {
+		return nil, fmt.Errorf("failed to convert UUID to string: %w", err)
+	} else {
+		return &pb.CreateUserResponse{Value: wrapperspb.String(string(uuidStr))}, nil
 	}
-	responseValue := wrapperspb.String(string(uuidStr))
-
-	return &pb.CreateUserResponse{Value: responseValue}, nil
 }
 
 func (s *Service) CreateUserReturnAll(ctx context.Context, req *pb.CreateUserReturnAllRequest) (*pb.CreateUserReturnAllResponse, error) {
