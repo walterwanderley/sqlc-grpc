@@ -4,7 +4,7 @@ Create a **gRPC** (and **HTTP/JSON**) **Server** from the generated code by the 
 
 ### Requirements
 
-- Go 1.21 or superior
+- Go 1.23 or superior
 - [sqlc](https://sqlc.dev/)
 - [buf](https://buf.build/)
 
