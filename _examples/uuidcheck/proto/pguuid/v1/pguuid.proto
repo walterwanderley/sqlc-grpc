@@ -19,6 +19,12 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   }
 };
 service PguuidService {
+  rpc CreateLocationTransactions(CreateLocationTransactionsRequest) returns (CreateLocationTransactionsResponse) {
+    option (google.api.http) = {
+      post: "/location-transactions"
+      body: "*"
+    };
+  }
   rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {
     option (google.api.http) = {
       post: "/product"
@@ -71,6 +77,13 @@ service PguuidService {
 message Category {
   int32 id = 1;
 }
+
+message CreateLocationTransactionsRequest {
+  repeated google.protobuf.StringValue column1 = 1;
+  repeated google.protobuf.StringValue column2 = 2;
+}
+
+message CreateLocationTransactionsResponse {}
 
 message CreateProductRequest {
   int32 id = 1;
@@ -146,6 +159,11 @@ message GetProductsByIdsResponse {
 
 message Location {
   google.protobuf.StringValue id = 1;
+}
+
+message LocationTransaction {
+  google.protobuf.StringValue location_id = 1;
+  google.protobuf.StringValue transaction_id = 2;
 }
 
 message Product {

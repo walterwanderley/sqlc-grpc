@@ -21,6 +21,29 @@ type Service struct {
 	querier *Queries
 }
 
+func (s *Service) CreateLocationTransactions(ctx context.Context, req *pb.CreateLocationTransactionsRequest) (*pb.CreateLocationTransactionsResponse, error) {
+	var arg CreateLocationTransactionsParams
+	arg.Column1 = make([]pgtype.UUID, len(req.GetColumn1()))
+	for i, s := range req.GetColumn1() {
+		if err := arg.Column1[i].Scan(s.Value); err != nil {
+			return nil, fmt.Errorf("invalid UUID in Column1 at index %d: %w", i, err)
+		}
+	}
+	arg.Column2 = make([]pgtype.UUID, len(req.GetColumn2()))
+	for i, s := range req.GetColumn2() {
+		if err := arg.Column2[i].Scan(s.Value); err != nil {
+			return nil, fmt.Errorf("invalid UUID in Column2 at index %d: %w", i, err)
+		}
+	}
+
+	err := s.querier.CreateLocationTransactions(ctx, arg)
+	if err != nil {
+		slog.Error("CreateLocationTransactions sql call failed", "error", err)
+		return nil, err
+	}
+	return &pb.CreateLocationTransactionsResponse{}, nil
+}
+
 func (s *Service) CreateProduct(ctx context.Context, req *pb.CreateProductRequest) (*pb.CreateProductResponse, error) {
 	var arg CreateProductParams
 	arg.ID = req.GetId()

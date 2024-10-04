@@ -13,3 +13,8 @@ CREATE TABLE IF NOT EXISTS "products" (
     "category" INT REFERENCES "category" ("id"),
     "name" VARCHAR
 );
+
+CREATE TABLE location_transactions (
+    location_id UUID NOT NULL,
+    transaction_id UUID NOT NULL
+);

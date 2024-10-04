@@ -11,6 +11,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createLocationTransactions = `-- name: CreateLocationTransactions :exec
+
+INSERT INTO location_transactions
+SELECT
+    UNNEST($1::UUID[]) as location_id,
+    UNNEST($2::UUID[]) as transaction_id
+`
+
+type CreateLocationTransactionsParams struct {
+	Column1 []pgtype.UUID `json:"column_1"`
+	Column2 []pgtype.UUID `json:"column_2"`
+}
+
+// ---------
+func (q *Queries) CreateLocationTransactions(ctx context.Context, arg CreateLocationTransactionsParams) error {
+	_, err := q.db.Exec(ctx, createLocationTransactions, arg.Column1, arg.Column2)
+	return err
+}
+
 const createProduct = `-- name: CreateProduct :one
 
 INSERT INTO products (id, category) VALUES ($1, $2) RETURNING id

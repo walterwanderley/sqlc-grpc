@@ -24,6 +24,38 @@
     "application/json"
   ],
   "paths": {
+    "/location-transactions": {
+      "post": {
+        "operationId": "PguuidService_CreateLocationTransactions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pguuidv1CreateLocationTransactionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pguuidv1CreateLocationTransactionsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PguuidService"
+        ]
+      }
+    },
     "/product": {
       "post": {
         "operationId": "PguuidService_CreateProduct",
@@ -257,6 +289,26 @@
     }
   },
   "definitions": {
+    "googleuuidv1CreateLocationTransactionsRequest": {
+      "type": "object",
+      "properties": {
+        "column1": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "column2": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "googleuuidv1CreateLocationTransactionsResponse": {
+      "type": "object"
+    },
     "googleuuidv1CreateProductRequest": {
       "type": "object",
       "properties": {
@@ -442,6 +494,26 @@
           "type": "string"
         }
       }
+    },
+    "pguuidv1CreateLocationTransactionsRequest": {
+      "type": "object",
+      "properties": {
+        "column1": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "column2": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pguuidv1CreateLocationTransactionsResponse": {
+      "type": "object"
     },
     "pguuidv1CreateProductRequest": {
       "type": "object",

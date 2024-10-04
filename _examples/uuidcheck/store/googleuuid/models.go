@@ -17,6 +17,11 @@ type Location struct {
 	ID uuid.UUID `json:"id"`
 }
 
+type LocationTransaction struct {
+	LocationID    uuid.UUID `json:"location_id"`
+	TransactionID uuid.UUID `json:"transaction_id"`
+}
+
 type Product struct {
 	ID       int32       `json:"id"`
 	Category pgtype.Int4 `json:"category"`

@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	GoogleuuidService_CreateLocationTransactions_FullMethodName = "/googleuuid.v1.GoogleuuidService/CreateLocationTransactions"
 	GoogleuuidService_CreateProduct_FullMethodName              = "/googleuuid.v1.GoogleuuidService/CreateProduct"
 	GoogleuuidService_CreateProductReturnAll_FullMethodName     = "/googleuuid.v1.GoogleuuidService/CreateProductReturnAll"
 	GoogleuuidService_CreateProductReturnPartial_FullMethodName = "/googleuuid.v1.GoogleuuidService/CreateProductReturnPartial"
@@ -32,6 +33,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GoogleuuidServiceClient interface {
+	CreateLocationTransactions(ctx context.Context, in *CreateLocationTransactionsRequest, opts ...grpc.CallOption) (*CreateLocationTransactionsResponse, error)
 	CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*CreateProductResponse, error)
 	CreateProductReturnAll(ctx context.Context, in *CreateProductReturnAllRequest, opts ...grpc.CallOption) (*CreateProductReturnAllResponse, error)
 	CreateProductReturnPartial(ctx context.Context, in *CreateProductReturnPartialRequest, opts ...grpc.CallOption) (*CreateProductReturnPartialResponse, error)
@@ -47,6 +49,16 @@ type googleuuidServiceClient struct {
 
 func NewGoogleuuidServiceClient(cc grpc.ClientConnInterface) GoogleuuidServiceClient {
 	return &googleuuidServiceClient{cc}
+}
+
+func (c *googleuuidServiceClient) CreateLocationTransactions(ctx context.Context, in *CreateLocationTransactionsRequest, opts ...grpc.CallOption) (*CreateLocationTransactionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateLocationTransactionsResponse)
+	err := c.cc.Invoke(ctx, GoogleuuidService_CreateLocationTransactions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *googleuuidServiceClient) CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*CreateProductResponse, error) {
@@ -123,6 +135,7 @@ func (c *googleuuidServiceClient) GetProductsByIds(ctx context.Context, in *GetP
 // All implementations must embed UnimplementedGoogleuuidServiceServer
 // for forward compatibility.
 type GoogleuuidServiceServer interface {
+	CreateLocationTransactions(context.Context, *CreateLocationTransactionsRequest) (*CreateLocationTransactionsResponse, error)
 	CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error)
 	CreateProductReturnAll(context.Context, *CreateProductReturnAllRequest) (*CreateProductReturnAllResponse, error)
 	CreateProductReturnPartial(context.Context, *CreateProductReturnPartialRequest) (*CreateProductReturnPartialResponse, error)
@@ -140,6 +153,9 @@ type GoogleuuidServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedGoogleuuidServiceServer struct{}
 
+func (UnimplementedGoogleuuidServiceServer) CreateLocationTransactions(context.Context, *CreateLocationTransactionsRequest) (*CreateLocationTransactionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateLocationTransactions not implemented")
+}
 func (UnimplementedGoogleuuidServiceServer) CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProduct not implemented")
 }
@@ -180,6 +196,24 @@ func RegisterGoogleuuidServiceServer(s grpc.ServiceRegistrar, srv GoogleuuidServ
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&GoogleuuidService_ServiceDesc, srv)
+}
+
+func _GoogleuuidService_CreateLocationTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateLocationTransactionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoogleuuidServiceServer).CreateLocationTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GoogleuuidService_CreateLocationTransactions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoogleuuidServiceServer).CreateLocationTransactions(ctx, req.(*CreateLocationTransactionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _GoogleuuidService_CreateProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -315,6 +349,10 @@ var GoogleuuidService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "googleuuid.v1.GoogleuuidService",
 	HandlerType: (*GoogleuuidServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateLocationTransactions",
+			Handler:    _GoogleuuidService_CreateLocationTransactions_Handler,
+		},
 		{
 			MethodName: "CreateProduct",
 			Handler:    _GoogleuuidService_CreateProduct_Handler,

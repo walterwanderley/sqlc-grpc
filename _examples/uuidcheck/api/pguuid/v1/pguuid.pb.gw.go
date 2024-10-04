@@ -31,6 +31,32 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
+func request_PguuidService_CreateLocationTransactions_0(ctx context.Context, marshaler runtime.Marshaler, client PguuidServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateLocationTransactionsRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.CreateLocationTransactions(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_PguuidService_CreateLocationTransactions_0(ctx context.Context, marshaler runtime.Marshaler, server PguuidServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateLocationTransactionsRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.CreateLocationTransactions(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_PguuidService_CreateProduct_0(ctx context.Context, marshaler runtime.Marshaler, client PguuidServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateProductRequest
 	var metadata runtime.ServerMetadata
@@ -219,6 +245,31 @@ func local_request_PguuidService_GetProductsByIds_0(ctx context.Context, marshal
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterPguuidServiceHandlerFromEndpoint instead.
 // GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
 func RegisterPguuidServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server PguuidServiceServer) error {
+
+	mux.Handle("POST", pattern_PguuidService_CreateLocationTransactions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/pguuid.v1.PguuidService/CreateLocationTransactions", runtime.WithHTTPPathPattern("/location-transactions"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_PguuidService_CreateLocationTransactions_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PguuidService_CreateLocationTransactions_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
 
 	mux.Handle("POST", pattern_PguuidService_CreateProduct_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -436,6 +487,28 @@ func RegisterPguuidServiceHandler(ctx context.Context, mux *runtime.ServeMux, co
 // "PguuidServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
 func RegisterPguuidServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client PguuidServiceClient) error {
 
+	mux.Handle("POST", pattern_PguuidService_CreateLocationTransactions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/pguuid.v1.PguuidService/CreateLocationTransactions", runtime.WithHTTPPathPattern("/location-transactions"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_PguuidService_CreateLocationTransactions_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PguuidService_CreateLocationTransactions_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_PguuidService_CreateProduct_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -634,6 +707,8 @@ func (m response_PguuidService_GetProductsByIds_0) XXX_ResponseBody() interface{
 }
 
 var (
+	pattern_PguuidService_CreateLocationTransactions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"location-transactions"}, ""))
+
 	pattern_PguuidService_CreateProduct_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"product"}, ""))
 
 	pattern_PguuidService_CreateProductReturnAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"product-return-all"}, ""))
@@ -650,6 +725,8 @@ var (
 )
 
 var (
+	forward_PguuidService_CreateLocationTransactions_0 = runtime.ForwardResponseMessage
+
 	forward_PguuidService_CreateProduct_0 = runtime.ForwardResponseMessage
 
 	forward_PguuidService_CreateProductReturnAll_0 = runtime.ForwardResponseMessage
