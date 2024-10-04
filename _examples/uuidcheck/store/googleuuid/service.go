@@ -21,6 +21,35 @@ type Service struct {
 	querier *Queries
 }
 
+func (s *Service) CreateLocationTransactions(ctx context.Context, req *pb.CreateLocationTransactionsRequest) (*pb.CreateLocationTransactionsResponse, error) {
+	var arg CreateLocationTransactionsParams
+	arg.Column1 = make([]uuid.UUID, len(req.GetColumn1()))
+	for i, s := range req.GetColumn1() {
+		if v, err := uuid.Parse(s); err != nil {
+			err = fmt.Errorf("invalid Column1: %s%w", err.Error(), validation.ErrUserInput)
+			return nil, err
+		} else {
+			arg.Column1[i] = v
+		}
+	}
+	arg.Column2 = make([]uuid.UUID, len(req.GetColumn2()))
+	for i, s := range req.GetColumn2() {
+		if v, err := uuid.Parse(s); err != nil {
+			err = fmt.Errorf("invalid Column2: %s%w", err.Error(), validation.ErrUserInput)
+			return nil, err
+		} else {
+			arg.Column2[i] = v
+		}
+	}
+
+	err := s.querier.CreateLocationTransactions(ctx, arg)
+	if err != nil {
+		slog.Error("CreateLocationTransactions sql call failed", "error", err)
+		return nil, err
+	}
+	return &pb.CreateLocationTransactionsResponse{}, nil
+}
+
 func (s *Service) CreateProduct(ctx context.Context, req *pb.CreateProductRequest) (*pb.CreateProductResponse, error) {
 	var arg CreateProductParams
 	arg.ID = req.GetId()
@@ -133,6 +162,30 @@ func (s *Service) CreateUserReturnPartial(ctx context.Context, req *pb.CreateUse
 		return nil, err
 	}
 	return &pb.CreateUserReturnPartialResponse{CreateUserReturnPartialRow: toCreateUserReturnPartialRow(result)}, nil
+}
+
+func (s *Service) GetProductsByIds(ctx context.Context, req *pb.GetProductsByIdsRequest) (*pb.GetProductsByIdsResponse, error) {
+	var dollar_1 []uuid.UUID
+	dollar_1 = make([]uuid.UUID, len(req.GetDollar_1()))
+	for i, s := range req.GetDollar_1() {
+		if v, err := uuid.Parse(s); err != nil {
+			err = fmt.Errorf("invalid Dollar_1: %s%w", err.Error(), validation.ErrUserInput)
+			return nil, err
+		} else {
+			dollar_1[i] = v
+		}
+	}
+
+	result, err := s.querier.GetProductsByIds(ctx, dollar_1)
+	if err != nil {
+		slog.Error("GetProductsByIds sql call failed", "error", err)
+		return nil, err
+	}
+	res := new(pb.GetProductsByIdsResponse)
+	for _, r := range result {
+		res.List = append(res.List, toProduct(r))
+	}
+	return res, nil
 }
 
 func (s *Service) WithTx(tx pgx.Tx) *Service {

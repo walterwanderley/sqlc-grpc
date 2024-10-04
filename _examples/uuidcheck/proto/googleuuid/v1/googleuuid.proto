@@ -19,6 +19,12 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   }
 };
 service GoogleuuidService {
+  rpc CreateLocationTransactions(CreateLocationTransactionsRequest) returns (CreateLocationTransactionsResponse) {
+    option (google.api.http) = {
+      post: "/location-transactions"
+      body: "*"
+    };
+  }
   rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {
     option (google.api.http) = {
       post: "/product"
@@ -59,11 +65,25 @@ service GoogleuuidService {
       response_body: "create_user_return_partial_row"
     };
   }
+  rpc GetProductsByIds(GetProductsByIdsRequest) returns (GetProductsByIdsResponse) {
+    option (google.api.http) = {
+      post: "/products-by-ids"
+      body: "dollar_1"
+      response_body: "list"
+    };
+  }
 }
 
 message Category {
   int32 id = 1;
 }
+
+message CreateLocationTransactionsRequest {
+  repeated string column1 = 1;
+  repeated string column2 = 2;
+}
+
+message CreateLocationTransactionsResponse {}
 
 message CreateProductRequest {
   int32 id = 1;
@@ -129,8 +149,21 @@ message CreateUserReturnPartialRow {
   google.protobuf.StringValue name = 2;
 }
 
+message GetProductsByIdsRequest {
+  repeated string dollar_1 = 1;
+}
+
+message GetProductsByIdsResponse {
+  repeated Product list = 1;
+}
+
 message Location {
   string id = 1;
+}
+
+message LocationTransaction {
+  string location_id = 1;
+  string transaction_id = 2;
 }
 
 message Product {

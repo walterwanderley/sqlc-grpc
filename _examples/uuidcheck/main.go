@@ -103,5 +103,4 @@ func httpHandlers(mux *http.ServeMux) {
 		w.WriteHeader(200)
 	})
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
-
 }

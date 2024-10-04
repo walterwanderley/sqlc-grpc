@@ -12,6 +12,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createLocationTransactions = `-- name: CreateLocationTransactions :exec
+
+INSERT INTO location_transactions
+SELECT
+    UNNEST($1::UUID[]) as location_id,
+    UNNEST($2::UUID[]) as transaction_id
+`
+
+type CreateLocationTransactionsParams struct {
+	Column1 []uuid.UUID `json:"column_1"`
+	Column2 []uuid.UUID `json:"column_2"`
+}
+
+// ---------
+func (q *Queries) CreateLocationTransactions(ctx context.Context, arg CreateLocationTransactionsParams) error {
+	_, err := q.db.Exec(ctx, createLocationTransactions, arg.Column1, arg.Column2)
+	return err
+}
+
 const createProduct = `-- name: CreateProduct :one
 
 INSERT INTO products (id, category) VALUES ($1, $2) RETURNING id
@@ -121,4 +140,28 @@ func (q *Queries) CreateUserReturnPartial(ctx context.Context, arg CreateUserRet
 	var i CreateUserReturnPartialRow
 	err := row.Scan(&i.ID, &i.Name)
 	return i, err
+}
+
+const getProductsByIds = `-- name: GetProductsByIds :many
+SELECT id, category, name FROM products WHERE id = ANY($1::uuid[])
+`
+
+func (q *Queries) GetProductsByIds(ctx context.Context, dollar_1 []uuid.UUID) ([]Product, error) {
+	rows, err := q.db.Query(ctx, getProductsByIds, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Product{}
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(&i.ID, &i.Category, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -1,6 +1,6 @@
 module github.com/walterwanderley/sqlc-grpc
 
-go 1.17
+go 1.23
 
 require (
 	github.com/emicklei/proto v1.13.2

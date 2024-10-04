@@ -19,24 +19,28 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	PguuidService_CreateLocationTransactions_FullMethodName = "/pguuid.v1.PguuidService/CreateLocationTransactions"
 	PguuidService_CreateProduct_FullMethodName              = "/pguuid.v1.PguuidService/CreateProduct"
 	PguuidService_CreateProductReturnAll_FullMethodName     = "/pguuid.v1.PguuidService/CreateProductReturnAll"
 	PguuidService_CreateProductReturnPartial_FullMethodName = "/pguuid.v1.PguuidService/CreateProductReturnPartial"
 	PguuidService_CreateUser_FullMethodName                 = "/pguuid.v1.PguuidService/CreateUser"
 	PguuidService_CreateUserReturnAll_FullMethodName        = "/pguuid.v1.PguuidService/CreateUserReturnAll"
 	PguuidService_CreateUserReturnPartial_FullMethodName    = "/pguuid.v1.PguuidService/CreateUserReturnPartial"
+	PguuidService_GetProductsByIds_FullMethodName           = "/pguuid.v1.PguuidService/GetProductsByIds"
 )
 
 // PguuidServiceClient is the client API for PguuidService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PguuidServiceClient interface {
+	CreateLocationTransactions(ctx context.Context, in *CreateLocationTransactionsRequest, opts ...grpc.CallOption) (*CreateLocationTransactionsResponse, error)
 	CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*CreateProductResponse, error)
 	CreateProductReturnAll(ctx context.Context, in *CreateProductReturnAllRequest, opts ...grpc.CallOption) (*CreateProductReturnAllResponse, error)
 	CreateProductReturnPartial(ctx context.Context, in *CreateProductReturnPartialRequest, opts ...grpc.CallOption) (*CreateProductReturnPartialResponse, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	CreateUserReturnAll(ctx context.Context, in *CreateUserReturnAllRequest, opts ...grpc.CallOption) (*CreateUserReturnAllResponse, error)
 	CreateUserReturnPartial(ctx context.Context, in *CreateUserReturnPartialRequest, opts ...grpc.CallOption) (*CreateUserReturnPartialResponse, error)
+	GetProductsByIds(ctx context.Context, in *GetProductsByIdsRequest, opts ...grpc.CallOption) (*GetProductsByIdsResponse, error)
 }
 
 type pguuidServiceClient struct {
@@ -45,6 +49,16 @@ type pguuidServiceClient struct {
 
 func NewPguuidServiceClient(cc grpc.ClientConnInterface) PguuidServiceClient {
 	return &pguuidServiceClient{cc}
+}
+
+func (c *pguuidServiceClient) CreateLocationTransactions(ctx context.Context, in *CreateLocationTransactionsRequest, opts ...grpc.CallOption) (*CreateLocationTransactionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateLocationTransactionsResponse)
+	err := c.cc.Invoke(ctx, PguuidService_CreateLocationTransactions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *pguuidServiceClient) CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*CreateProductResponse, error) {
@@ -107,16 +121,28 @@ func (c *pguuidServiceClient) CreateUserReturnPartial(ctx context.Context, in *C
 	return out, nil
 }
 
+func (c *pguuidServiceClient) GetProductsByIds(ctx context.Context, in *GetProductsByIdsRequest, opts ...grpc.CallOption) (*GetProductsByIdsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProductsByIdsResponse)
+	err := c.cc.Invoke(ctx, PguuidService_GetProductsByIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PguuidServiceServer is the server API for PguuidService service.
 // All implementations must embed UnimplementedPguuidServiceServer
 // for forward compatibility.
 type PguuidServiceServer interface {
+	CreateLocationTransactions(context.Context, *CreateLocationTransactionsRequest) (*CreateLocationTransactionsResponse, error)
 	CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error)
 	CreateProductReturnAll(context.Context, *CreateProductReturnAllRequest) (*CreateProductReturnAllResponse, error)
 	CreateProductReturnPartial(context.Context, *CreateProductReturnPartialRequest) (*CreateProductReturnPartialResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	CreateUserReturnAll(context.Context, *CreateUserReturnAllRequest) (*CreateUserReturnAllResponse, error)
 	CreateUserReturnPartial(context.Context, *CreateUserReturnPartialRequest) (*CreateUserReturnPartialResponse, error)
+	GetProductsByIds(context.Context, *GetProductsByIdsRequest) (*GetProductsByIdsResponse, error)
 	mustEmbedUnimplementedPguuidServiceServer()
 }
 
@@ -127,6 +153,9 @@ type PguuidServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPguuidServiceServer struct{}
 
+func (UnimplementedPguuidServiceServer) CreateLocationTransactions(context.Context, *CreateLocationTransactionsRequest) (*CreateLocationTransactionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateLocationTransactions not implemented")
+}
 func (UnimplementedPguuidServiceServer) CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProduct not implemented")
 }
@@ -144,6 +173,9 @@ func (UnimplementedPguuidServiceServer) CreateUserReturnAll(context.Context, *Cr
 }
 func (UnimplementedPguuidServiceServer) CreateUserReturnPartial(context.Context, *CreateUserReturnPartialRequest) (*CreateUserReturnPartialResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserReturnPartial not implemented")
+}
+func (UnimplementedPguuidServiceServer) GetProductsByIds(context.Context, *GetProductsByIdsRequest) (*GetProductsByIdsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductsByIds not implemented")
 }
 func (UnimplementedPguuidServiceServer) mustEmbedUnimplementedPguuidServiceServer() {}
 func (UnimplementedPguuidServiceServer) testEmbeddedByValue()                       {}
@@ -164,6 +196,24 @@ func RegisterPguuidServiceServer(s grpc.ServiceRegistrar, srv PguuidServiceServe
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&PguuidService_ServiceDesc, srv)
+}
+
+func _PguuidService_CreateLocationTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateLocationTransactionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PguuidServiceServer).CreateLocationTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PguuidService_CreateLocationTransactions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PguuidServiceServer).CreateLocationTransactions(ctx, req.(*CreateLocationTransactionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _PguuidService_CreateProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -274,6 +324,24 @@ func _PguuidService_CreateUserReturnPartial_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PguuidService_GetProductsByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductsByIdsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PguuidServiceServer).GetProductsByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PguuidService_GetProductsByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PguuidServiceServer).GetProductsByIds(ctx, req.(*GetProductsByIdsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PguuidService_ServiceDesc is the grpc.ServiceDesc for PguuidService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -281,6 +349,10 @@ var PguuidService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "pguuid.v1.PguuidService",
 	HandlerType: (*PguuidServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateLocationTransactions",
+			Handler:    _PguuidService_CreateLocationTransactions_Handler,
+		},
 		{
 			MethodName: "CreateProduct",
 			Handler:    _PguuidService_CreateProduct_Handler,
@@ -304,6 +376,10 @@ var PguuidService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUserReturnPartial",
 			Handler:    _PguuidService_CreateUserReturnPartial_Handler,
+		},
+		{
+			MethodName: "GetProductsByIds",
+			Handler:    _PguuidService_GetProductsByIds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
