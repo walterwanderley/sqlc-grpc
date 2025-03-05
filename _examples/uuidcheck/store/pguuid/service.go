@@ -38,7 +38,7 @@ func (s *Service) CreateLocationTransactions(ctx context.Context, req *pb.Create
 
 	err := s.querier.CreateLocationTransactions(ctx, arg)
 	if err != nil {
-		slog.Error("CreateLocationTransactions sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateLocationTransactions sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateLocationTransactionsResponse{}, nil
@@ -53,7 +53,7 @@ func (s *Service) CreateProduct(ctx context.Context, req *pb.CreateProductReques
 
 	result, err := s.querier.CreateProduct(ctx, arg)
 	if err != nil {
-		slog.Error("CreateProduct sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateProduct sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateProductResponse{Value: result}, nil
@@ -68,7 +68,7 @@ func (s *Service) CreateProductReturnAll(ctx context.Context, req *pb.CreateProd
 
 	result, err := s.querier.CreateProductReturnAll(ctx, arg)
 	if err != nil {
-		slog.Error("CreateProductReturnAll sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateProductReturnAll sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateProductReturnAllResponse{Product: toProduct(result)}, nil
@@ -83,7 +83,7 @@ func (s *Service) CreateProductReturnPartial(ctx context.Context, req *pb.Create
 
 	result, err := s.querier.CreateProductReturnPartial(ctx, arg)
 	if err != nil {
-		slog.Error("CreateProductReturnPartial sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateProductReturnPartial sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateProductReturnPartialResponse{CreateProductReturnPartialRow: toCreateProductReturnPartialRow(result)}, nil
@@ -106,7 +106,7 @@ func (s *Service) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*p
 
 	result, err := s.querier.CreateUser(ctx, arg)
 	if err != nil {
-		slog.Error("CreateUser sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateUser sql call failed", "error", err)
 		return nil, err
 	}
 	if uuidStr, err := result.MarshalJSON(); err != nil {
@@ -133,7 +133,7 @@ func (s *Service) CreateUserReturnAll(ctx context.Context, req *pb.CreateUserRet
 
 	result, err := s.querier.CreateUserReturnAll(ctx, arg)
 	if err != nil {
-		slog.Error("CreateUserReturnAll sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateUserReturnAll sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateUserReturnAllResponse{User: toUser(result)}, nil
@@ -156,7 +156,7 @@ func (s *Service) CreateUserReturnPartial(ctx context.Context, req *pb.CreateUse
 
 	result, err := s.querier.CreateUserReturnPartial(ctx, arg)
 	if err != nil {
-		slog.Error("CreateUserReturnPartial sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateUserReturnPartial sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateUserReturnPartialResponse{CreateUserReturnPartialRow: toCreateUserReturnPartialRow(result)}, nil
@@ -173,7 +173,7 @@ func (s *Service) GetProductsByIds(ctx context.Context, req *pb.GetProductsByIds
 
 	result, err := s.querier.GetProductsByIds(ctx, dollar_1)
 	if err != nil {
-		slog.Error("GetProductsByIds sql call failed", "error", err)
+		slog.ErrorContext(ctx, "GetProductsByIds sql call failed", "error", err)
 		return nil, err
 	}
 	res := new(pb.GetProductsByIdsResponse)

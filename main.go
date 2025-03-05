@@ -177,7 +177,7 @@ func postProcess(def *metadata.Definition) {
 			os.Exit(-1)
 		}
 		execCommand("go mod init " + def.GoModule)
-		execCommand("go get -u github.com/docker/docker")
+		execCommand("go get github.com/grpc-ecosystem/go-grpc-middleware/v2@v2.2.0")
 		execCommand("go mod tidy")
 		execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway")
 		execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2")
@@ -187,7 +187,7 @@ func postProcess(def *metadata.Definition) {
 		os.Chdir(wd)
 	} else {
 		execCommand("go mod init " + def.GoModule)
-		execCommand("go get -u github.com/docker/docker")
+		execCommand("go get github.com/grpc-ecosystem/go-grpc-middleware/v2@v2.2.0")
 		execCommand("go mod tidy")
 		execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway")
 		execCommand("go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2")

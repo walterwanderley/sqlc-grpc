@@ -18,18 +18,21 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
+	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
 	_ "github.com/mattn/go-sqlite3"
 
 	"authors/internal/server"
+	"authors/internal/server/instrumentation/trace"
 	"authors/internal/server/litefs"
 	"authors/internal/server/litestream"
 )
 
-//go:generate sqlc-grpc -m authors -migration-path sql/migrations -litefs -litestream -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -metric -litefs -litestream -append
 
 const (
 	serviceName    = "authors"
@@ -53,10 +56,10 @@ func main() {
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
-
+	flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port")
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
-
+	flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
 	litefs.SetFlags(&litefsConfig)
 	flag.Parse()
@@ -96,9 +99,33 @@ func run(cfg server.Config) error {
 		slog.Info("LiteFS cluster is ready")
 	}
 
-	db, err := sql.Open("sqlite3", dbURL)
-	if err != nil {
-		return err
+	var db *sql.DB
+	if cfg.TracingEnabled() {
+		flush, err := trace.Init(context.Background(), serviceName, cfg.OtlpEndpoint)
+		if err != nil {
+			return err
+		}
+		defer flush()
+
+		db, err = otelsql.Open("sqlite3", dbURL, otelsql.WithAttributes(
+			semconv.DBSystemSqlite,
+		))
+		if err != nil {
+			return err
+		}
+
+		err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
+			semconv.DBSystemSqlite,
+		))
+		if err != nil {
+			return err
+		}
+	} else {
+
+		db, err = sql.Open("sqlite3", dbURL)
+		if err != nil {
+			return err
+		}
 	}
 	defer db.Close()
 

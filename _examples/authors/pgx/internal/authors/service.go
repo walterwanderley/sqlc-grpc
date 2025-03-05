@@ -39,7 +39,7 @@ func (s *Service) CreateAuthor(ctx context.Context, req *pb.CreateAuthorRequest)
 
 	result, err := s.querier.CreateAuthor(ctx, s.db, arg)
 	if err != nil {
-		slog.Error("CreateAuthor sql call failed", "error", err)
+		slog.ErrorContext(ctx, "CreateAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.CreateAuthorResponse{Authors: toAuthors(result)}, nil
@@ -50,7 +50,7 @@ func (s *Service) DeleteAuthor(ctx context.Context, req *pb.DeleteAuthorRequest)
 
 	err := s.querier.DeleteAuthor(ctx, s.db, id)
 	if err != nil {
-		slog.Error("DeleteAuthor sql call failed", "error", err)
+		slog.ErrorContext(ctx, "DeleteAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.DeleteAuthorResponse{}, nil
@@ -61,7 +61,7 @@ func (s *Service) GetAuthor(ctx context.Context, req *pb.GetAuthorRequest) (*pb.
 
 	result, err := s.querier.GetAuthor(ctx, s.db, id)
 	if err != nil {
-		slog.Error("GetAuthor sql call failed", "error", err)
+		slog.ErrorContext(ctx, "GetAuthor sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.GetAuthorResponse{Authors: toAuthors(result)}, nil
@@ -71,7 +71,7 @@ func (s *Service) ListAuthors(ctx context.Context, req *pb.ListAuthorsRequest) (
 
 	result, err := s.querier.ListAuthors(ctx, s.db)
 	if err != nil {
-		slog.Error("ListAuthors sql call failed", "error", err)
+		slog.ErrorContext(ctx, "ListAuthors sql call failed", "error", err)
 		return nil, err
 	}
 	res := new(pb.ListAuthorsResponse)
@@ -90,7 +90,7 @@ func (s *Service) UpdateAuthorBio(ctx context.Context, req *pb.UpdateAuthorBioRe
 
 	err := s.querier.UpdateAuthorBio(ctx, s.db, arg)
 	if err != nil {
-		slog.Error("UpdateAuthorBio sql call failed", "error", err)
+		slog.ErrorContext(ctx, "UpdateAuthorBio sql call failed", "error", err)
 		return nil, err
 	}
 	return &pb.UpdateAuthorBioResponse{}, nil
