@@ -34,7 +34,7 @@ func (s *Service) {{.Name | UpperFirstCharacter}}(ctx context.Context, req *pb.{
 	{{end}}
 	{{if not .EmptyOutput}}result, {{end}}err := s.querier.{{ .Name}}(ctx{{if $emitDbArgument}}, s.db{{end}}{{ .ParamsCallDatabase}})
 	if err != nil {
-		slog.Error("{{.Name}} sql call failed", "error", err)			
+		slog.ErrorContext(ctx,"{{.Name}} sql call failed", "error", err)
 		return nil, err
 	}
 	{{ range . | Output}}{{ .}}
