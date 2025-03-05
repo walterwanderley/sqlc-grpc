@@ -73,7 +73,7 @@ func ToProtoType(typ string) string {
 		return "google.protobuf.DoubleValue"
 	case "sql.NullString", "pgtype.Text", "pgtype.UUID":
 		return "google.protobuf.StringValue"
-	case "sql.NullTime", "time.Time", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestampz":
+	case "sql.NullTime", "time.Time", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestamptz":
 		return "google.protobuf.Timestamp"
 	case "string", "uuid.UUID", "net.HardwareAddr", "net.IP":
 		return "string"
