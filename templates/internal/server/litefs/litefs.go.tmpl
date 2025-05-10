@@ -176,7 +176,7 @@ func Start(cfg Config) (*LiteFS, error) {
 		return nil, fmt.Errorf("cannot open store: %w", err)
 	}
 	fsys := fuse.NewFileSystem(cfg.MountDir, store)
-	if err := fsys.Mount(); err != nil {
+	if err := fsys.Mount(false); err != nil {
 		return nil, fmt.Errorf("cannot open file system: %s", err)
 	}
 	store.Invalidator = fsys
