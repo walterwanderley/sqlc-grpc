@@ -1,4 +1,3 @@
-version: '3'
 services:
   app:
     build: .
@@ -7,9 +6,6 @@ services:
     environment:
       - "AWS_ACCESS_KEY_ID=minio"
       - "AWS_SECRET_ACCESS_KEY=minio123"
-      - "LITESTREAM_ENDPOINT=minio:9000"
-      - "LITESTREAM_FORCE_PATH_STYLE=true"
-      - "LITESTREAM_SCHEME=http"
     volumes:
       - .:/app
     depends_on:
@@ -48,7 +44,10 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 minio minio123;
+      until /usr/bin/mc alias set myminio http://minio:9000 minio minio123; do
+        echo 'Retrying...'
+        sleep 2;
+      done;  
       /usr/bin/mc rm -r --force myminio/somebucketname;
       /usr/bin/mc mb myminio/somebucketname;
       /usr/bin/mc policy set public myminio/somebucketname;

@@ -71,7 +71,7 @@ func (d *Definition) Database() string {
 func (d *Definition) DatabaseDriver() string {
 	switch d.Database() {
 	case "sqlite":
-		if !d.LiteFS && !d.Litestream {
+		if !d.LiteFS {
 			return "sqlite"
 		}
 		return "sqlite3"
@@ -87,7 +87,7 @@ func (d *Definition) DatabaseDriver() string {
 func (d *Definition) DatabaseImport() string {
 	switch d.Database() {
 	case "sqlite":
-		if !d.LiteFS && !d.Litestream {
+		if !d.LiteFS {
 			return "modernc.org/sqlite"
 		}
 		return "github.com/mattn/go-sqlite3"

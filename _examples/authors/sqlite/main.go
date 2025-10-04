@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"syscall"
 	"time"
@@ -24,26 +23,20 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 
 	"authors/internal/server"
 	"authors/internal/server/instrumentation/trace"
-	"authors/internal/server/litefs"
 	"authors/internal/server/litestream"
 )
 
-//go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -metric -litefs -litestream -append
+//go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -metric -litestream -append
 
-const (
-	serviceName    = "authors"
-	forwardTimeout = 10 * time.Second
-)
+const serviceName = "authors"
 
 var (
 	dbURL          string
 	replicationURL string
-	litefsConfig   litefs.Config
-	liteFS         *litefs.LiteFS
 
 	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
@@ -61,10 +54,8 @@ func main() {
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
-	litefs.SetFlags(&litefsConfig)
-	flag.Parse()
 
-	dbURL = filepath.Join(litefsConfig.MountDir, dbURL)
+	flag.Parse()
 
 	initLogger(dev)
 	if err := run(cfg); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -80,25 +71,6 @@ func run(cfg server.Config) error {
 	}
 	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
-	if litefsConfig.MountDir != "" {
-		err := litefsConfig.Validate()
-		if err != nil {
-			return fmt.Errorf("liteFS parameters validation: %w", err)
-		}
-
-		liteFS, err = litefs.Start(litefsConfig)
-		if err != nil {
-			return fmt.Errorf("cannot start LiteFS: %w", err)
-		}
-		defer liteFS.Close()
-
-		cfg.Middlewares = append(cfg.Middlewares, liteFS.ForwardToLeader(forwardTimeout, "POST", "PUT", "PATCH", "DELETE"))
-		cfg.Middlewares = append(cfg.Middlewares, liteFS.ConsistentReader(forwardTimeout, "GET"))
-
-		<-liteFS.ReadyCh()
-		slog.Info("LiteFS cluster is ready")
-	}
-
 	var db *sql.DB
 	if cfg.TracingEnabled() {
 		flush, err := trace.Init(context.Background(), serviceName, cfg.OtlpEndpoint)
@@ -107,7 +79,7 @@ func run(cfg server.Config) error {
 		}
 		defer flush()
 
-		db, err = otelsql.Open("sqlite3", dbURL, otelsql.WithAttributes(
+		db, err = otelsql.Open("sqlite", dbURL, otelsql.WithAttributes(
 			semconv.DBSystemSqlite,
 		))
 		if err != nil {
@@ -122,7 +94,7 @@ func run(cfg server.Config) error {
 		}
 	} else {
 
-		db, err = sql.Open("sqlite3", dbURL)
+		db, err = sql.Open("sqlite", dbURL)
 		if err != nil {
 			return err
 		}
@@ -135,7 +107,7 @@ func run(cfg server.Config) error {
 		if err != nil {
 			return fmt.Errorf("init replication error: %w", err)
 		}
-		defer lsdb.Close()
+		defer lsdb.Close(context.Background())
 	}
 
 	if err := ensureSchema(db); err != nil {
@@ -177,7 +149,4 @@ func httpHandlers(mux *http.ServeMux) {
 	})
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
 
-	if liteFS != nil {
-		mux.HandleFunc("/nodes/", liteFS.ForwardToLeaderFunc(liteFS.ClusterHandler, forwardTimeout, "POST", "DELETE"))
-	}
 }
