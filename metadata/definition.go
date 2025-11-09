@@ -72,9 +72,9 @@ func (d *Definition) DatabaseDriver() string {
 	switch d.Database() {
 	case "sqlite":
 		if !d.LiteFS {
-			return "sqlite"
+			return "sqlite-ha"
 		}
-		return "sqlite3"
+		return "sqlite3-ha"
 	case "postgresql":
 		return "pgx"
 	case "mysql":
@@ -88,9 +88,9 @@ func (d *Definition) DatabaseImport() string {
 	switch d.Database() {
 	case "sqlite":
 		if !d.LiteFS {
-			return "modernc.org/sqlite"
+			return "github.com/litesql/go-sqlite-ha"
 		}
-		return "github.com/mattn/go-sqlite3"
+		return "github.com/litesql/go-sqlite3-ha"
 	case "postgresql":
 		if d.SqlPackage() == "pgx/v5" {
 			return "github.com/jackc/pgx/v5/pgxpool"

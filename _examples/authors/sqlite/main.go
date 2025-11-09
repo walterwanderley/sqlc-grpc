@@ -23,7 +23,7 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
-	_ "modernc.org/sqlite"
+	_ "github.com/litesql/go-sqlite-ha"
 
 	"authors/internal/server"
 	"authors/internal/server/instrumentation/trace"
@@ -79,7 +79,7 @@ func run(cfg server.Config) error {
 		}
 		defer flush()
 
-		db, err = otelsql.Open("sqlite", dbURL, otelsql.WithAttributes(
+		db, err = otelsql.Open("sqlite-ha", dbURL, otelsql.WithAttributes(
 			semconv.DBSystemSqlite,
 		))
 		if err != nil {
@@ -94,7 +94,7 @@ func run(cfg server.Config) error {
 		}
 	} else {
 
-		db, err = sql.Open("sqlite", dbURL)
+		db, err = sql.Open("sqlite-ha", dbURL)
 		if err != nil {
 			return err
 		}
