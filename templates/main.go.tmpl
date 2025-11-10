@@ -19,6 +19,7 @@ import (
 
 	"github.com/exaring/otelpgx"
 	"github.com/flowchartsman/swaggerui"
+	"github.com/litesql/go-ha"
 	"github.com/XSAM/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -80,7 +81,7 @@ func run(cfg server.Config) error {
 		slog.Warn("startup", "error", err)
 	}
 	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
-
+	{{if eq .Database "sqlite"}}defer ha.Shutdown(){{end}}
 	{{if .LiteFS}}
 	if litefsConfig.MountDir != "" {
 		err := litefsConfig.Validate()

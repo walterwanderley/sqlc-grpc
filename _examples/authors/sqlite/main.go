@@ -19,6 +19,7 @@ import (
 
 	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
+	"github.com/litesql/go-ha"
 	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
 	"go.uber.org/automaxprocs/maxprocs"
 
@@ -70,6 +71,7 @@ func run(cfg server.Config) error {
 		slog.Warn("startup", "error", err)
 	}
 	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
+	defer ha.Shutdown()
 
 	var db *sql.DB
 	if cfg.TracingEnabled() {
