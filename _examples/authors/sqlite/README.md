@@ -1,4 +1,4 @@
-# SQLite with LiteFS example
+# SQLite replication example
 
 ## Steps to generate this code
 
@@ -76,7 +76,7 @@ sqlc generate
 6. Execute sqlc-grpc
 
 ```sh
-sqlc-grpc -m example -migration-path sql/migrations -litefs
+sqlc-grpc -m example -migration-path sql/migrations
 ```
 
 ### Running a cluster with 3 instances in STATIC leasing mode:
@@ -84,27 +84,22 @@ sqlc-grpc -m example -migration-path sql/migrations -litefs
 >**Note:** In this mode you configure a single node to be the primary/leader.
 The downside of this approach is that you will lose write availability if that node goes down.
 
-- Start instance 1:
+- Start instance 1 (the leader):
 ```sh
-go run . -db authors.db -port 8080 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/cfg1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
--litefs-advertise-url http://localhost:20202 -dev
+go run . -db "node1.db" -cdc-id example -nats-port 4222 \
+-node n1 -port 8080
 ```
 
 - Start instance 2:
 ```sh
-go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/cfg2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
--litefs-advertise-url http://localhost:20202 \
--litefs-candidate=false -dev
+go run . -db "node2.db" -cdc-id example -nats-url nats://localhost:4222 \
+-node n2 -port 8081 -leader-target http://localhost:8080 -leader-redirect
 ```
 
 - Start instance 3:
 ```sh
-go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/cfg3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
--litefs-advertise-url http://localhost:20202 \
--litefs-candidate=false -dev
+go run . -db "node3.db" -cdc-id example -nats-url nats://localhost:4222 \
+-node n3 -port 8082 -leader-target http://localhost:8080 -leader-redirect
 ```
 
 ### Running a cluster with 3 instances in RAFT-based leasing mode:
@@ -115,46 +110,20 @@ The downside of this approach is that "[adding distributed consensus to your app
 
 - Start instance 1:
 ```sh
-go run . -db authors.db -port 8080 -litefs-redirect http://localhost:8080 -litefs-hostname node1 \
--litefs-config-dir /tmp/raft1 -litefs-mount-dir /tmp/data1 -litefs-port 20202 \
--litefs-advertise-url http://localhost:20202 -litefs-members="node2=localhost:9081, node3=localhost:9082" \
--litefs-raft-port 9080 -litefs-raft-addr localhost:9080 -dev
+go run . -db "node1.db" -cdc-id example -nats-port 4222 \
+-node n1 -port 8080 -cluster-size 3 -leader-redirect
 ```
 
 - Start instance 2:
 ```sh
-go run . -db authors.db -port 8081 -litefs-redirect http://localhost:8081 -litefs-hostname node2 \
--litefs-config-dir /tmp/raft2 -litefs-mount-dir /tmp/data2 -litefs-port 20203 \
--litefs-advertise-url http://localhost:20203 -litefs-raft-port 9081 -litefs-raft-addr localhost:9081 \
--litefs-bootstrap-cluster=false -dev
+go run . -db "node2.db" -cdc-id example -nats-url nats://localhost:4222 \
+-node n2 -port 8081 -cluster-size 3 -leader-redirect
 ```
 
 - Start instance 3:
 ```sh
-go run . -db authors.db -port 8082 -litefs-redirect http://localhost:8082 -litefs-hostname node1 \
--litefs-config-dir /tmp/raft3 -litefs-mount-dir /tmp/data3 -litefs-port 20204 \
--litefs-advertise-url http://localhost:20204 -litefs-raft-port 9082 -litefs-raft-addr localhost:9082 \
--litefs-bootstrap-cluster=false -dev
-```
-
-- List nodes:
-```sh
-curl http://localhost:8080/nodes/
-```
-
-- Get the leader:
-```sh
-curl http://localhost:8080/nodes/leader
-```
-
-- Add new node to cluster:
-```sh
-curl -X POST -d '{"id": "{-litefs-hostname}", "addr": "{-litefs-raft-addr}", readOnly: false}' http://localhost:8080/nodes/
-```
-
-- Remove a node from cluster:
-```sh
-curl -X DELETE http://localhost:8080/nodes/{id}
+go run . -db "node3.db" -cdc-id example -nats-url nats://localhost:4222 \
+-node n3 -port 8082 -cluster-size 3 -leader-redirect
 ```
 
 ## Explore the API
@@ -163,7 +132,7 @@ curl -X DELETE http://localhost:8080/nodes/{id}
 - [http://localhost:8081/swagger/](http://localhost:8081/swagger/)
 - [http://localhost:8082/swagger/](http://localhost:8082/swagger/)
 
-**POST/PUT/DELETE** requests are forwarded to the Leader.
+**POST/PUT/DELETE/PATCH** requests are forwarded to the Leader.
 
 ## Litestream
 

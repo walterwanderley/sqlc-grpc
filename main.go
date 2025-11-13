@@ -24,7 +24,6 @@ var (
 	ignoreQueries      string
 	migrationPath      string
 	migrationLib       string
-	liteFS             bool
 	litestream         bool
 	distributedTracing bool
 	metric             bool
@@ -42,7 +41,6 @@ func main() {
 	flag.StringVar(&ignoreQueries, "i", "", "Comma separated list (regex) of queries to ignore")
 	flag.StringVar(&migrationPath, "migration-path", "", "Path to migration directory")
 	flag.StringVar(&migrationLib, "migration-lib", "goose", "The migration library. goose or migrate")
-	flag.BoolVar(&liteFS, "litefs", false, "Enable support to LiteFS")
 	flag.BoolVar(&litestream, "litestream", false, "Enable support to Litestream")
 	flag.BoolVar(&distributedTracing, "tracing", false, "Enable support to distributed tracing")
 	flag.BoolVar(&metric, "metric", false, "Enable support to metrics")
@@ -99,7 +97,6 @@ func main() {
 		MigrationPath:      migrationPath,
 		MigrationLib:       migrationLib,
 		Packages:           make([]*metadata.Package, 0),
-		LiteFS:             liteFS,
 		Litestream:         litestream,
 		DistributedTracing: distributedTracing,
 		Metric:             metric,

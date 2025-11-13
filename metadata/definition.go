@@ -21,7 +21,6 @@ type Definition struct {
 	Packages           []*Package
 	MigrationPath      string
 	MigrationLib       string
-	LiteFS             bool
 	Litestream         bool
 	DistributedTracing bool
 	Metric             bool
@@ -71,10 +70,7 @@ func (d *Definition) Database() string {
 func (d *Definition) DatabaseDriver() string {
 	switch d.Database() {
 	case "sqlite":
-		if !d.LiteFS {
-			return "sqlite-ha"
-		}
-		return "sqlite3-ha"
+		return "sqlite-ha"
 	case "postgresql":
 		return "pgx"
 	case "mysql":
@@ -87,10 +83,7 @@ func (d *Definition) DatabaseDriver() string {
 func (d *Definition) DatabaseImport() string {
 	switch d.Database() {
 	case "sqlite":
-		if !d.LiteFS {
-			return "github.com/litesql/go-sqlite-ha"
-		}
-		return "github.com/litesql/go-sqlite3-ha"
+		return "github.com/litesql/go-sqlite-ha"
 	case "postgresql":
 		if d.SqlPackage() == "pgx/v5" {
 			return "github.com/jackc/pgx/v5/pgxpool"

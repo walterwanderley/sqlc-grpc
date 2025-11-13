@@ -43,6 +43,9 @@ func request_BooksService_BooksByTags_0(ctx context.Context, marshaler runtime.M
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Dollar_1); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	msg, err := client.BooksByTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -66,7 +69,9 @@ func request_BooksService_BooksByTitleYear_0(ctx context.Context, marshaler runt
 		protoReq BooksByTitleYearRequest
 		metadata runtime.ServerMetadata
 	)
-	io.Copy(io.Discard, req.Body)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -100,6 +105,9 @@ func request_BooksService_CreateAuthor_0(ctx context.Context, marshaler runtime.
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	msg, err := client.CreateAuthor(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -124,6 +132,9 @@ func request_BooksService_CreateBook_0(ctx context.Context, marshaler runtime.Ma
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	msg, err := client.CreateBook(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -146,7 +157,9 @@ func request_BooksService_DeleteBook_0(ctx context.Context, marshaler runtime.Ma
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	io.Copy(io.Discard, req.Body)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	val, ok := pathParams["book_id"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
@@ -183,7 +196,9 @@ func request_BooksService_GetAuthor_0(ctx context.Context, marshaler runtime.Mar
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	io.Copy(io.Discard, req.Body)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	val, ok := pathParams["author_id"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "author_id")
@@ -220,7 +235,9 @@ func request_BooksService_GetBook_0(ctx context.Context, marshaler runtime.Marsh
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	io.Copy(io.Discard, req.Body)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
 	val, ok := pathParams["book_id"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
@@ -259,6 +276,9 @@ func request_BooksService_UpdateBook_0(ctx context.Context, marshaler runtime.Ma
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
 	}
 	val, ok := pathParams["book_id"]
 	if !ok {
@@ -301,6 +321,9 @@ func request_BooksService_UpdateBookISBN_0(ctx context.Context, marshaler runtim
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
 	}
 	val, ok := pathParams["book_id"]
 	if !ok {
@@ -722,7 +745,8 @@ type response_BooksService_BooksByTags_0 struct {
 }
 
 func (m response_BooksService_BooksByTags_0) XXX_ResponseBody() interface{} {
-	return m.List
+	response := m.BooksByTagsResponse
+	return response.List
 }
 
 type response_BooksService_BooksByTitleYear_0 struct {
@@ -730,7 +754,8 @@ type response_BooksService_BooksByTitleYear_0 struct {
 }
 
 func (m response_BooksService_BooksByTitleYear_0) XXX_ResponseBody() interface{} {
-	return m.List
+	response := m.BooksByTitleYearResponse
+	return response.List
 }
 
 type response_BooksService_CreateAuthor_0 struct {
@@ -738,7 +763,8 @@ type response_BooksService_CreateAuthor_0 struct {
 }
 
 func (m response_BooksService_CreateAuthor_0) XXX_ResponseBody() interface{} {
-	return m.Author
+	response := m.CreateAuthorResponse
+	return response.Author
 }
 
 type response_BooksService_CreateBook_0 struct {
@@ -746,7 +772,8 @@ type response_BooksService_CreateBook_0 struct {
 }
 
 func (m response_BooksService_CreateBook_0) XXX_ResponseBody() interface{} {
-	return m.Book
+	response := m.CreateBookResponse
+	return response.Book
 }
 
 type response_BooksService_GetAuthor_0 struct {
@@ -754,7 +781,8 @@ type response_BooksService_GetAuthor_0 struct {
 }
 
 func (m response_BooksService_GetAuthor_0) XXX_ResponseBody() interface{} {
-	return m.Author
+	response := m.GetAuthorResponse
+	return response.Author
 }
 
 type response_BooksService_GetBook_0 struct {
@@ -762,7 +790,8 @@ type response_BooksService_GetBook_0 struct {
 }
 
 func (m response_BooksService_GetBook_0) XXX_ResponseBody() interface{} {
-	return m.Book
+	response := m.GetBookResponse
+	return response.Book
 }
 
 var (

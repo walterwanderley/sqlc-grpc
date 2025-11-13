@@ -29,12 +29,11 @@ import (
 
 	{{range .Packages}}app_{{.Package}} "{{ .GoModule}}/{{.SrcPath}}"
 	{{end}}	"{{ .GoModule}}/internal/server"
-	"{{ .GoModule}}/internal/server/litefs"
 	"{{ .GoModule}}/internal/server/litestream"
 	"{{ .GoModule}}/internal/server/instrumentation/trace"
 )
 {{if .Args}}//go:generate {{ .Args}}{{end}}
-{{if .LiteFS}}
+{{if eq .Database "sqlite"}}
 const (
 	serviceName    = "{{ .GoModule}}"
 	forwardTimeout = 10 * time.Second
@@ -44,9 +43,17 @@ const serviceName = "{{ .GoModule}}"
 var (
 	dbURL string
 	{{if .Litestream}}replicationURL string{{end}}
-	{{if .LiteFS}}litefsConfig   litefs.Config
-	liteFS         *litefs.LiteFS{{end}}
-
+	{{if eq .Database "sqlite"}}node string
+	leaderRedirect bool
+	staticLeader   string
+	advertiseAddr  string
+	natsAsyncPub   bool
+	natsConfig     string
+	natsPort       int
+	natsURL        string
+	cdcID          string
+	clusterSize    int
+	{{end}}
 	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
 )
@@ -58,17 +65,72 @@ func main() {
 	var dev bool
 	flag.StringVar(&dbURL, "db", "", "The Database connection URL")
 	flag.IntVar(&cfg.Port, "port", 5000, "The server port")
-	{{if .Metric}}flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port"){{end}}
+	{{if .Metric}}flag.IntVar(&cfg.PrometheusPort, "prometheus-port", 0, "The metrics server port")
+	{{end -}}
 	flag.BoolVar(&cfg.EnableCors, "cors", false, "Enable CORS middleware")
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
-	{{if .DistributedTracing}}flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)"){{end}}
-	{{if .Litestream}}flag.StringVar(&replicationURL, "replication", "", "S3 replication URL"){{end}}
-	{{if .LiteFS}}litefs.SetFlags(&litefsConfig){{end}}
+	{{if .DistributedTracing}}flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
+	{{end -}}
+	{{if .Litestream}}flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
+	{{end -}}
+	{{if eq .Database "sqlite"}}flag.StringVar(&node, "node", "", "Node name identify (for database replication)")
+	flag.StringVar(&cdcID, "cdc-id", "", "CDC ID for replication (defaults to database filename)")
+	flag.IntVar(&clusterSize, "cluster-size", 1, "Cluster size (for leader election)")
+	flag.StringVar(&natsConfig, "nats-config", "", "Embedded NATS configuration file path (overrides other NATS configs)")
+	flag.IntVar(&natsPort, "nats-port", 0, "Embedded NATS port for database replication")
+	flag.StringVar(&natsURL, "nats-url", "", "External NATS URL connect for database replication. Ex: nats://host:4222")
+	flag.BoolVar(&natsAsyncPub, "nats-async-pub", false, "Async publishes to NATS")
+	flag.BoolVar(&leaderRedirect, "leader-redirect", false, "Redirect POST/PUT/DELETE/PATCH requests to Leader")
+	flag.StringVar(&staticLeader, "leader-target", "", "Leader static target endoint")
+	flag.StringVar(&advertiseAddr, "advertise-addr", "", "Advertise address (ex: http://localhost:5000)")
+	{{end -}}
 	flag.Parse()
 
-	{{if .LiteFS}}dbURL = filepath.Join(litefsConfig.MountDir, dbURL){{end}}
+	{{if eq .Database "sqlite"}}hostname, _ := os.Hostname()
+	if hostname == "" {
+		hostname = "localhost"
+	}
+	if advertiseAddr == "" {
+		advertiseAddr = fmt.Sprintf("http://%s:%d", hostname, cfg.Port)
+	}
+
+	if !strings.Contains(dbURL, "?") {
+		dbURL += "?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous=NORMAL&_txlock=immediate"
+	}
+	dbURL += "&autoStart=false"
+	if node != "" {
+		dbURL += fmt.Sprintf("&name=%s", node)
+	}
+	if natsConfig != "" {
+		dbURL += fmt.Sprintf("&natsConfigFile=%s", natsConfig)
+	}
+	if natsPort > 0 {
+		dbURL += fmt.Sprintf("&natsPort=%d", natsPort)
+	}
+	if natsURL != "" {
+		dbURL += fmt.Sprintf("&replicationURL=%s", natsURL)
+	}
+	if natsAsyncPub {
+		dbURL += "&asyncPublisher=true"
+	}
+	if cdcID != "" {
+		dbURL += fmt.Sprintf("&cdcID=%s", cdcID)
+	}
+	if clusterSize > 0 {
+		dbURL += fmt.Sprintf("&clusterSize=%d", clusterSize)
+	}
+	if leaderRedirect {
+		if staticLeader != "" {
+			dbURL += fmt.Sprintf("&leaderProvider=static:%s", staticLeader)
+		} else {
+			dbURL += fmt.Sprintf("&leaderProvider=dynamic:%s", advertiseAddr)
+		}
+	}
+
+	dbURL = "file:" + strings.TrimPrefix(dbURL, "file:"){{end}}
 
 	initLogger(dev)
+
 	if err := run(cfg); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("server error", "error", err)
 		os.Exit(1)
@@ -82,26 +144,6 @@ func run(cfg server.Config) error {
 	}
 	slog.Info("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 	{{if eq .Database "sqlite"}}defer ha.Shutdown(){{end}}
-	{{if .LiteFS}}
-	if litefsConfig.MountDir != "" {
-		err := litefsConfig.Validate()
-		if err != nil {
-			return fmt.Errorf("liteFS parameters validation: %w", err)
-		}
-
-		liteFS, err = litefs.Start(litefsConfig)
-		if err != nil {
-			return fmt.Errorf("cannot start LiteFS: %w", err)
-		}
-		defer liteFS.Close()
-
-		cfg.Middlewares = append(cfg.Middlewares, liteFS.ForwardToLeader(forwardTimeout, "POST", "PUT", "PATCH", "DELETE"))
-		cfg.Middlewares = append(cfg.Middlewares, liteFS.ConsistentReader(forwardTimeout, "GET"))
-
-		<-liteFS.ReadyCh()
-		slog.Info("LiteFS cluster is ready")
-	}
-	{{end}}
 
 	{{if .DistributedTracing}}
 	var db {{if eq .SqlPackage "pgx/v5"}}*pgxpool.Pool{{else}}*sql.DB{{end}}
@@ -171,6 +213,25 @@ func run(cfg server.Config) error {
 	dbMigration.Close()
 	{{else}}
 	if err := ensureSchema(db); err != nil { slog.Error("migration error", "error", err) }{{end}}{{end}}
+	{{if eq .Database "sqlite"}}
+	connector, ok := ha.LookupConnector(dbURL)
+	if ok {
+		err := connector.Start(db)
+		if err != nil {
+			return fmt.Errorf("failed to start connector: %w", err)
+		}
+	} else {
+		return fmt.Errorf("connector not found")
+	}
+
+	if leaderRedirect {
+		cfg.Middlewares = append(cfg.Middlewares, connector.ForwardToLeader(forwardTimeout, "POST", "PUT", "PATCH", "DELETE"))
+		cfg.Middlewares = append(cfg.Middlewares, connector.ConsistentReader(forwardTimeout, "GET"))
+		slog.Info("waiting for a leader")
+		<-connector.LeaderProvider().Ready()
+		slog.Info("leader elected", "target", connector.LeaderProvider().RedirectTarget())
+	}
+	{{end}}
 	srv := server.New(cfg, registerServer(db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
@@ -206,8 +267,4 @@ func httpHandlers(mux *http.ServeMux) {
 		w.WriteHeader(200)
 	})
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
-
-	{{if .LiteFS}}if liteFS != nil {
-		mux.HandleFunc("/nodes/", liteFS.ForwardToLeaderFunc(liteFS.ClusterHandler, forwardTimeout, "POST", "DELETE"))
-	}{{end}}
 }

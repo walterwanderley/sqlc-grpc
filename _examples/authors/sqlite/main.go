@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 
@@ -33,11 +34,24 @@ import (
 
 //go:generate sqlc-grpc -m authors -migration-path sql/migrations -tracing -metric -litestream -append
 
-const serviceName = "authors"
+const (
+	serviceName    = "authors"
+	forwardTimeout = 10 * time.Second
+)
 
 var (
 	dbURL          string
 	replicationURL string
+	node           string
+	leaderRedirect bool
+	staticLeader   string
+	advertiseAddr  string
+	natsAsyncPub   bool
+	natsConfig     string
+	natsPort       int
+	natsURL        string
+	cdcID          string
+	clusterSize    int
 
 	//go:embed api/apidocs.swagger.json
 	openAPISpec []byte
@@ -55,10 +69,63 @@ func main() {
 	flag.BoolVar(&dev, "dev", false, "Set logger to development mode")
 	flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
-
+	flag.StringVar(&node, "node", "", "Node name identify (for database replication)")
+	flag.StringVar(&cdcID, "cdc-id", "", "CDC ID for replication (defaults to database filename)")
+	flag.IntVar(&clusterSize, "cluster-size", 1, "Cluster size (for leader election)")
+	flag.StringVar(&natsConfig, "nats-config", "", "Embedded NATS configuration file path (overrides other NATS configs)")
+	flag.IntVar(&natsPort, "nats-port", 0, "Embedded NATS port for database replication")
+	flag.StringVar(&natsURL, "nats-url", "", "External NATS URL connect for database replication. Ex: nats://host:4222")
+	flag.BoolVar(&natsAsyncPub, "nats-async-pub", false, "Async publishes to NATS")
+	flag.BoolVar(&leaderRedirect, "leader-redirect", false, "Redirect POST/PUT/DELETE/PATCH requests to Leader")
+	flag.StringVar(&staticLeader, "leader-target", "", "Leader static target endoint")
+	flag.StringVar(&advertiseAddr, "advertise-addr", "", "Advertise address (ex: http://localhost:5000)")
 	flag.Parse()
 
+	hostname, _ := os.Hostname()
+	if hostname == "" {
+		hostname = "localhost"
+	}
+	if advertiseAddr == "" {
+		advertiseAddr = fmt.Sprintf("http://%s:%d", hostname, cfg.Port)
+	}
+
+	if !strings.Contains(dbURL, "?") {
+		dbURL += "?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous=NORMAL&_txlock=immediate"
+	}
+	dbURL += "&autoStart=false"
+	if node != "" {
+		dbURL += fmt.Sprintf("&name=%s", node)
+	}
+	if natsConfig != "" {
+		dbURL += fmt.Sprintf("&natsConfigFile=%s", natsConfig)
+	}
+	if natsPort > 0 {
+		dbURL += fmt.Sprintf("&natsPort=%d", natsPort)
+	}
+	if natsURL != "" {
+		dbURL += fmt.Sprintf("&replicationURL=%s", natsURL)
+	}
+	if natsAsyncPub {
+		dbURL += "&asyncPublisher=true"
+	}
+	if cdcID != "" {
+		dbURL += fmt.Sprintf("&cdcID=%s", cdcID)
+	}
+	if clusterSize > 0 {
+		dbURL += fmt.Sprintf("&clusterSize=%d", clusterSize)
+	}
+	if leaderRedirect {
+		if staticLeader != "" {
+			dbURL += fmt.Sprintf("&leaderProvider=static:%s", staticLeader)
+		} else {
+			dbURL += fmt.Sprintf("&leaderProvider=dynamic:%s", advertiseAddr)
+		}
+	}
+
+	dbURL = "file:" + strings.TrimPrefix(dbURL, "file:")
+
 	initLogger(dev)
+
 	if err := run(cfg); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("server error", "error", err)
 		os.Exit(1)
@@ -115,6 +182,25 @@ func run(cfg server.Config) error {
 	if err := ensureSchema(db); err != nil {
 		slog.Error("migration error", "error", err)
 	}
+
+	connector, ok := ha.LookupConnector(dbURL)
+	if ok {
+		err := connector.Start(db)
+		if err != nil {
+			return fmt.Errorf("failed to start connector: %w", err)
+		}
+	} else {
+		return fmt.Errorf("connector not found")
+	}
+
+	if leaderRedirect {
+		cfg.Middlewares = append(cfg.Middlewares, connector.ForwardToLeader(forwardTimeout, "POST", "PUT", "PATCH", "DELETE"))
+		cfg.Middlewares = append(cfg.Middlewares, connector.ConsistentReader(forwardTimeout, "GET"))
+		slog.Info("waiting for a leader")
+		<-connector.LeaderProvider().Ready()
+		slog.Info("leader elected", "target", connector.LeaderProvider().RedirectTarget())
+	}
+
 	srv := server.New(cfg, registerServer(db), registerHandlers(), httpHandlers)
 
 	done := make(chan os.Signal, 1)
@@ -150,5 +236,4 @@ func httpHandlers(mux *http.ServeMux) {
 		w.WriteHeader(200)
 	})
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(openAPISpec)))
-
 }
