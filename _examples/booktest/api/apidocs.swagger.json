@@ -155,45 +155,6 @@
         ]
       }
     },
-    "/books-by-tags": {
-      "post": {
-        "operationId": "BooksService_BooksByTags",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "$ref": "#/definitions/v1BooksByTagsRow"
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "dollar1",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        ],
-        "tags": [
-          "BooksService"
-        ]
-      }
-    },
     "/books/{bookId}": {
       "get": {
         "operationId": "BooksService_GetBook",
@@ -424,42 +385,6 @@
         "available": {
           "type": "string",
           "format": "date-time"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "v1BooksByTagsResponse": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1BooksByTagsRow"
-          }
-        }
-      }
-    },
-    "v1BooksByTagsRow": {
-      "type": "object",
-      "properties": {
-        "bookId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "title": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "isbn": {
-          "type": "string"
         },
         "tags": {
           "type": "array",

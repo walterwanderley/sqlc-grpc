@@ -35,33 +35,6 @@ var (
 	_ = metadata.Join
 )
 
-func request_BooksService_BooksByTags_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq BooksByTagsRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Dollar_1); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if req.Body != nil {
-		_, _ = io.Copy(io.Discard, req.Body)
-	}
-	msg, err := client.BooksByTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_BooksService_BooksByTags_0(ctx context.Context, marshaler runtime.Marshaler, server BooksServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq BooksByTagsRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Dollar_1); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.BooksByTags(ctx, &protoReq)
-	return msg, metadata, err
-}
-
 var filter_BooksService_BooksByTitleYear_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 
 func request_BooksService_BooksByTitleYear_0(ctx context.Context, marshaler runtime.Marshaler, client BooksServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -364,26 +337,6 @@ func local_request_BooksService_UpdateBookISBN_0(ctx context.Context, marshaler 
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterBooksServiceHandlerFromEndpoint instead.
 // GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
 func RegisterBooksServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server BooksServiceServer) error {
-	mux.Handle(http.MethodPost, pattern_BooksService_BooksByTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/books.v1.BooksService/BooksByTags", runtime.WithHTTPPathPattern("/books-by-tags"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_BooksService_BooksByTags_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_BooksService_BooksByTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp.(*BooksByTagsResponse)}, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodGet, pattern_BooksService_BooksByTitleYear_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -584,23 +537,6 @@ func RegisterBooksServiceHandler(ctx context.Context, mux *runtime.ServeMux, con
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
 // "BooksServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
 func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client BooksServiceClient) error {
-	mux.Handle(http.MethodPost, pattern_BooksService_BooksByTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/books.v1.BooksService/BooksByTags", runtime.WithHTTPPathPattern("/books-by-tags"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_BooksService_BooksByTags_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_BooksService_BooksByTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_BooksService_BooksByTags_0{resp.(*BooksByTagsResponse)}, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodGet, pattern_BooksService_BooksByTitleYear_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -740,15 +676,6 @@ func RegisterBooksServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 	return nil
 }
 
-type response_BooksService_BooksByTags_0 struct {
-	*BooksByTagsResponse
-}
-
-func (m response_BooksService_BooksByTags_0) XXX_ResponseBody() interface{} {
-	response := m.BooksByTagsResponse
-	return response.List
-}
-
 type response_BooksService_BooksByTitleYear_0 struct {
 	*BooksByTitleYearResponse
 }
@@ -795,7 +722,6 @@ func (m response_BooksService_GetBook_0) XXX_ResponseBody() interface{} {
 }
 
 var (
-	pattern_BooksService_BooksByTags_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books-by-tags"}, ""))
 	pattern_BooksService_BooksByTitleYear_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books"}, ""))
 	pattern_BooksService_CreateAuthor_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"authors"}, ""))
 	pattern_BooksService_CreateBook_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books"}, ""))
@@ -807,7 +733,6 @@ var (
 )
 
 var (
-	forward_BooksService_BooksByTags_0      = runtime.ForwardResponseMessage
 	forward_BooksService_BooksByTitleYear_0 = runtime.ForwardResponseMessage
 	forward_BooksService_CreateAuthor_0     = runtime.ForwardResponseMessage
 	forward_BooksService_CreateBook_0       = runtime.ForwardResponseMessage

@@ -54,6 +54,8 @@ SELECT id, name, bio FROM authors
 ORDER BY name
 `
 
+// ref: name :test
+// ref: bio :teste2
 func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
 	rows, err := q.db.QueryContext(ctx, listAuthors)
 	if err != nil {

@@ -3,6 +3,8 @@ SELECT * FROM authors
 WHERE id = ? LIMIT 1;
 
 /* name: ListAuthors :many */
+/* ref: name :test */
+/* ref: bio :teste2 */
 SELECT * FROM authors
 ORDER BY name;
 

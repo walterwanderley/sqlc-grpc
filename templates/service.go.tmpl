@@ -28,7 +28,7 @@ type Service struct {
 }
 
 {{$emitDbArgument := .EmitDbArgument}}
-{{ range .Services }}
+{{ range .Services }}{{if not .Skip}}
 func (s *Service) {{.Name | UpperFirstCharacter}}(ctx context.Context, req *pb.{{.Name  | UpperFirstCharacter}}Request) (*pb.{{.Name | UpperFirstCharacter}}Response, error) {
 	{{ range . | Input}}{{ .}}
 	{{end}}
@@ -40,7 +40,7 @@ func (s *Service) {{.Name | UpperFirstCharacter}}(ctx context.Context, req *pb.{
 	{{ range . | Output}}{{ .}}
 	{{end -}}
 }
-{{ end }}
+{{ end }}{{end}}
 {{if not .EmitInterface}}{{if not .EmitDbArgument}}
 func (s *Service) WithTx(tx {{if eq .SqlPackage "pgx/v5"}}pgx.Tx{{else}}*sql.Tx{{end}}) *Service {
 	return &Service{

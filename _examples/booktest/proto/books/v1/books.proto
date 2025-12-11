@@ -20,13 +20,6 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   }
 };
 service BooksService {
-  rpc BooksByTags(BooksByTagsRequest) returns (BooksByTagsResponse) {
-    option (google.api.http) = {
-      post: "/books-by-tags"
-      body: "dollar_1"
-      response_body: "list"
-    };
-  }
   rpc BooksByTitleYear(BooksByTitleYearRequest) returns (BooksByTitleYearResponse) {
     option (google.api.http) = {
       get: "/books"

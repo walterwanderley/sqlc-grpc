@@ -17,21 +17,6 @@ type Service struct {
 	querier *Queries
 }
 
-func (s *Service) BooksByTags(ctx context.Context, req *pb.BooksByTagsRequest) (*pb.BooksByTagsResponse, error) {
-	dollar_1 := req.GetDollar_1()
-
-	result, err := s.querier.BooksByTags(ctx, dollar_1)
-	if err != nil {
-		slog.ErrorContext(ctx, "BooksByTags sql call failed", "error", err)
-		return nil, err
-	}
-	res := new(pb.BooksByTagsResponse)
-	for _, r := range result {
-		res.List = append(res.List, toBooksByTagsRow(r))
-	}
-	return res, nil
-}
-
 func (s *Service) BooksByTitleYear(ctx context.Context, req *pb.BooksByTitleYearRequest) (*pb.BooksByTitleYearResponse, error) {
 	var arg BooksByTitleYearParams
 	arg.Title = req.GetTitle()

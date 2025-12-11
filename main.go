@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -112,6 +113,12 @@ func main() {
 		}, queriesToIgnore)
 		if err != nil {
 			log.Fatal("parser error:", err.Error())
+		}
+
+		for _, svc := range pkg.Services {
+			for k, v := range svc.CustomSpecs {
+				slog.Warn("Custom", "service", svc.Name, "k", k, "v", v, "len", len(v))
+			}
 		}
 
 		pkg.GoModule = module

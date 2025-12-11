@@ -80,3 +80,14 @@ func (s *Service) EmptyInput() bool {
 func (s *Service) EmptyOutput() bool {
 	return s.Output == ""
 }
+
+func (s *Service) Skip() bool {
+	if specs, ok := s.CustomSpecs["skip"]; ok {
+		for _, v := range specs {
+			if strings.TrimSpace(v) == "true" {
+				return true
+			}
+		}
+	}
+	return false
+}

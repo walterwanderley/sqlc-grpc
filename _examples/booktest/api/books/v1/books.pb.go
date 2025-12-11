@@ -1268,9 +1268,8 @@ const file_books_v1_books_proto_rawDesc = "" +
 	"\x04tags\x18\x02 \x03(\tR\x04tags\x12\x1b\n" +
 	"\tbook_type\x18\x03 \x01(\tR\bbookType\x12\x17\n" +
 	"\abook_id\x18\x04 \x01(\x05R\x06bookId\"\x14\n" +
-	"\x12UpdateBookResponse2\xcd\a\n" +
-	"\fBooksService\x12r\n" +
-	"\vBooksByTags\x12\x1c.books.v1.BooksByTagsRequest\x1a\x1d.books.v1.BooksByTagsResponse\"&\x82\xd3\xe4\x93\x02 :\bdollar_1b\x04list\"\x0e/books-by-tags\x12o\n" +
+	"\x12UpdateBookResponse2\xd9\x06\n" +
+	"\fBooksService\x12o\n" +
 	"\x10BooksByTitleYear\x12!.books.v1.BooksByTitleYearRequest\x1a\".books.v1.BooksByTitleYearResponse\"\x14\x82\xd3\xe4\x93\x02\x0eb\x04list\x12\x06/books\x12j\n" +
 	"\fCreateAuthor\x12\x1d.books.v1.CreateAuthorRequest\x1a\x1e.books.v1.CreateAuthorResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*b\x06author\"\b/authors\x12`\n" +
 	"\n" +
@@ -1335,26 +1334,24 @@ var file_books_v1_books_proto_depIdxs = []int32{
 	1,  // 6: books.v1.CreateBookResponse.book:type_name -> books.v1.Book
 	0,  // 7: books.v1.GetAuthorResponse.author:type_name -> books.v1.Author
 	1,  // 8: books.v1.GetBookResponse.book:type_name -> books.v1.Book
-	3,  // 9: books.v1.BooksService.BooksByTags:input_type -> books.v1.BooksByTagsRequest
-	6,  // 10: books.v1.BooksService.BooksByTitleYear:input_type -> books.v1.BooksByTitleYearRequest
-	8,  // 11: books.v1.BooksService.CreateAuthor:input_type -> books.v1.CreateAuthorRequest
-	10, // 12: books.v1.BooksService.CreateBook:input_type -> books.v1.CreateBookRequest
-	12, // 13: books.v1.BooksService.DeleteBook:input_type -> books.v1.DeleteBookRequest
-	14, // 14: books.v1.BooksService.GetAuthor:input_type -> books.v1.GetAuthorRequest
-	16, // 15: books.v1.BooksService.GetBook:input_type -> books.v1.GetBookRequest
-	21, // 16: books.v1.BooksService.UpdateBook:input_type -> books.v1.UpdateBookRequest
-	19, // 17: books.v1.BooksService.UpdateBookISBN:input_type -> books.v1.UpdateBookISBNRequest
-	4,  // 18: books.v1.BooksService.BooksByTags:output_type -> books.v1.BooksByTagsResponse
-	7,  // 19: books.v1.BooksService.BooksByTitleYear:output_type -> books.v1.BooksByTitleYearResponse
-	9,  // 20: books.v1.BooksService.CreateAuthor:output_type -> books.v1.CreateAuthorResponse
-	11, // 21: books.v1.BooksService.CreateBook:output_type -> books.v1.CreateBookResponse
-	13, // 22: books.v1.BooksService.DeleteBook:output_type -> books.v1.DeleteBookResponse
-	15, // 23: books.v1.BooksService.GetAuthor:output_type -> books.v1.GetAuthorResponse
-	17, // 24: books.v1.BooksService.GetBook:output_type -> books.v1.GetBookResponse
-	22, // 25: books.v1.BooksService.UpdateBook:output_type -> books.v1.UpdateBookResponse
-	20, // 26: books.v1.BooksService.UpdateBookISBN:output_type -> books.v1.UpdateBookISBNResponse
-	18, // [18:27] is the sub-list for method output_type
-	9,  // [9:18] is the sub-list for method input_type
+	6,  // 9: books.v1.BooksService.BooksByTitleYear:input_type -> books.v1.BooksByTitleYearRequest
+	8,  // 10: books.v1.BooksService.CreateAuthor:input_type -> books.v1.CreateAuthorRequest
+	10, // 11: books.v1.BooksService.CreateBook:input_type -> books.v1.CreateBookRequest
+	12, // 12: books.v1.BooksService.DeleteBook:input_type -> books.v1.DeleteBookRequest
+	14, // 13: books.v1.BooksService.GetAuthor:input_type -> books.v1.GetAuthorRequest
+	16, // 14: books.v1.BooksService.GetBook:input_type -> books.v1.GetBookRequest
+	21, // 15: books.v1.BooksService.UpdateBook:input_type -> books.v1.UpdateBookRequest
+	19, // 16: books.v1.BooksService.UpdateBookISBN:input_type -> books.v1.UpdateBookISBNRequest
+	7,  // 17: books.v1.BooksService.BooksByTitleYear:output_type -> books.v1.BooksByTitleYearResponse
+	9,  // 18: books.v1.BooksService.CreateAuthor:output_type -> books.v1.CreateAuthorResponse
+	11, // 19: books.v1.BooksService.CreateBook:output_type -> books.v1.CreateBookResponse
+	13, // 20: books.v1.BooksService.DeleteBook:output_type -> books.v1.DeleteBookResponse
+	15, // 21: books.v1.BooksService.GetAuthor:output_type -> books.v1.GetAuthorResponse
+	17, // 22: books.v1.BooksService.GetBook:output_type -> books.v1.GetBookResponse
+	22, // 23: books.v1.BooksService.UpdateBook:output_type -> books.v1.UpdateBookResponse
+	20, // 24: books.v1.BooksService.UpdateBookISBN:output_type -> books.v1.UpdateBookISBNResponse
+	17, // [17:25] is the sub-list for method output_type
+	9,  // [9:17] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name

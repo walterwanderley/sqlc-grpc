@@ -26,13 +26,13 @@ service {{.Package | PascalCase}}Service {
     {{end}}
     {{- range .CustomProtoRPCs}}{{ .}}
     {{end}}
-    {{- range .Services}}
+    {{- range .Services}}{{if not .Skip}}
     {{range .CustomProtoComments}}// {{ .}}
     {{end -}}
     rpc {{.Name | UpperFirstCharacter}}({{.Name | UpperFirstCharacter}}Request) returns ({{.Name | UpperFirstCharacter}}Response) {
         {{range .HttpOptions}}{{ .}}
         {{end}}
-    }{{end}}
+    }{{end}}{{end}}
 }
 
 {{- range .CustomProtoMessages}}{{ .}}

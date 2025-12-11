@@ -19,6 +19,7 @@ SELECT * FROM books
 WHERE title = $1 AND year = $2;
 
 -- name: BooksByTags :many
+-- skip: true
 SELECT 
   book_id,
   title,

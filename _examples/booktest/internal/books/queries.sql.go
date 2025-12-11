@@ -33,6 +33,7 @@ type BooksByTagsRow struct {
 	Tags   []string
 }
 
+// skip: true
 func (q *Queries) BooksByTags(ctx context.Context, dollar_1 []string) ([]BooksByTagsRow, error) {
 	rows, err := q.db.QueryContext(ctx, booksByTags, pq.Array(dollar_1))
 	if err != nil {
