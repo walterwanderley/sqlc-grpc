@@ -50,7 +50,7 @@ var (
 	natsConfig     string
 	natsPort       int
 	natsURL        string
-	cdcID          string
+	replicationID  string
 	clusterSize    int
 
 	//go:embed api/apidocs.swagger.json
@@ -70,7 +70,7 @@ func main() {
 	flag.StringVar(&cfg.OtlpEndpoint, "otlp-endpoint", "", "The Open Telemetry Protocol Endpoint (example: localhost:4317)")
 	flag.StringVar(&replicationURL, "replication", "", "S3 replication URL")
 	flag.StringVar(&node, "node", "", "Node name identify (for database replication)")
-	flag.StringVar(&cdcID, "cdc-id", "", "CDC ID for replication (defaults to database filename)")
+	flag.StringVar(&replicationID, "replication-id", "", "Replication ID (defaults to database filename)")
 	flag.IntVar(&clusterSize, "cluster-size", 1, "Cluster size (for leader election)")
 	flag.StringVar(&natsConfig, "nats-config", "", "Embedded NATS configuration file path (overrides other NATS configs)")
 	flag.IntVar(&natsPort, "nats-port", 0, "Embedded NATS port for database replication")
@@ -108,8 +108,8 @@ func main() {
 	if natsAsyncPub {
 		dbURL += "&asyncPublisher=true"
 	}
-	if cdcID != "" {
-		dbURL += fmt.Sprintf("&cdcID=%s", cdcID)
+	if replicationID != "" {
+		dbURL += fmt.Sprintf("&replicationID=%s", replicationID)
 	}
 	if clusterSize > 0 {
 		dbURL += fmt.Sprintf("&clusterSize=%d", clusterSize)
@@ -155,7 +155,7 @@ func run(cfg server.Config) error {
 			return err
 		}
 
-		err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
+		_, err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
 			semconv.DBSystemSqlite,
 		))
 		if err != nil {

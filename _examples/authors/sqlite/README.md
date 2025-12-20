@@ -86,19 +86,19 @@ The downside of this approach is that you will lose write availability if that n
 
 - Start instance 1 (the leader):
 ```sh
-go run . -db "node1.db" -cdc-id example -nats-port 4222 \
+go run . -db "node1.db" -replication-id example -nats-port 4222 \
 -node n1 -port 8080
 ```
 
 - Start instance 2:
 ```sh
-go run . -db "node2.db" -cdc-id example -nats-url nats://localhost:4222 \
+go run . -db "node2.db" -replication-id example -nats-url nats://localhost:4222 \
 -node n2 -port 8081 -leader-target http://localhost:8080 -leader-redirect
 ```
 
 - Start instance 3:
 ```sh
-go run . -db "node3.db" -cdc-id example -nats-url nats://localhost:4222 \
+go run . -db "node3.db" -replication-id example -nats-url nats://localhost:4222 \
 -node n3 -port 8082 -leader-target http://localhost:8080 -leader-redirect
 ```
 
@@ -110,19 +110,19 @@ The downside of this approach is that "[adding distributed consensus to your app
 
 - Start instance 1:
 ```sh
-go run . -db "node1.db" -cdc-id example -nats-port 4222 \
+go run . -db "node1.db" -replication-id example -nats-port 4222 \
 -node n1 -port 8080 -cluster-size 3 -leader-redirect
 ```
 
 - Start instance 2:
 ```sh
-go run . -db "node2.db" -cdc-id example -nats-url nats://localhost:4222 \
+go run . -db "node2.db" -replication-id example -nats-url nats://localhost:4222 \
 -node n2 -port 8081 -cluster-size 3 -leader-redirect
 ```
 
 - Start instance 3:
 ```sh
-go run . -db "node3.db" -cdc-id example -nats-url nats://localhost:4222 \
+go run . -db "node3.db" -replication-id example -nats-url nats://localhost:4222 \
 -node n3 -port 8082 -cluster-size 3 -leader-redirect
 ```
 
