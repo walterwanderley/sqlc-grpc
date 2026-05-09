@@ -1,4 +1,4 @@
-FROM golang:1.21
+FROM golang:1.26-trixie
 
 RUN go install github.com/cespare/reflex@latest
 

@@ -19,6 +19,7 @@ func toAuthors(in *Authors) *pb.Authors {
 	if in.Bio.Valid {
 		out.Bio = wrapperspb.String(in.Bio.String)
 	}
+	out.Age = Numeric(in.Age)
 	if in.CreatedAt.Valid {
 		out.CreatedAt = timestamppb.New(in.CreatedAt.Time)
 	}
