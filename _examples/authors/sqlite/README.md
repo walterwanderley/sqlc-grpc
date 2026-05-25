@@ -7,9 +7,6 @@
 ```sh
 go install github.com/walterwanderley/sqlc-grpc@latest
 ```
-```sh
-go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-```
 
 1. Create a directory to store SQL scripts.
 
@@ -67,13 +64,7 @@ packages:
 ' > sqlc.yaml
 ```
 
-5. Execute sqlc
-
-```sh
-sqlc generate
-```
-
-6. Execute sqlc-grpc
+5. Execute sqlc-grpc
 
 ```sh
 sqlc-grpc -m example -migration-path sql/migrations

@@ -54,7 +54,7 @@ message Authors {
   int64 id = 1;
   string name = 2;
   google.protobuf.StringValue bio = 3;
-  Numeric age = 4;
+  google.protobuf.StringValue age = 4;
   google.protobuf.Timestamp created_at = 5;
 }
 

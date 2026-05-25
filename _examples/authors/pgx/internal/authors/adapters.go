@@ -3,6 +3,8 @@
 package authors
 
 import (
+	"encoding/json"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -19,7 +21,9 @@ func toAuthors(in *Authors) *pb.Authors {
 	if in.Bio.Valid {
 		out.Bio = wrapperspb.String(in.Bio.String)
 	}
-	out.Age = Numeric(in.Age)
+	if v, err := json.Marshal(in.Age); err == nil {
+		out.Age = wrapperspb.String(string(v))
+	}
 	if in.CreatedAt.Valid {
 		out.CreatedAt = timestamppb.New(in.CreatedAt.Time)
 	}

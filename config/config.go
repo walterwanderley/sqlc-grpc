@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -52,11 +53,14 @@ func readConfigV1(name string) (SqlcConfig, error) {
 	return cfg, err
 }
 
-func Load() (SqlcConfig, error) {
+func Load(name string) (SqlcConfig, error) {
 	var cfg SqlcConfig
-	name, err := configFile()
-	if err != nil {
-		return cfg, err
+	if name == "" {
+		var err error
+		name, err = configFile()
+		if err != nil {
+			return cfg, err
+		}
 	}
 
 	f, err := os.Open(name)
@@ -66,19 +70,19 @@ func Load() (SqlcConfig, error) {
 	defer f.Close()
 
 	var v sqlcConfigVersion
-	switch name {
-	case jsonConfig:
+	switch {
+	case strings.HasSuffix(name, ".json"):
 		err = json.NewDecoder(f).Decode(&v)
 		if err != nil {
 			return cfg, err
 		}
-	case yamlConfig, ymlConfig:
+	case strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml"):
 		err = yaml.NewDecoder(f).Decode(&v)
 		if err != nil {
 			return cfg, err
 		}
 	default:
-		return cfg, fmt.Errorf("invalid config file %q", name)
+		return cfg, fmt.Errorf("invalid config file type %q", name)
 	}
 
 	if v.Version == "1" {

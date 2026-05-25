@@ -4,12 +4,10 @@ Create a **gRPC** (and **HTTP/JSON**) **Server** from the generated code by the 
 
 ### Requirements
 
-- Go 1.25 or superior
-- [sqlc](https://sqlc.dev/)
+- Go 1.26 or superior
 - [buf](https://buf.build/)
 
 ```sh
-go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 go install github.com/bufbuild/buf/cmd/buf@latest
 ```
 
@@ -77,25 +75,19 @@ sql:
       out: "internal/author"
 ```
 
-3. Execute sqlc
-
-```sh
-sqlc generate
-```
-
-4. Execute sqlc-grpc
+3. Execute sqlc-grpc
 
 ```sh
 sqlc-grpc -m "mymodule"
 ```
 
-5. Run the generated server
+4. Run the generated server
 
 ```sh
 go run . -db [Database Connection URL] -dev
 ```
 
-6. Enjoy!
+5. Enjoy!
 
 - Swagger UI [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
@@ -130,10 +122,9 @@ WHERE id = $2;
 
 - It's safe to edit any generated code that doesn't have the `DO NOT EDIT` indication at the very first line.
 
-- After modify a SQL file, execute these commands below:
+- After modify a SQL file, execute the command below:
 
 ```sh
-sqlc generate
 go generate
 ```
 

@@ -71,7 +71,7 @@ func ToProtoType(typ string) string {
 		return "google.protobuf.FloatValue"
 	case "sql.NullFloat64", "pgtype.Float8":
 		return "google.protobuf.DoubleValue"
-	case "sql.NullString", "pgtype.Text", "pgtype.UUID":
+	case "sql.NullString", "pgtype.Text", "pgtype.UUID", "pgtype.Numeric":
 		return "google.protobuf.StringValue"
 	case "sql.NullTime", "time.Time", "pgtype.Date", "pgtype.Timestamp", "pgtype.Timestamptz":
 		return "google.protobuf.Timestamp"
@@ -121,7 +121,7 @@ func BindToProto(src, dst, attrName, attrType string) []string {
 		res = append(res, fmt.Sprintf("%s.%s = timestamppb.New(%s.%s)", dst, CamelCaseProto(attrName), src, attrName))
 	case "uuid.UUID", "net.HardwareAddr", "net.IP":
 		res = append(res, fmt.Sprintf("%s.%s = %s.%s.String()", dst, CamelCaseProto(attrName), src, attrName))
-	case "pgtype.UUID":
+	case "pgtype.UUID", "pgtype.Numeric":
 		res = append(res, fmt.Sprintf("if v, err := json.Marshal(%s.%s); err == nil {", src, attrName))
 		res = append(res, fmt.Sprintf("%s.%s = wrapperspb.String(string(v))", dst, CamelCaseProto(attrName)))
 		res = append(res, "}")
@@ -234,7 +234,7 @@ func BindToGo(src, dst, attrName, attrType string, newVar bool) []string {
 		res = append(res, fmt.Sprintf("err = fmt.Errorf(\"invalid %s: %%s%%w\", err.Error(), validation.ErrUserInput)", attrName)) // Handle error
 		res = append(res, "return nil, err } else {")                                                                              // Close error check
 		res = append(res, fmt.Sprintf("%s[i] = v } }", dst))                                                                       // Assign parsed UUID and close loop
-	case "pgtype.UUID":
+	case "pgtype.UUID", "pgtype.Numeric":
 		if newVar {
 			res = append(res, fmt.Sprintf("var %s %s", dst, attrType))
 		}

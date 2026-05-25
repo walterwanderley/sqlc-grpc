@@ -21,7 +21,7 @@ import (
 	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
 	"github.com/litesql/go-ha"
-	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
@@ -149,14 +149,14 @@ func run(cfg server.Config) error {
 		defer flush()
 
 		db, err = otelsql.Open("sqlite-ha", dbURL, otelsql.WithAttributes(
-			semconv.DBSystemSqlite,
+			semconv.DBSystemNameSQLite,
 		))
 		if err != nil {
 			return err
 		}
 
 		_, err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
-			semconv.DBSystemSqlite,
+			semconv.DBSystemNameSQLite,
 		))
 		if err != nil {
 			return err

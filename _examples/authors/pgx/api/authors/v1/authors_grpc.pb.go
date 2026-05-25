@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthorsService_CreateAuthor_FullMethodName = "/authors.v1.AuthorsService/CreateAuthor"
-	AuthorsService_DeleteAuthor_FullMethodName = "/authors.v1.AuthorsService/DeleteAuthor"
-	AuthorsService_GetAuthor_FullMethodName    = "/authors.v1.AuthorsService/GetAuthor"
-	AuthorsService_ListAuthors_FullMethodName  = "/authors.v1.AuthorsService/ListAuthors"
+	AuthorsService_CreateAuthor_FullMethodName    = "/authors.v1.AuthorsService/CreateAuthor"
+	AuthorsService_DeleteAuthor_FullMethodName    = "/authors.v1.AuthorsService/DeleteAuthor"
+	AuthorsService_GetAuthor_FullMethodName       = "/authors.v1.AuthorsService/GetAuthor"
+	AuthorsService_ListAuthors_FullMethodName     = "/authors.v1.AuthorsService/ListAuthors"
+	AuthorsService_UpdateAuthorBio_FullMethodName = "/authors.v1.AuthorsService/UpdateAuthorBio"
 )
 
 // AuthorsServiceClient is the client API for AuthorsService service.
@@ -33,6 +34,7 @@ type AuthorsServiceClient interface {
 	DeleteAuthor(ctx context.Context, in *DeleteAuthorRequest, opts ...grpc.CallOption) (*DeleteAuthorResponse, error)
 	GetAuthor(ctx context.Context, in *GetAuthorRequest, opts ...grpc.CallOption) (*GetAuthorResponse, error)
 	ListAuthors(ctx context.Context, in *ListAuthorsRequest, opts ...grpc.CallOption) (*ListAuthorsResponse, error)
+	UpdateAuthorBio(ctx context.Context, in *UpdateAuthorBioRequest, opts ...grpc.CallOption) (*UpdateAuthorBioResponse, error)
 }
 
 type authorsServiceClient struct {
@@ -83,6 +85,16 @@ func (c *authorsServiceClient) ListAuthors(ctx context.Context, in *ListAuthorsR
 	return out, nil
 }
 
+func (c *authorsServiceClient) UpdateAuthorBio(ctx context.Context, in *UpdateAuthorBioRequest, opts ...grpc.CallOption) (*UpdateAuthorBioResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAuthorBioResponse)
+	err := c.cc.Invoke(ctx, AuthorsService_UpdateAuthorBio_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthorsServiceServer is the server API for AuthorsService service.
 // All implementations must embed UnimplementedAuthorsServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type AuthorsServiceServer interface {
 	DeleteAuthor(context.Context, *DeleteAuthorRequest) (*DeleteAuthorResponse, error)
 	GetAuthor(context.Context, *GetAuthorRequest) (*GetAuthorResponse, error)
 	ListAuthors(context.Context, *ListAuthorsRequest) (*ListAuthorsResponse, error)
+	UpdateAuthorBio(context.Context, *UpdateAuthorBioRequest) (*UpdateAuthorBioResponse, error)
 	mustEmbedUnimplementedAuthorsServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedAuthorsServiceServer) GetAuthor(context.Context, *GetAuthorRe
 }
 func (UnimplementedAuthorsServiceServer) ListAuthors(context.Context, *ListAuthorsRequest) (*ListAuthorsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListAuthors not implemented")
+}
+func (UnimplementedAuthorsServiceServer) UpdateAuthorBio(context.Context, *UpdateAuthorBioRequest) (*UpdateAuthorBioResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateAuthorBio not implemented")
 }
 func (UnimplementedAuthorsServiceServer) mustEmbedUnimplementedAuthorsServiceServer() {}
 func (UnimplementedAuthorsServiceServer) testEmbeddedByValue()                        {}
@@ -206,6 +222,24 @@ func _AuthorsService_ListAuthors_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthorsService_UpdateAuthorBio_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAuthorBioRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorsServiceServer).UpdateAuthorBio(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorsService_UpdateAuthorBio_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorsServiceServer).UpdateAuthorBio(ctx, req.(*UpdateAuthorBioRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthorsService_ServiceDesc is the grpc.ServiceDesc for AuthorsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var AuthorsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAuthors",
 			Handler:    _AuthorsService_ListAuthors_Handler,
+		},
+		{
+			MethodName: "UpdateAuthorBio",
+			Handler:    _AuthorsService_UpdateAuthorBio_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

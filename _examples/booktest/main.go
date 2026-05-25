@@ -18,7 +18,7 @@ import (
 
 	"github.com/XSAM/otelsql"
 	"github.com/flowchartsman/swaggerui"
-	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	// database driver
@@ -76,14 +76,14 @@ func run(cfg server.Config) error {
 		defer flush()
 
 		db, err = otelsql.Open("pgx", dbURL, otelsql.WithAttributes(
-			semconv.DBSystemPostgreSQL,
+			semconv.DBSystemNamePostgreSQL,
 		))
 		if err != nil {
 			return err
 		}
 
 		_, err = otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
-			semconv.DBSystemPostgreSQL,
+			semconv.DBSystemNamePostgreSQL,
 		))
 		if err != nil {
 			return err
